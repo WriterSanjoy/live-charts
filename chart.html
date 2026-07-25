@@ -167,7 +167,12 @@
     <h3>Recently viewed</h3>
     <table id="watchTable"><tbody></tbody></table>
 
-    <div class="hint">Price/% change is fetched live from Yahoo Finance in your browser. Target/stop badges assume a long position. The embedded chart is Moneycontrol only — TradingView and broker platforms block iframe embedding by design; use the "Open with your account" links above instead, where indicators/drawings save to your own account.</div>
+    <h3>Live price source</h3>
+    <div class="field">
+      <label>Price proxy base URL (your Vercel project)</label>
+      <input type="text" id="proxyBase" placeholder="https://live-charts-xyz.vercel.app" oninput="saveProxyBase()">
+    </div>
+    <div class="hint">Yahoo blocks direct browser requests, so prices are fetched through a small serverless proxy you deploy on Vercel (see quote.js). Paste your deployed project's URL here — no trailing slash needed. Target/stop badges assume a long position. The embedded chart is Moneycontrol only — TradingView and broker platforms block iframe embedding by design; use the "Open with your account" links above instead, where indicators/drawings save to your own account.</div>
 
     <h3>Backup your data</h3>
     <div class="field">
@@ -229,6 +234,7 @@ var LS_STATE = "mc_chart_state_v3";
 var LS_NOTES = "mc_chart_notes_v3";
 var LS_RECENT = "mc_chart_recent_v3";
 var LS_GH = "mc_chart_gh_v1";
+var LS_PROXY = "mc_chart_proxy_v1";
 var LS_PANEL = "mc_chart_panel_v3";
 var priceCache = {};
 
@@ -330,9 +336,13 @@ function formatPct(p){
   var s = p.toFixed(2) + '%';
   return (p >= 0 ? '+' : '') + s;
 }
+function loadProxyBase(){ try { return (localStorage.getItem(LS_PROXY) || '').replace(/\/$/, ''); } catch(e){ return ''; } }
 async function fetchPrice(mcSymbol){
   var ySym = toYahooSymbol(mcSymbol);
-  var url = "https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(ySym);
+  var proxyBase = loadProxyBase();
+  var url = proxyBase
+    ? (proxyBase + "/api/quote?symbol=" + encodeURIComponent(ySym))
+    : ("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(ySym)); // will fail from a browser origin — Yahoo blocks this; set the proxy URL below
   try {
     var res = await fetch(url);
     if (!res.ok) throw new Error('bad status ' + res.status);
@@ -345,8 +355,9 @@ async function fetchPrice(mcSymbol){
     document.getElementById('priceError').textContent = '';
   } catch (e) {
     priceCache[mcSymbol] = { price: null, pct: null, fetchedAt: Date.now(), ok: false };
-    document.getElementById('priceError').textContent =
-      'Live price unavailable right now (source blocked this request). Chart and notes still work normally.';
+    document.getElementById('priceError').textContent = proxyBase
+      ? 'Live price unavailable right now (proxy or upstream error). Chart and notes still work normally.'
+      : 'Live price needs the proxy URL set below — Yahoo blocks direct browser requests. Chart and notes still work normally.';
   }
   renderPriceStrip(mcSymbol);
   renderSideLists();
@@ -468,6 +479,12 @@ function importFromFile(evt){
 }
 
 function loadGhConfig(){ try { return JSON.parse(localStorage.getItem(LS_GH)) || {}; } catch(e){ return {}; } }
+function saveProxyBase(){
+  try { localStorage.setItem(LS_PROXY, document.getElementById('proxyBase').value.trim()); } catch(e){}
+}
+function restoreProxyBase(){
+  try { document.getElementById('proxyBase').value = localStorage.getItem(LS_PROXY) || ''; } catch(e){}
+}
 function saveGhConfig(){
   var cfg = {
     token: document.getElementById('ghToken').value.trim(),
@@ -632,6 +649,7 @@ document.addEventListener('keydown', function(e){
 
 restorePanelState();
 restoreGhConfig();
+restoreProxyBase();
 setInterval(function(){
 	if (document.visibilityState === 'visible') refreshAllPrices();
 }, 60000);
