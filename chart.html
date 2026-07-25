@@ -53,6 +53,14 @@
   button.ghost:hover, a.linkbtn.ghost:hover { background: #1c2430; color: var(--text); }
 
   #toolbar { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; flex-shrink: 0; }
+  input[type=text].display-badge {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--muted);
+    cursor: default;
+    pointer-events: none;
+  }
+  input[type=text].display-badge:focus { outline: none; }
   #toolbarRow1, #toolbarRow2 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   #toolbarRow2 { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
   #toolbarRow2 .label { font-size: 11px; color: var(--muted); margin-right: 2px; }
@@ -110,13 +118,20 @@
 
 <div id="toolbar">
   <div id="toolbarRow1">
-    <input type="text" id="currentScript" value="NIFTY" readonly style="width:110px">
+    <input type="text" id="currentScript" value="NIFTY" readonly tabindex="-1" class="display-badge" style="width:110px">
+    <input type="text" id="nextScript" value="NIFTY" style="width:110px" onkeydown="if(event.key==='Enter'){go_to();}">
     <button onclick="go_to()">Goto</button>
-    <input type="text" id="nextScript" value="NIFTY" style="width:110px">
-    <button onclick="change()">Change</button>
+    <select name="sel1" id="select" onchange="show_chart();"></select>
     <button onclick="down()">▼</button>
     <button onclick="up()">▲</button>
-    <select name="sel1" id="select" onchange="show_chart();"></select>
+    <span class="label">Watchlist:</span>
+    <select id="listSwitch" onchange="switchList()">
+      <option value="0">List 0 (default)</option>
+      <option value="1">List 1</option>
+      <option value="2">List 2</option>
+      <option value="3">List 3</option>
+      <option value="4">List 4</option>
+    </select>
     <button class="ghost" onclick="togglePanel()" id="panelToggleBtn">Hide panel</button>
     <button class="ghost" onclick="refreshAllPrices()">Refresh prices</button>
     <div id="priceStrip"></div>
@@ -588,6 +603,7 @@ function show(){
 		else if (saved && saved.listIndex === "3") { listToLoad = stocks3; currentListIndex = "3"; }
 		else if (saved && saved.listIndex === "4") { listToLoad = stocks4; currentListIndex = "4"; }
 		listToLoad.forEach(loadValues);
+		document.getElementById('listSwitch').value = currentListIndex;
 
 		if (saved && saved.symbol) {
 			document.getElementById('nextScript').value = saved.symbol;
@@ -612,14 +628,11 @@ function show_chart() {
     document.getElementById('chart').src = buildChartSrc(txt);
     afterChartChange();
 }
-function change(){
-	var x = document.getElementById('nextScript').value;
-	if (x == "0") { changeValues(stocks0); currentListIndex = "0"; }
-	else if (x == "1") { changeValues(stocks1); currentListIndex = "1"; }
-	else if (x == "2") { changeValues(stocks2); currentListIndex = "2"; }
-	else if (x == "3") { changeValues(stocks3); currentListIndex = "3"; }
-	else if (x == "4") { changeValues(stocks4); currentListIndex = "4"; }
-	document.getElementById('nextScript').value = document.getElementById("select").length;
+function switchList(){
+	var x = document.getElementById('listSwitch').value;
+	var lists = { "0": stocks0, "1": stocks1, "2": stocks2, "3": stocks3, "4": stocks4 };
+	changeValues(lists[x]);
+	currentListIndex = x;
 	saveState(document.getElementById('currentScript').value);
 }
 function changeValues(list){
