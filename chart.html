@@ -112,6 +112,7 @@
   .hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
   #priceError { font-size: 11px; color: var(--warn); margin-top: 4px; }
   #iframeNote { font-size: 11px; color: var(--warn); margin-top: 4px; display: none; }
+  #addBanner { font-size: 12px; color: var(--warn); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
 </style>
 </head>
 <body>
@@ -132,6 +133,9 @@
       <option value="3">List 3</option>
       <option value="4">List 4</option>
     </select>
+    <input type="text" id="addSymbolInput" placeholder="Add symbol" style="width:100px" onkeydown="if(event.key==='Enter'){addSymbolToCurrentList(document.getElementById('addSymbolInput').value); document.getElementById('addSymbolInput').value='';}">
+    <button class="ghost" onclick="addSymbolToCurrentList(document.getElementById('addSymbolInput').value); document.getElementById('addSymbolInput').value='';">+ Add</button>
+    <button class="ghost" onclick="removeSymbolFromCurrentList(document.getElementById('select').value)">- Remove selected</button>
     <button class="ghost" onclick="togglePanel()" id="panelToggleBtn">Hide panel</button>
     <button class="ghost" onclick="refreshAllPrices()">Refresh prices</button>
     <div id="priceStrip"></div>
@@ -143,6 +147,11 @@
     <a class="linkbtn ghost" href="https://neo.kotaksecurities.com/" target="_blank" rel="noopener">Kotak Neo ↗</a>
     <a class="linkbtn ghost" href="https://secure.icicidirect.com/" target="_blank" rel="noopener">ICICIdirect ↗</a>
     <a class="linkbtn ghost" href="https://www.5paisa.com/" target="_blank" rel="noopener">5paisa ↗</a>
+  </div>
+  <div id="addBanner" style="display:none;">
+    <span class="label" id="addBannerText"></span>
+    <button onclick="confirmAddToWatchlist()">Add to current watchlist</button>
+    <button class="ghost" onclick="hideAddBanner()">Dismiss</button>
   </div>
 </div>
 
@@ -221,23 +230,28 @@
 
 <script>
 var stocks =[];
-var stocks0 = ["NIFTY","HDFCBANK","RECLTD","HCLTECH","LICI","VEDL","SBICARD","INFY","POWERGRID","ITBEES",
-"TCS","ICICIBANK","M%26M","SBI","NAUKRI","SBILIFE","TECHM","JUBLFOOD","INDUSINDBK","INDIGO","TITAN","ETERNAL","RELIANCE"];
+var stocks0 = ["NIFTY","DALMIASUG","ELGIEQUIP","BAJAJ-AUTO","TRIVENI","GRINDWELL","CARBORUNIV","HDFCBANK",
+"M%26M","CASTROLIND","DCMSHRIRAM","DWARKESH","RECLTD","GREAVESCOT","HCLTECH","LICI","INDHOTEL","VEDL",
+"TATAELXSI","SBICARD","IOC","TMB","SUNDRMFAST","ABSLAMC","RAILTEL","NMDC","IRFC","SANSERA","INFY",
+"POWERGRID","NIFTYBEES","MOTHERSUMI","TATAPOWER","ITBEES","MSUMI","TCS","ENDURANCE","NSLNISP",
+"EXIDEIND","BANKBEES","CROMPTON","RALLIS","AMARAJABAT","CADILAHC"];
 
-var stocks1 = ["DLF","COALINDIA","BAJAJ-AUTO","ONGC","UTKARSHBNK","VBL","BECTORFOOD",
-"DIXON","NIFTYBEES","BANKBEES"];
-
-var stocks2 = ["DALMIASUG","ICICIBANK","ELGIEQUIP","INFY","BAJAJ-AUTO","GRINDWELL",
+var stocks1 = ["HDFCBANK","DALMIASUG","ICICIBANK","ELGIEQUIP","INFY","BAJAJ-AUTO","GRINDWELL",
 "M%26M","CARBORUNIV","TRIVENI","HCLTECH","CASTROLIND","DCMSHRIRAM","SBI","HDFC","DWARKESH",
 "RECLTD","TCS","BHARTIARTL","BAJFINANCE","AXISBANK","LTIM","RELIANCE","LT","ITC","GREAVESCOT","NTPC","SBICARD","KOTAKBANK","MARUTI"];
 
-var stocks3 = ["LICI","DMART","INDHOTEL","VEDL","IOC","TATAELXSI","NAUKRI","MOTHERSUMI","SUNPHARMA",
+var stocks2 = ["LICI","DMART","INDHOTEL","VEDL","IOC","TATAELXSI","NAUKRI","MOTHERSUMI","SUNPHARMA",
 "TITAN","SBILIFE","TMB","TECHM","SUNDRMFAST","COFORGE","BANKBARODA","CIPLA","IRFC","TATAMOTORS",
 "RAILTEL","ABSLAMC","APOLLOHOSP","ASTRAL","ULTRACEMCO","PIIND","HINDUNILVR","HAL","CROMPTON","POWERGRID"];
 
-var stocks4 = ["JUBLFOOD","SHREECEM","CUMMINSIND","MSUMI","PERSISTENT","SCHAEFFLER","ENDURANCE",
+var stocks3 = ["JUBLFOOD","SHREECEM","CUMMINSIND","MSUMI","PERSISTENT","SCHAEFFLER","ENDURANCE",
 "MAXHEALTH","NMDC","BEL","ASHOKLEY","GAIL","AUBANK","CHOLAFIN","ASIANPAINT","MFSL","FEDERALBNK",
 "PIDILITIND","SUVENPHAR","SANSERA","HAVELLS"];
+
+var stocks4 =["EICHERMOT","MPHASIS","INDUSINDBK","COALINDIA","PFC","BDL","BPCL","AJANTPHARM",
+"HINDALCO","TATAPOWER","MARICO","DIVISLAB","LUPIN","ONGC","BERGEPAINT","HINDPETRO","IPCALAB",
+"INDIAMART","GLAND","SKFINDIA","NIFTYBEES","NESTLEIND","TIMKEN","TORNTPHARM","KAJARIACER","OBEROIRLTY",
+"TIINDIA","TIINDIA","DABUR","AAVAS","NHPC","NAVINFLUOR","BOSCHLTD","TATASTEEL","M%26MFIN"];
 
 var currentListIndex = "0";
 var LS_STATE = "mc_chart_state_v3";
@@ -245,6 +259,7 @@ var LS_NOTES = "mc_chart_notes_v3";
 var LS_RECENT = "mc_chart_recent_v3";
 var LS_GH = "mc_chart_gh_v1";
 var LS_PROXY = "mc_chart_proxy_v1";
+var LS_LISTS = "mc_chart_lists_v1";
 var LS_PANEL = "mc_chart_panel_v3";
 var priceCache = {};
 
@@ -436,10 +451,15 @@ function renderSideLists(){
   loadRecent().forEach(function(symbol){
     var tr = document.createElement('tr');
     if (symbol === current) tr.className = 'active-row';
-    tr.innerHTML = '<td>' + symbol + '</td>' + priceCell(symbol);
+    tr.innerHTML = '<td>' + symbol + '</td>' + priceCell(symbol) +
+      '<td><button class="ghost" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();removeFromRecent(\'' + symbol + '\')">−</button></td>';
     tr.onclick = function(){ document.getElementById('nextScript').value = symbol; go_to(); };
     watchBody.appendChild(tr);
   });
+}
+function removeFromRecent(symbol){
+  saveRecent(loadRecent().filter(function(s){ return s !== symbol; }));
+  renderSideLists();
 }
 
 /* ---------- backup: export/import to local file, and GitHub sync ---------- */
@@ -583,20 +603,40 @@ function up(){
 }
 function go_to(){
 	if (document.getElementById("select").length < 1) { stocks.forEach(loadValues); }
-	document.getElementById('chart').src = buildChartSrc(document.getElementById('nextScript').value);
-	document.getElementById('currentScript').value = document.getElementById('nextScript').value;
+	var symbol = document.getElementById('nextScript').value.trim().toUpperCase();
+	document.getElementById('nextScript').value = symbol;
+	document.getElementById('chart').src = buildChartSrc(symbol);
+	document.getElementById('currentScript').value = symbol;
 	var sel = document.getElementById('select');
-	if (stocks.indexOf(document.getElementById('nextScript').value) > -1) sel.value = document.getElementById('nextScript').value;
+	if (stocks.indexOf(symbol) > -1) {
+		sel.value = symbol;
+		hideAddBanner();
+	} else {
+		showAddBanner(symbol);
+	}
 	afterChartChange();
+}
+var pendingAddSymbol = null;
+function showAddBanner(symbol){
+	pendingAddSymbol = symbol;
+	document.getElementById('addBannerText').textContent = symbol + ' isn\'t in the current watchlist.';
+	document.getElementById('addBanner').style.display = 'flex';
+}
+function hideAddBanner(){
+	pendingAddSymbol = null;
+	document.getElementById('addBanner').style.display = 'none';
+}
+function confirmAddToWatchlist(){
+	if (!pendingAddSymbol) return;
+	var symbol = pendingAddSymbol;
+	hideAddBanner();
+	addSymbolToCurrentList(symbol);
 }
 function show(){
 	if (document.getElementById("select").length < 1) {
 		var saved = loadState();
-		var listToLoad = stocks0;
-		if (saved && saved.listIndex === "1") { listToLoad = stocks1; currentListIndex = "1"; }
-		else if (saved && saved.listIndex === "2") { listToLoad = stocks2; currentListIndex = "2"; }
-		else if (saved && saved.listIndex === "3") { listToLoad = stocks3; currentListIndex = "3"; }
-		else if (saved && saved.listIndex === "4") { listToLoad = stocks4; currentListIndex = "4"; }
+		if (saved && saved.listIndex) currentListIndex = saved.listIndex;
+		var listToLoad = getListByIndex(currentListIndex);
 		listToLoad.forEach(loadValues);
 		document.getElementById('listSwitch').value = currentListIndex;
 
@@ -623,10 +663,17 @@ function show_chart() {
     document.getElementById('chart').src = buildChartSrc(txt);
     afterChartChange();
 }
+function loadCustomLists(){ try { return JSON.parse(localStorage.getItem(LS_LISTS)) || {}; } catch(e){ return {}; } }
+function saveCustomLists(obj){ try { localStorage.setItem(LS_LISTS, JSON.stringify(obj)); } catch(e){} }
+function getListByIndex(idx){
+  var custom = loadCustomLists();
+  if (custom[idx]) return custom[idx].slice();
+  var defaults = { "0": stocks0, "1": stocks1, "2": stocks2, "3": stocks3, "4": stocks4 };
+  return defaults[idx].slice();
+}
 function switchList(){
 	var x = document.getElementById('listSwitch').value;
-	var lists = { "0": stocks0, "1": stocks1, "2": stocks2, "3": stocks3, "4": stocks4 };
-	changeValues(lists[x]);
+	changeValues(getListByIndex(x));
 	currentListIndex = x;
 	saveState(document.getElementById('currentScript').value);
 }
@@ -635,6 +682,36 @@ function changeValues(list){
 	while (x.length >1){ x.remove(1); }
 	stocks =[];
 	list.forEach(loadValues);
+	show_chart();
+}
+function addSymbolToCurrentList(symbol){
+	symbol = (symbol || '').trim().toUpperCase();
+	if (!symbol) return;
+	var current = getListByIndex(currentListIndex);
+	if (current.indexOf(symbol) === -1) current.push(symbol);
+	var custom = loadCustomLists();
+	custom[currentListIndex] = current;
+	saveCustomLists(custom);
+	var x = document.getElementById("select");
+	while (x.length >1){ x.remove(1); }
+	stocks = [];
+	current.forEach(loadValues);
+	document.getElementById('nextScript').value = symbol;
+	go_to();
+}
+function removeSymbolFromCurrentList(symbol){
+	if (!symbol) return;
+	var current = getListByIndex(currentListIndex);
+	var idx = current.indexOf(symbol);
+	if (idx === -1) return;
+	current.splice(idx, 1);
+	var custom = loadCustomLists();
+	custom[currentListIndex] = current;
+	saveCustomLists(custom);
+	var x = document.getElementById("select");
+	while (x.length >1){ x.remove(1); }
+	stocks = [];
+	current.forEach(loadValues);
 	show_chart();
 }
 
