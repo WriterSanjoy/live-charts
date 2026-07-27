@@ -136,6 +136,7 @@
     <input type="text" id="addSymbolInput" placeholder="Add symbol" style="width:100px" onkeydown="if(event.key==='Enter'){addSymbolToCurrentList(document.getElementById('addSymbolInput').value); document.getElementById('addSymbolInput').value='';}">
     <button class="ghost" onclick="addSymbolToCurrentList(document.getElementById('addSymbolInput').value); document.getElementById('addSymbolInput').value='';">+ Add</button>
     <button class="ghost" onclick="removeSymbolFromCurrentList(document.getElementById('select').value)">- Remove selected</button>
+    <button class="ghost" onclick="resetCurrentListToDefault()">Reset list to file default</button>
     <button class="ghost" onclick="togglePanel()" id="panelToggleBtn">Hide panel</button>
     <button class="ghost" onclick="refreshAllPrices()">Refresh prices</button>
     <div id="priceStrip"></div>
@@ -680,6 +681,12 @@ function changeValues(list){
 	stocks =[];
 	list.forEach(loadValues);
 	show_chart();
+}
+function resetCurrentListToDefault(){
+	var custom = loadCustomLists();
+	delete custom[currentListIndex];
+	saveCustomLists(custom);
+	changeValues(getListByIndex(currentListIndex));
 }
 function addSymbolToCurrentList(symbol){
 	symbol = (symbol || '').trim().toUpperCase();
