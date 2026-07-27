@@ -28,8 +28,8 @@ export default async function handler(req, res) {
 
     // Allow any origin to read this — it's just public market data, no secrets involved.
     res.setHeader('Access-Control-Allow-Origin', '*');
-    // Cache briefly at the edge so rapid symbol-switching / auto-refresh doesn't hammer Yahoo.
-    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=30');
+    // Very short edge cache — just enough to absorb near-simultaneous requests, not to hold stale data.
+    res.setHeader('Cache-Control', 's-maxage=5, stale-while-revalidate=5');
     res.status(200).json(data);
   } catch (e) {
     res.status(500).json({ error: 'proxy fetch failed' });
