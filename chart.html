@@ -363,11 +363,12 @@ function loadProxyBase(){ try { return (localStorage.getItem(LS_PROXY) || '').re
 async function fetchPrice(mcSymbol){
   var ySym = toYahooSymbol(mcSymbol);
   var proxyBase = loadProxyBase();
+  var cacheBust = "&_ts=" + Date.now();
   var url = proxyBase
-    ? (proxyBase + "/api/quote?symbol=" + encodeURIComponent(ySym))
+    ? (proxyBase + "/api/quote?symbol=" + encodeURIComponent(ySym) + cacheBust)
     : ("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(ySym)); // will fail from a browser origin — Yahoo blocks this; set the proxy URL below
   try {
-    var res = await fetch(url);
+    var res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('bad status ' + res.status);
     var data = await res.json();
     var meta = data.chart.result[0].meta;
@@ -382,7 +383,7 @@ async function fetchPrice(mcSymbol){
       ? 'Live price unavailable right now (proxy or upstream error). Chart and notes still work normally.'
       : 'Live price needs the proxy URL set below — Yahoo blocks direct browser requests. Chart and notes still work normally.';
   }
-  renderPriceStrip(mcSymbol);
+  renderPriceStrip(document.getElementById('currentScript').value);
   renderSideLists();
 }
 function renderPriceStrip(activeSymbol){
@@ -390,7 +391,9 @@ function renderPriceStrip(activeSymbol){
   var p = priceCache[activeSymbol];
   if (!p || !p.ok) { el.innerHTML = ''; return; }
   var cls = p.pct >= 0 ? 'up' : 'down';
-  el.innerHTML = '<span class="price">' + p.price.toFixed(2) + '</span> <span class="' + cls + '">' + formatPct(p.pct) + '</span>';
+  var asOf = new Date(p.fetchedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  el.innerHTML = '<span class="price">' + p.price.toFixed(2) + '</span> <span class="' + cls + '">' + formatPct(p.pct) + '</span>' +
+    '<span style="color:var(--muted);font-size:10px">as of ' + asOf + '</span>';
 }
 function alertBadgeFor(symbol, notes){
   var p = priceCache[symbol];
