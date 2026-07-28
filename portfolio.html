@@ -120,6 +120,7 @@
   <div id="toolbarRow1">
     <span id="title">Portfolio Tracker</span>
     <button id="refreshBtn">Refresh Prices</button>
+    <button id="refreshFundBtn" class="ghost">Refresh Fundamentals</button>
     <button id="addRowBtn" class="ghost">+ Add Row</button>
     <button id="manageColsBtn" class="ghost">Manage Columns</button>
     <button id="exportBtn" class="ghost">Export</button>
@@ -129,7 +130,9 @@
   </div>
   <div id="toolbarRow2">
     <span class="label">Yahoo proxy base</span>
-    <input type="text" id="proxyBase" style="width:340px">
+    <input type="text" id="proxyBase" style="width:280px">
+    <span class="label">Fundamentals proxy base</span>
+    <input type="text" id="proxyFundBase" style="width:280px">
     <span class="label">Auto-refresh</span>
     <select id="autoRefresh">
       <option value="0">Off</option>
@@ -175,7 +178,12 @@
         <label>Formula (JS expression, use column keys as variables)</label>
         <input type="text" id="newColFormula" class="formula-edit" placeholder="e.g. (curVal-invested)/invested*100">
         <div class="key-chips" id="keyChips"></div>
-        <div class="hint">Click a key to insert it. Aggregate columns are numbers; blank/text cells read as <code>0</code>. Formulas are evaluated top-to-bottom, so a calc column can reference any column above it.</div>
+        <label style="margin-top:8px">Result type</label>
+        <select id="newColResultType">
+          <option value="number">Number</option>
+          <option value="text">Text (e.g. a BUY/SELL style label)</option>
+        </select>
+        <div class="hint">Click a key to insert it. All column values read as numbers inside the formula (blank/text cells read as <code>0</code>) — pick "Text" if your formula's <em>result</em> should be a word like <code>'BUY'</code> rather than a number. Formulas are evaluated top-to-bottom, so a calc column can reference any column above it.</div>
       </div>
       <div class="full">
         <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)">
@@ -197,7 +205,9 @@
 // ---------- storage ----------
 const LS_KEY = 'portfolioToolData_v1';
 const LS_PROXY = 'portfolioToolProxyBase';
+const LS_PROXY_FUND = 'portfolioToolProxyFundBase';
 const DEFAULT_PROXY = 'https://live-charts.vercel.app/api/quote?symbol=';
+const DEFAULT_PROXY_FUND = 'https://live-charts.vercel.app/api/quoteSummary?symbol=';
 
 function slugify(label){
   let s = label.trim().replace(/[^a-zA-Z0-9 ]/g,'').split(/\s+/).map((w,i)=>{
@@ -215,6 +225,9 @@ function uniqueKey(base, existing){
 }
 function uid(){ return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
+// Keep a few high-traffic columns compact so more fit on screen without horizontal scroll.
+const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '62px', target: '62px' };
+
 const DEFAULT_COLUMNS = [
   { key: 'symbol',    label: 'Symbol',       type: 'manual', agg: false },
   { key: 'qty',       label: 'Qty',          type: 'manual', agg: false },
@@ -223,14 +236,37 @@ const DEFAULT_COLUMNS = [
   { key: 'ltp',       label: 'LTP',          type: 'fetched', agg: false },
   { key: 'prevClose', label: 'Prev Close',   type: 'fetched', agg: false },
   { key: 'chgPct',    label: 'Chg %',        type: 'fetched', agg: false },
+  { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false },
+  { key: 'fiftyTwoWkLow',  label: '52W Low',  type: 'fetched', agg: false },
+  { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false },
+  { key: 'eps',       label: 'EPS',          type: 'fetched', agg: false },
+  { key: 'beta',      label: 'Beta',         type: 'fetched', agg: false },
   { key: 'invested',  label: 'Invested',     type: 'calc', formula: 'qty*buyPrice', agg: true },
   { key: 'curVal',    label: 'Current Value',type: 'calc', formula: 'qty*ltp', agg: true },
   { key: 'pnl',       label: 'P&L',          type: 'calc', formula: 'curVal-invested', agg: true },
   { key: 'pnlPct',    label: 'P&L %',        type: 'calc', formula: 'invested ? (pnl/invested*100) : 0', agg: false },
+  { key: 'alert',     label: 'Alert',        type: 'manual', agg: false },
+  { key: 'target',    label: 'Target',       type: 'manual', agg: false },
+  { key: 'signal',    label: 'Signal',       type: 'calc', resultType: 'text',
+    formula: "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')", agg: false },
 ];
 
 function defaultTab(name){
   return { id: uid(), name: name || 'Portfolio 1', rows: [] };
+}
+
+// Adds any DEFAULT_COLUMNS a saved file is missing (e.g. after an update), without touching
+// columns the user has customized or added themselves.
+function migrateColumns(st){
+  const existingKeys = st.columns.map(c => c.key);
+  DEFAULT_COLUMNS.forEach(defCol => {
+    if(!existingKeys.includes(defCol.key)){
+      st.columns.push(JSON.parse(JSON.stringify(defCol)));
+      st.tabs.forEach(t => t.rows.forEach(r => {
+        if(!(defCol.key in r)) r[defCol.key] = defCol.type === 'manual' ? '' : (defCol.type === 'fetched' ? '' : 0);
+      }));
+    }
+  });
 }
 
 function loadState(){
@@ -241,6 +277,7 @@ function loadState(){
     raw.activeTab = raw.tabs[0].id;
   }
   if(!raw.columns || !raw.columns.length) raw.columns = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
+  migrateColumns(raw);
   return raw;
 }
 let state = loadState();
@@ -255,12 +292,15 @@ function coerceNum(v){
   const f = parseFloat(v);
   return isNaN(f) ? 0 : f;
 }
-function evalFormula(formula, row, columns){
+function evalFormula(formula, row, columns, resultType){
   try {
     const keys = columns.map(c => c.key);
     const vals = keys.map(k => coerceNum(row[k]));
     const fn = new Function(...keys, 'return (' + formula + ')');
     const result = fn(...vals);
+    if(resultType === 'text'){
+      return (result === undefined || result === null) ? '' : String(result);
+    }
     if(typeof result !== 'number' || !isFinite(result)) return 0;
     return result;
   } catch(e){
@@ -275,7 +315,7 @@ function newRowObject(){
 function recomputeRow(row){
   state.columns.forEach(col => {
     if(col.type === 'calc'){
-      row[col.key] = evalFormula(col.formula, row, state.columns);
+      row[col.key] = evalFormula(col.formula, row, state.columns, col.resultType);
     }
   });
 }
@@ -344,6 +384,7 @@ function renderTable(){
   const trh = document.createElement('tr');
   state.columns.forEach(col => {
     const th = document.createElement('th');
+    if(NARROW_WIDTHS[col.key]) th.style.width = NARROW_WIDTHS[col.key];
     const wrap = document.createElement('div');
     wrap.className = 'colhead';
     const span = document.createElement('span');
@@ -371,6 +412,7 @@ function renderTable(){
         const inp = document.createElement('input');
         inp.type = (col.key === 'symbol' || col.key === 'name') ? 'text' : 'number';
         inp.value = val;
+        if(NARROW_WIDTHS[col.key]){ inp.style.width = NARROW_WIDTHS[col.key]; inp.style.minWidth = '0'; }
         inp.addEventListener('input', () => {
           row[col.key] = inp.type === 'number' ? (inp.value === '' ? '' : parseFloat(inp.value)) : inp.value;
           recomputeRow(row);
@@ -398,6 +440,8 @@ function renderTable(){
           td.textContent = val.toFixed(2);
         } else {
           td.textContent = val;
+          if(val === 'BUY') td.classList.add('up');
+          else if(val === 'SELL') td.classList.add('down');
         }
       }
       tr.appendChild(td);
@@ -469,6 +513,8 @@ function renderTableValuesOnly(){
           td.textContent = val.toFixed(2);
         } else {
           td.textContent = val;
+          if(val === 'BUY') td.classList.add('up');
+          else if(val === 'SELL') td.classList.add('down');
         }
       }
     });
@@ -536,6 +582,10 @@ const proxyInput = document.getElementById('proxyBase');
 proxyInput.value = localStorage.getItem(LS_PROXY) || DEFAULT_PROXY;
 proxyInput.addEventListener('change', () => localStorage.setItem(LS_PROXY, proxyInput.value));
 
+const proxyFundInput = document.getElementById('proxyFundBase');
+proxyFundInput.value = localStorage.getItem(LS_PROXY_FUND) || DEFAULT_PROXY_FUND;
+proxyFundInput.addEventListener('change', () => localStorage.setItem(LS_PROXY_FUND, proxyFundInput.value));
+
 async function fetchQuote(symbol){
   const base = proxyInput.value || DEFAULT_PROXY;
   const url = base + encodeURIComponent(symbol);
@@ -545,6 +595,16 @@ async function fetchQuote(symbol){
   const meta = data && data.chart && data.chart.result && data.chart.result[0] && data.chart.result[0].meta;
   if(!meta) throw new Error('no data');
   return meta;
+}
+
+async function fetchFundamentals(symbol){
+  const base = proxyFundInput.value || DEFAULT_PROXY_FUND;
+  const url = base + encodeURIComponent(symbol);
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  if(data.error) throw new Error(data.error);
+  return data;
 }
 
 async function refreshPrices(){
@@ -563,6 +623,8 @@ async function refreshPrices(){
       row.name = meta.longName || meta.shortName || row.name || '';
       row.chgPct = (typeof ltp === 'number' && typeof prevClose === 'number' && prevClose !== 0)
         ? ((ltp - prevClose) / prevClose * 100) : '';
+      row.fiftyTwoWkHigh = typeof meta.fiftyTwoWeekHigh === 'number' ? meta.fiftyTwoWeekHigh : '';
+      row.fiftyTwoWkLow = typeof meta.fiftyTwoWeekLow === 'number' ? meta.fiftyTwoWeekLow : '';
       recomputeRow(row);
     } catch(e){
       errors++;
@@ -576,6 +638,34 @@ async function refreshPrices(){
   statusEl.textContent = errors ? ('Updated ' + now + ' (' + errors + ' failed)') : ('Updated ' + now);
 }
 document.getElementById('refreshBtn').addEventListener('click', refreshPrices);
+
+async function refreshFundamentals(){
+  const tab = activeTab();
+  const rows = tab.rows.filter(r => r.symbol);
+  if(!rows.length){ statusEl.textContent = 'No symbols to refresh.'; return; }
+  statusEl.textContent = 'Fetching fundamentals 0/' + rows.length + '…';
+  let done = 0, errors = 0;
+  for(const row of rows){
+    try {
+      const data = await fetchFundamentals(row.symbol);
+      row.peRatio = typeof data.trailingPE === 'number' ? data.trailingPE : '';
+      row.eps = typeof data.trailingEps === 'number' ? data.trailingEps : '';
+      row.beta = typeof data.beta === 'number' ? data.beta : '';
+      recomputeRow(row);
+    } catch(e){
+      errors++;
+    }
+    done++;
+    statusEl.textContent = 'Fetching fundamentals ' + done + '/' + rows.length + '…';
+  }
+  save();
+  renderTable();
+  const now = new Date().toLocaleTimeString();
+  statusEl.textContent = errors
+    ? ('Fundamentals updated ' + now + ' (' + errors + ' failed — this endpoint needs a Yahoo crumb/cookie and can be flakier than prices)')
+    : ('Fundamentals updated ' + now);
+}
+document.getElementById('refreshFundBtn').addEventListener('click', refreshFundamentals);
 
 let autoTimer = null;
 document.getElementById('autoRefresh').addEventListener('change', (e) => {
@@ -658,10 +748,11 @@ document.getElementById('addColBtn').addEventListener('click', () => {
     const formula = document.getElementById('newColFormula').value.trim();
     if(!formula){ alert('Enter a formula for a calculated column.'); return; }
     col.formula = formula;
+    col.resultType = document.getElementById('newColResultType').value;
   }
   state.columns.push(col);
   state.tabs.forEach(t => t.rows.forEach(r => {
-    r[key] = type === 'calc' ? evalFormula(col.formula, r, state.columns) : '';
+    r[key] = type === 'calc' ? evalFormula(col.formula, r, state.columns, col.resultType) : '';
   }));
   save();
   document.getElementById('newColLabel').value = '';
@@ -670,6 +761,8 @@ document.getElementById('addColBtn').addEventListener('click', () => {
 });
 
 // ---------- init ----------
+state.tabs.forEach(t => t.rows.forEach(recomputeRow));
+save();
 renderAll();
 </script>
 </body>
