@@ -234,6 +234,18 @@ function uniqueKey(base, existing){
 }
 function uid(){ return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
+// Best-effort: Moneycontrol's scId often (not always) matches the Yahoo symbol with the
+// exchange suffix stripped. The optional, hidden "MC Code" column lets you override it per-row
+// when the guess is wrong — same idea as the manual symbol field in chart.html.
+function mcCodeFromSymbol(symbol){
+  if(!symbol) return '';
+  return String(symbol).replace(/\.(NS|BO)$/i, '').toUpperCase();
+}
+function mcChartUrl(symbol, mcCodeOverride){
+  const code = (mcCodeOverride && String(mcCodeOverride).trim()) ? String(mcCodeOverride).trim() : mcCodeFromSymbol(symbol);
+  return 'https://www.moneycontrol.com/mc/stock/chart?scId=' + encodeURIComponent(code) + '&ex=NSE';
+}
+
 // Keep a few high-traffic columns compact so more fit on screen without horizontal scroll.
 const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '62px', target: '62px' };
 
@@ -260,6 +272,7 @@ const DEFAULT_COLUMNS = [
   { key: 'target',    label: 'Target',       type: 'manual', agg: false, hidden: false },
   { key: 'signal',    label: 'Signal',       type: 'calc', resultType: 'text',
     formula: "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')", agg: false, hidden: false },
+  { key: 'mcCode',    label: 'MC Code',      type: 'manual', agg: false, hidden: true },
 ];
 
 function defaultTab(name){
@@ -453,8 +466,20 @@ function renderTable(){
           td.textContent = val.toFixed(2);
         } else {
           td.textContent = val;
-          if(val === 'BUY' || val === '🔼') td.classList.add('up');
-          else if(val === 'SELL' || val === '🔽') td.classList.add('down');
+          if(val === 'BUY' || val === '🔼' || val === '🟢') td.classList.add('up');
+          else if(val === 'SELL' || val === '🔽' || val === '🔴') td.classList.add('down');
+          if(col.key === 'trend'){
+            const link = document.createElement('a');
+            link.href = mcChartUrl(row.symbol, row.mcCode);
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.textContent = '↗️';
+            link.title = 'Open ' + (row.symbol || 'chart') + ' on Moneycontrol';
+            link.style.marginLeft = '4px';
+            link.style.textDecoration = 'none';
+            link.addEventListener('click', (e) => e.stopPropagation());
+            td.appendChild(link);
+          }
         }
       }
       tr.appendChild(td);
@@ -527,8 +552,20 @@ function renderTableValuesOnly(){
           td.textContent = val.toFixed(2);
         } else {
           td.textContent = val;
-          if(val === 'BUY' || val === '🔼') td.classList.add('up');
-          else if(val === 'SELL' || val === '🔽') td.classList.add('down');
+          if(val === 'BUY' || val === '🔼' || val === '🟢') td.classList.add('up');
+          else if(val === 'SELL' || val === '🔽' || val === '🔴') td.classList.add('down');
+          if(col.key === 'trend'){
+            const link = document.createElement('a');
+            link.href = mcChartUrl(row.symbol, row.mcCode);
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.textContent = '↗️';
+            link.title = 'Open ' + (row.symbol || 'chart') + ' on Moneycontrol';
+            link.style.marginLeft = '4px';
+            link.style.textDecoration = 'none';
+            link.addEventListener('click', (e) => e.stopPropagation());
+            td.appendChild(link);
+          }
         }
       }
     });
