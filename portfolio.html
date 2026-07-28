@@ -100,9 +100,15 @@
   .modal h3 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 16px 0 6px; }
   .modal-close-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
   .col-row { display: flex; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .col-row.dragging { opacity: .35; }
+  .col-row.drag-over { border-top: 2px solid var(--accent); }
+  .col-row.is-hidden { opacity: .5; }
+  .col-row .draghandle { cursor: grab; color: var(--muted); font-size: 14px; padding: 0 2px; user-select: none; }
+  .col-row .draghandle:active { cursor: grabbing; }
   .col-row .colname { flex: 1; }
   .col-row .coltag { font-size: 10px; color: var(--muted); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; }
   .col-row input.formula-edit { flex: 2; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  .eyebtn { padding: 3px 7px; font-size: 12px; }
   #addColForm { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
   #addColForm .full { grid-column: 1 / -1; }
   #addColForm label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 3px; }
@@ -232,26 +238,28 @@ function uid(){ return 'r' + Date.now().toString(36) + Math.random().toString(36
 const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '62px', target: '62px' };
 
 const DEFAULT_COLUMNS = [
-  { key: 'symbol',    label: 'Symbol',       type: 'manual', agg: false },
-  { key: 'qty',       label: 'Qty',          type: 'manual', agg: false },
-  { key: 'buyPrice',  label: 'Buy Price',    type: 'manual', agg: false },
-  { key: 'name',      label: 'Name',         type: 'fetched', agg: false },
-  { key: 'ltp',       label: 'LTP',          type: 'fetched', agg: false },
-  { key: 'prevClose', label: 'Prev Close',   type: 'fetched', agg: false },
-  { key: 'chgPct',    label: 'Chg %',        type: 'fetched', agg: false },
-  { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false },
-  { key: 'fiftyTwoWkLow',  label: '52W Low',  type: 'fetched', agg: false },
-  { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false },
-  { key: 'eps',       label: 'EPS',          type: 'fetched', agg: false },
-  { key: 'beta',      label: 'Beta',         type: 'fetched', agg: false },
-  { key: 'invested',  label: 'Invested',     type: 'calc', formula: 'qty*buyPrice', agg: true },
-  { key: 'curVal',    label: 'Current Value',type: 'calc', formula: 'qty*ltp', agg: true },
-  { key: 'pnl',       label: 'P&L',          type: 'calc', formula: 'curVal-invested', agg: true },
-  { key: 'pnlPct',    label: 'P&L %',        type: 'calc', formula: 'invested ? (pnl/invested*100) : 0', agg: false },
-  { key: 'alert',     label: 'Alert',        type: 'manual', agg: false },
-  { key: 'target',    label: 'Target',       type: 'manual', agg: false },
+  { key: 'symbol',    label: 'Symbol',       type: 'manual', agg: false, hidden: false },
+  { key: 'qty',       label: 'Qty',          type: 'manual', agg: false, hidden: false },
+  { key: 'buyPrice',  label: 'Buy Price',    type: 'manual', agg: false, hidden: false },
+  { key: 'name',      label: 'Name',         type: 'fetched', agg: false, hidden: false },
+  { key: 'ltp',       label: 'LTP',          type: 'fetched', agg: false, hidden: false },
+  { key: 'prevClose', label: 'Prev Close',   type: 'fetched', agg: false, hidden: false },
+  { key: 'chgPct',    label: 'Chg %',        type: 'fetched', agg: false, hidden: false },
+  { key: 'trend',     label: 'Trend',        type: 'calc', resultType: 'text',
+    formula: "chgPct>0 ? '🔼' : (chgPct<0 ? '🔽' : '-')", agg: false, hidden: false },
+  { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWkLow',  label: '52W Low',  type: 'fetched', agg: false, hidden: false },
+  { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false, hidden: false },
+  { key: 'eps',       label: 'EPS',          type: 'fetched', agg: false, hidden: false },
+  { key: 'beta',      label: 'Beta',         type: 'fetched', agg: false, hidden: false },
+  { key: 'invested',  label: 'Invested',     type: 'calc', formula: 'qty*buyPrice', agg: true, hidden: false },
+  { key: 'curVal',    label: 'Current Value',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
+  { key: 'pnl',       label: 'P&L',          type: 'calc', formula: 'curVal-invested', agg: true, hidden: false },
+  { key: 'pnlPct',    label: 'P&L %',        type: 'calc', formula: 'invested ? (pnl/invested*100) : 0', agg: false, hidden: false },
+  { key: 'alert',     label: 'Alert',        type: 'manual', agg: false, hidden: false },
+  { key: 'target',    label: 'Target',       type: 'manual', agg: false, hidden: false },
   { key: 'signal',    label: 'Signal',       type: 'calc', resultType: 'text',
-    formula: "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')", agg: false },
+    formula: "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')", agg: false, hidden: false },
 ];
 
 function defaultTab(name){
@@ -270,6 +278,7 @@ function migrateColumns(st){
       }));
     }
   });
+  st.columns.forEach(c => { if(c.hidden === undefined) c.hidden = false; });
 }
 
 function loadState(){
@@ -383,9 +392,10 @@ function renderTabs(){
 
 function renderTable(){
   const tab = activeTab();
+  const visibleColumns = state.columns.filter(c => !c.hidden);
   thead.innerHTML = '';
   const trh = document.createElement('tr');
-  state.columns.forEach(col => {
+  visibleColumns.forEach(col => {
     const th = document.createElement('th');
     if(NARROW_WIDTHS[col.key]) th.style.width = NARROW_WIDTHS[col.key];
     const wrap = document.createElement('div');
@@ -408,7 +418,7 @@ function renderTable(){
   tbody.innerHTML = '';
   tab.rows.forEach(row => {
     const tr = document.createElement('tr');
-    state.columns.forEach(col => {
+    visibleColumns.forEach(col => {
       const td = document.createElement('td');
       const val = row[col.key];
       if(col.type === 'manual'){
@@ -443,8 +453,8 @@ function renderTable(){
           td.textContent = val.toFixed(2);
         } else {
           td.textContent = val;
-          if(val === 'BUY') td.classList.add('up');
-          else if(val === 'SELL') td.classList.add('down');
+          if(val === 'BUY' || val === '🔼') td.classList.add('up');
+          else if(val === 'SELL' || val === '🔽') td.classList.add('down');
         }
       }
       tr.appendChild(td);
@@ -466,7 +476,7 @@ function renderTable(){
   // totals
   tfoot.innerHTML = '';
   const trf = document.createElement('tr');
-  state.columns.forEach((col, i) => {
+  visibleColumns.forEach((col, i) => {
     const td = document.createElement('td');
     if(i === 0){
       td.textContent = 'Totals';
@@ -486,12 +496,13 @@ function renderTable(){
 // Fast path: update only text of readonly/calc cells + input values, without full rebuild (keeps focus)
 function renderTableValuesOnly(){
   const tab = activeTab();
+  const visibleColumns = state.columns.filter(c => !c.hidden);
   const rows = tbody.querySelectorAll('tr');
   tab.rows.forEach((row, ri) => {
     const tr = rows[ri];
     if(!tr) return;
     const cells = tr.querySelectorAll('td');
-    state.columns.forEach((col, ci) => {
+    visibleColumns.forEach((col, ci) => {
       const td = cells[ci];
       if(!td) return;
       const val = row[col.key];
@@ -516,8 +527,8 @@ function renderTableValuesOnly(){
           td.textContent = val.toFixed(2);
         } else {
           td.textContent = val;
-          if(val === 'BUY') td.classList.add('up');
-          else if(val === 'SELL') td.classList.add('down');
+          if(val === 'BUY' || val === '🔼') td.classList.add('up');
+          else if(val === 'SELL' || val === '🔽') td.classList.add('down');
         }
       }
     });
@@ -525,7 +536,7 @@ function renderTableValuesOnly(){
   const trf = tfoot.querySelector('tr');
   if(trf){
     const cells = trf.querySelectorAll('td');
-    state.columns.forEach((col, i) => {
+    visibleColumns.forEach((col, i) => {
       const td = cells[i];
       if(!td || i === 0) return;
       if(col.agg){
@@ -688,12 +699,23 @@ newColType.addEventListener('change', () => {
   document.getElementById('newColFormulaWrap').style.display = newColType.value === 'calc' ? 'block' : 'none';
 });
 
+let dragSrcKey = null;
+
 function renderColModal(){
   const list = document.getElementById('colList');
   list.innerHTML = '';
   state.columns.forEach((col, idx) => {
     const row = document.createElement('div');
-    row.className = 'col-row';
+    row.className = 'col-row' + (col.hidden ? ' is-hidden' : '');
+    row.draggable = col.key !== 'symbol';
+    row.dataset.key = col.key;
+
+    const handle = document.createElement('span');
+    handle.className = 'draghandle';
+    handle.textContent = col.key === 'symbol' ? '📌' : '⠿';
+    handle.title = col.key === 'symbol' ? 'Symbol stays first (anchors the Totals row)' : 'Drag to reorder';
+    row.appendChild(handle);
+
     const name = document.createElement('div');
     name.className = 'colname';
     name.innerHTML = '<strong>' + col.label + '</strong> <span class="coltag">' + col.type + '</span>' +
@@ -711,6 +733,24 @@ function renderColModal(){
       });
       row.appendChild(finput);
     }
+
+    if(col.key !== 'symbol'){
+      const eyeBtn = document.createElement('button');
+      eyeBtn.className = 'ghost eyebtn';
+      eyeBtn.textContent = col.hidden ? '🙈 Hidden' : '👁 Visible';
+      eyeBtn.title = 'Toggle whether this column shows in the table (data is kept either way)';
+      eyeBtn.addEventListener('click', () => {
+        col.hidden = !col.hidden;
+        save(); renderColModal(); renderTable();
+      });
+      row.appendChild(eyeBtn);
+    } else {
+      const lockNote = document.createElement('span');
+      lockNote.className = 'coltag';
+      lockNote.textContent = 'always shown';
+      row.appendChild(lockNote);
+    }
+
     if(col.key !== 'symbol'){
       const del = document.createElement('button');
       del.className = 'danger';
@@ -723,6 +763,40 @@ function renderColModal(){
       });
       row.appendChild(del);
     }
+
+    row.addEventListener('dragstart', (e) => {
+      dragSrcKey = col.key;
+      row.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', col.key);
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('dragging');
+      list.querySelectorAll('.col-row').forEach(r => r.classList.remove('drag-over'));
+      dragSrcKey = null;
+    });
+    row.addEventListener('dragover', (e) => {
+      if(col.key === 'symbol') return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if(col.key !== dragSrcKey) row.classList.add('drag-over');
+    });
+    row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+    row.addEventListener('drop', (e) => {
+      if(col.key === 'symbol') return;
+      e.preventDefault();
+      row.classList.remove('drag-over');
+      const srcKey = dragSrcKey || e.dataTransfer.getData('text/plain');
+      if(!srcKey || srcKey === col.key) return;
+      const fromIdx = state.columns.findIndex(c => c.key === srcKey);
+      const toIdx = state.columns.findIndex(c => c.key === col.key);
+      if(fromIdx === -1 || toIdx === -1) return;
+      const [moved] = state.columns.splice(fromIdx, 1);
+      const insertAt = state.columns.findIndex(c => c.key === col.key);
+      state.columns.splice(insertAt, 0, moved);
+      save(); renderColModal(); renderTable();
+    });
+
     list.appendChild(row);
   });
   const chips = document.getElementById('keyChips');
@@ -746,7 +820,7 @@ document.getElementById('addColBtn').addEventListener('click', () => {
   const type = document.getElementById('newColType').value;
   const agg = document.getElementById('newColAgg').checked;
   const key = uniqueKey(slugify(label), state.columns.map(c => c.key));
-  const col = { key, label, type, agg };
+  const col = { key, label, type, agg, hidden: false };
   if(type === 'calc'){
     const formula = document.getElementById('newColFormula').value.trim();
     if(!formula){ alert('Enter a formula for a calculated column.'); return; }
