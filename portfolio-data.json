@@ -201,7 +201,7 @@
           "peRatio": 38.295677,
           "eps": 15.05,
           "beta": "",
-          "alert": "",
+          "alert": 572,
           "target": "",
           "signal": "-",
           "trend": "🔴",
@@ -577,7 +577,7 @@
           "eps": "",
           "beta": "",
           "signal": "-",
-          "alert": "",
+          "alert": 2283,
           "target": "",
           "mcCode": ""
         }
@@ -698,7 +698,7 @@
           "eps": "",
           "beta": "",
           "signal": "-",
-          "alert": "",
+          "alert": 98,
           "target": "",
           "mcCode": ""
         },
@@ -813,7 +813,7 @@
           "eps": 60.78,
           "beta": 0.337,
           "signal": "-",
-          "alert": "",
+          "alert": 320,
           "target": "",
           "mcCode": ""
         },
