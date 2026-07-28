@@ -131,6 +131,7 @@
     <button id="manageColsBtn" class="ghost">Manage Columns</button>
     <button id="exportBtn" class="ghost">Export</button>
     <button id="importBtn" class="ghost">Import</button>
+    <button id="syncBtn" class="ghost">GitHub Sync</button>
     <input type="file" id="importFile" accept=".json" style="display:none">
     <span id="status"></span>
   </div>
@@ -210,6 +211,34 @@
   </div>
 </div>
 
+<!-- GitHub Sync modal -->
+<div class="modal-backdrop" id="syncModalBackdrop">
+  <div class="modal">
+    <h2>Sync to GitHub</h2>
+    <div class="hint">Same idea as chart.html's sync — but its own file, so the two never overwrite each other.</div>
+
+    <h3>Personal access token</h3>
+    <input type="password" id="ghToken" style="width:100%">
+
+    <h3>Repo (owner/name)</h3>
+    <input type="text" id="ghRepo" placeholder="writersanjoy/live-charts" style="width:100%">
+
+    <h3>File path in repo</h3>
+    <input type="text" id="ghPath" placeholder="portfolio-data.json" style="width:100%">
+
+    <div class="modal-close-row" style="justify-content:flex-start;margin-top:14px">
+      <button id="saveToGhBtn">Save to GitHub</button>
+      <button class="ghost" id="loadFromGhBtn">Load from GitHub</button>
+    </div>
+    <div id="ghStatus" class="hint"></div>
+    <div class="hint">Use a fine-grained token scoped to just this repo, "Contents: read and write" only. It's stored in this browser's local storage and sent only to GitHub's API.</div>
+
+    <div class="modal-close-row">
+      <button class="ghost" id="closeSyncModal">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ---------- storage ----------
 const LS_KEY = 'portfolioToolData_v1';
@@ -245,9 +274,16 @@ function mcChartUrl(symbol, mcCodeOverride){
   const code = (mcCodeOverride && String(mcCodeOverride).trim()) ? String(mcCodeOverride).trim() : mcCodeFromSymbol(symbol);
   return 'https://www.moneycontrol.com/mc/stock/chart?scId=' + encodeURIComponent(code) + '&ex=NSE';
 }
+// Yahoo's longName is often long/all-caps ("VARUN BEVERAGES LIMITED"); keep just the
+// first two words in Sentence case ("Varun beverages") so the column stays narrow.
+function shortenName(name){
+  if(!name) return '';
+  const words = String(name).trim().split(/\s+/).slice(0, 2).join(' ').toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
 
 // Keep a few high-traffic columns compact so more fit on screen without horizontal scroll.
-const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '62px', target: '62px' };
+const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '62px', target: '62px', name: '110px' };
 
 const DEFAULT_COLUMNS = [
   { key: 'symbol',    label: 'Symbol',       type: 'manual', agg: false, hidden: false },
@@ -671,7 +707,7 @@ async function refreshPrices(){
       const prevClose = meta.previousClose ?? meta.chartPreviousClose;
       row.ltp = typeof ltp === 'number' ? ltp : '';
       row.prevClose = typeof prevClose === 'number' ? prevClose : '';
-      row.name = meta.longName || meta.shortName || row.name || '';
+      row.name = shortenName(meta.longName || meta.shortName || row.name || '');
       row.chgPct = (typeof ltp === 'number' && typeof prevClose === 'number' && prevClose !== 0)
         ? ((ltp - prevClose) / prevClose * 100) : '';
       row.fiftyTwoWkHigh = typeof meta.fiftyTwoWeekHigh === 'number' ? meta.fiftyTwoWeekHigh : '';
@@ -730,6 +766,85 @@ const colModalBackdrop = document.getElementById('colModalBackdrop');
 document.getElementById('manageColsBtn').addEventListener('click', () => { renderColModal(); colModalBackdrop.classList.add('open'); });
 document.getElementById('closeColModal').addEventListener('click', () => colModalBackdrop.classList.remove('open'));
 colModalBackdrop.addEventListener('click', (e) => { if(e.target === colModalBackdrop) colModalBackdrop.classList.remove('open'); });
+
+// ---------- GitHub sync (mirrors chart.html's pattern; separate keys/file so nothing collides) ----------
+const LS_GH = 'portfolioToolGhConfig_v1';
+const syncModalBackdrop = document.getElementById('syncModalBackdrop');
+const ghStatusEl = document.getElementById('ghStatus');
+
+function loadGhConfig(){ try { return JSON.parse(localStorage.getItem(LS_GH)) || {}; } catch(e){ return {}; } }
+function saveGhConfig(){
+  const cfg = {
+    token: document.getElementById('ghToken').value.trim(),
+    repo: document.getElementById('ghRepo').value.trim(),
+    path: document.getElementById('ghPath').value.trim() || 'portfolio-data.json'
+  };
+  try { localStorage.setItem(LS_GH, JSON.stringify(cfg)); } catch(e){}
+}
+function restoreGhConfig(){
+  const cfg = loadGhConfig();
+  document.getElementById('ghToken').value = cfg.token || '';
+  document.getElementById('ghRepo').value = cfg.repo || '';
+  document.getElementById('ghPath').value = cfg.path || 'portfolio-data.json';
+}
+function flashGhStatus(msg){ ghStatusEl.textContent = msg; }
+['ghToken', 'ghRepo', 'ghPath'].forEach(id => document.getElementById(id).addEventListener('input', saveGhConfig));
+
+function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64DecodeUnicode(str){ return decodeURIComponent(escape(atob(str))); }
+
+async function saveToGithub(){
+  const cfg = loadGhConfig();
+  if(!cfg.token || !cfg.repo){ flashGhStatus('Add your token and repo first.'); return; }
+  flashGhStatus('Saving…');
+  const url = 'https://api.github.com/repos/' + cfg.repo + '/contents/' + cfg.path;
+  try {
+    let sha = null;
+    const getRes = await fetch(url, { headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json' } });
+    if(getRes.status === 200){ const existing = await getRes.json(); sha = existing.sha; }
+    const body = {
+      message: 'Update portfolio data ' + new Date().toISOString(),
+      content: b64EncodeUnicode(JSON.stringify(state, null, 2))
+    };
+    if(sha) body.sha = sha;
+    const putRes = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!putRes.ok) throw new Error('GitHub responded ' + putRes.status);
+    flashGhStatus('Saved to GitHub.');
+  } catch(e){
+    flashGhStatus('Save failed — check token, repo name, path, and token permissions.');
+  }
+}
+async function loadFromGithub(){
+  const cfg = loadGhConfig();
+  if(!cfg.token || !cfg.repo){ flashGhStatus('Add your token and repo first.'); return; }
+  flashGhStatus('Loading…');
+  const url = 'https://api.github.com/repos/' + cfg.repo + '/contents/' + cfg.path;
+  try {
+    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json' } });
+    if(!res.ok) throw new Error('GitHub responded ' + res.status);
+    const json = await res.json();
+    const data = JSON.parse(b64DecodeUnicode(json.content));
+    if(!data.tabs || !data.columns) throw new Error('bad file');
+    state = data;
+    migrateColumns(state);
+    if(!state.tabs.find(t => t.id === state.activeTab)) state.activeTab = state.tabs[0].id;
+    save();
+    renderAll();
+    flashGhStatus('Loaded from GitHub.');
+  } catch(e){
+    flashGhStatus('Load failed — check token/repo/path, or the file may not exist yet (try Save first).');
+  }
+}
+
+document.getElementById('syncBtn').addEventListener('click', () => { restoreGhConfig(); flashGhStatus(''); syncModalBackdrop.classList.add('open'); });
+document.getElementById('closeSyncModal').addEventListener('click', () => syncModalBackdrop.classList.remove('open'));
+syncModalBackdrop.addEventListener('click', (e) => { if(e.target === syncModalBackdrop) syncModalBackdrop.classList.remove('open'); });
+document.getElementById('saveToGhBtn').addEventListener('click', saveToGithub);
+document.getElementById('loadFromGhBtn').addEventListener('click', loadFromGithub);
 
 const newColType = document.getElementById('newColType');
 newColType.addEventListener('change', () => {
