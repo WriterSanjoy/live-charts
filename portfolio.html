@@ -80,7 +80,8 @@
   th .colhead { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
   th:first-child .colhead { justify-content: flex-start; }
   th .coltype { font-size: 9px; opacity: .6; text-transform: none; }
-  tbody tr:hover { background: #212b38; }
+  tbody tr { transition: background .08s ease; }
+  tbody tr:hover { background: #2a3c54; box-shadow: inset 3px 0 0 var(--accent); }
   td input[type=text], td input[type=number] { width: 100%; min-width: 70px; text-align: right; padding: 3px 5px; }
   td:first-child input[type=text] { text-align: left; }
   td.readonly { color: var(--text); }
@@ -276,17 +277,22 @@ function mcChartUrl(symbol, mcCodeOverride){
 }
 // Yahoo's longName is often long/all-caps ("VARUN BEVERAGES LIMITED"); keep just the
 // first two words in Sentence case ("Varun beverages") so the column stays narrow.
-function shortenName(name){
-  if(!name) return '';
-  const words = String(name).trim().split(/\s+/).slice(0, 2).join(' ').toLowerCase();
-  return words.charAt(0).toUpperCase() + words.slice(1);
+function shortenName(name) {
+  if (!name) return '';
+  const words = String(name).trim().split(/\s+/).slice(0, 2);
+  const capitalized = words.map(
+    w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+  );
+  return capitalized.join(' ');
 }
 
 // Keep a few high-traffic columns compact so more fit on screen without horizontal scroll.
-const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '62px', target: '62px', name: '110px' };
+const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '62px', target: '62px', name: '110px', dayIcon: '36px' };
 
 const DEFAULT_COLUMNS = [
   { key: 'symbol',    label: 'Symbol',       type: 'manual', agg: false, hidden: false },
+  { key: 'dayIcon',   label: '',             type: 'calc', resultType: 'text',
+    formula: "dayHigh>prevHigh && dayLow>prevLow ? '⬆️' : (dayHigh<prevHigh && dayLow<prevLow ? '⬇️' : '-')", agg: false, hidden: false },
   { key: 'qty',       label: 'Qty',          type: 'manual', agg: false, hidden: false },
   { key: 'buyPrice',  label: 'Buy Price',    type: 'manual', agg: false, hidden: false },
   { key: 'name',      label: 'Name',         type: 'fetched', agg: false, hidden: false },
@@ -309,6 +315,10 @@ const DEFAULT_COLUMNS = [
   { key: 'signal',    label: 'Signal',       type: 'calc', resultType: 'text',
     formula: "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')", agg: false, hidden: false },
   { key: 'mcCode',    label: 'MC Code',      type: 'manual', agg: false, hidden: true },
+  { key: 'dayHigh',   label: 'Today High',   type: 'fetched', agg: false, hidden: true },
+  { key: 'dayLow',    label: 'Today Low',    type: 'fetched', agg: false, hidden: true },
+  { key: 'prevHigh',  label: 'Prev High',    type: 'fetched', agg: false, hidden: true },
+  { key: 'prevLow',   label: 'Prev Low',     type: 'fetched', agg: false, hidden: true },
 ];
 
 function defaultTab(name){
@@ -502,8 +512,8 @@ function renderTable(){
           td.textContent = val.toFixed(2);
         } else {
           td.textContent = val;
-          if(val === 'BUY' || val === '🔼' || val === '🟢') td.classList.add('up');
-          else if(val === 'SELL' || val === '🔽' || val === '🔴') td.classList.add('down');
+          if(val === 'BUY' || val === '🔼' || val === '🟢' || val === '⬆️') td.classList.add('up');
+          else if(val === 'SELL' || val === '🔽' || val === '🔴' || val === '⬇️') td.classList.add('down');
           if(col.key === 'trend'){
             const link = document.createElement('a');
             link.href = mcChartUrl(row.symbol, row.mcCode);
@@ -588,8 +598,8 @@ function renderTableValuesOnly(){
           td.textContent = val.toFixed(2);
         } else {
           td.textContent = val;
-          if(val === 'BUY' || val === '🔼' || val === '🟢') td.classList.add('up');
-          else if(val === 'SELL' || val === '🔽' || val === '🔴') td.classList.add('down');
+          if(val === 'BUY' || val === '🔼' || val === '🟢' || val === '⬆️') td.classList.add('up');
+          else if(val === 'SELL' || val === '🔽' || val === '🔴' || val === '⬇️') td.classList.add('down');
           if(col.key === 'trend'){
             const link = document.createElement('a');
             link.href = mcChartUrl(row.symbol, row.mcCode);
@@ -681,7 +691,7 @@ async function fetchQuote(symbol){
   const data = await res.json();
   const meta = data && data.chart && data.chart.result && data.chart.result[0] && data.chart.result[0].meta;
   if(!meta) throw new Error('no data');
-  return meta;
+  return { meta, prevHigh: data.prevHigh, prevLow: data.prevLow };
 }
 
 async function fetchFundamentals(symbol){
@@ -702,7 +712,7 @@ async function refreshPrices(){
   let done = 0, errors = 0;
   for(const row of rows){
     try {
-      const meta = await fetchQuote(row.symbol);
+      const { meta, prevHigh, prevLow } = await fetchQuote(row.symbol);
       const ltp = meta.regularMarketPrice;
       const prevClose = meta.previousClose ?? meta.chartPreviousClose;
       row.ltp = typeof ltp === 'number' ? ltp : '';
@@ -712,6 +722,10 @@ async function refreshPrices(){
         ? ((ltp - prevClose) / prevClose * 100) : '';
       row.fiftyTwoWkHigh = typeof meta.fiftyTwoWeekHigh === 'number' ? meta.fiftyTwoWeekHigh : '';
       row.fiftyTwoWkLow = typeof meta.fiftyTwoWeekLow === 'number' ? meta.fiftyTwoWeekLow : '';
+      row.dayHigh = typeof meta.regularMarketDayHigh === 'number' ? meta.regularMarketDayHigh : '';
+      row.dayLow = typeof meta.regularMarketDayLow === 'number' ? meta.regularMarketDayLow : '';
+      row.prevHigh = typeof prevHigh === 'number' ? prevHigh : '';
+      row.prevLow = typeof prevLow === 'number' ? prevLow : '';
       recomputeRow(row);
     } catch(e){
       errors++;
