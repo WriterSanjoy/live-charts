@@ -691,7 +691,7 @@ async function fetchQuote(symbol){
   const data = await res.json();
   const meta = data && data.chart && data.chart.result && data.chart.result[0] && data.chart.result[0].meta;
   if(!meta) throw new Error('no data');
-  return { meta, prevHigh: data.prevHigh, prevLow: data.prevLow };
+  return { meta, prevClose: data.prevClose, prevHigh: data.prevHigh, prevLow: data.prevLow };
 }
 
 async function fetchFundamentals(symbol){
@@ -712,9 +712,11 @@ async function refreshPrices(){
   let done = 0, errors = 0, lastError = '';
   for(const row of rows){
     try {
-      const { meta, prevHigh, prevLow } = await fetchQuote(row.symbol);
+      const { meta, prevClose: barsPrevClose, prevHigh, prevLow } = await fetchQuote(row.symbol);
       const ltp = meta.regularMarketPrice;
-      const prevClose = meta.previousClose ?? meta.chartPreviousClose;
+      // meta.previousClose/chartPreviousClose are unreliable with range=5d (anchored to the
+      // start of the window, not to yesterday) — prefer the value derived from daily bars.
+      const prevClose = (typeof barsPrevClose === 'number') ? barsPrevClose : (meta.previousClose ?? meta.chartPreviousClose);
       row.ltp = typeof ltp === 'number' ? ltp : '';
       row.prevClose = typeof prevClose === 'number' ? prevClose : '';
       row.name = shortenName(meta.longName || meta.shortName || row.name || '');
