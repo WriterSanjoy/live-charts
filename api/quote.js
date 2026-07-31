@@ -10,8 +10,9 @@
 // data.chart.result[0].meta.regularMarketPrice / previousClose keep working exactly as before.
 //
 // Added for portfolio.html: requests explicit daily bars (range=5d&interval=1d) so the response
-// carries enough history to derive the previous trading day's high/low — Yahoo's `meta` object
-// only has previousClose, not a previous high/low. Those are exposed as new top-level
+// carries enough history to derive the previous trading day's close/high/low — with this range,
+// Yahoo's meta.previousClose/chartPreviousClose no longer reliably means "yesterday" (see below),
+// so those are derived from the daily bars instead and exposed as new top-level `prevClose` /
 // `prevHigh` / `prevLow` fields alongside the untouched `chart` object.
 
 export default async function handler(req, res) {
@@ -34,20 +35,29 @@ export default async function handler(req, res) {
 
     const data = await upstream.json();
 
-    // Derive the previous completed trading day's high/low from the daily bars.
+    // Derive the previous completed trading day's close/high/low from the daily bars.
     // The last entry in each array is today's still-forming bar; the one before it
-    // is the last fully completed session.
+    // is the last fully completed session. Deliberately NOT using meta.previousClose /
+    // meta.chartPreviousClose here: with range=5d, Yahoo anchors chartPreviousClose to
+    // the close before the whole 5-day window (i.e. ~6 trading days back), not to yesterday.
     try {
       const result = data.chart && data.chart.result && data.chart.result[0];
       const quote = result && result.indicators && result.indicators.quote && result.indicators.quote[0];
       const ts = result && result.timestamp;
       if (quote && ts && ts.length >= 2) {
         const idx = ts.length - 2;
+        data.prevClose = typeof quote.close[idx] === 'number' ? quote.close[idx] : null;
         data.prevHigh = typeof quote.high[idx] === 'number' ? quote.high[idx] : null;
         data.prevLow = typeof quote.low[idx] === 'number' ? quote.low[idx] : null;
+        // Also patch meta.previousClose itself: chart.html reads meta.previousClose directly
+        // and was never changed to know about the new top-level fields above. Without this,
+        // chart.html would silently inherit the same "anchored to start of range" bug.
+        if (result.meta && typeof data.prevClose === 'number') {
+          result.meta.previousClose = data.prevClose;
+        }
       }
     } catch (e) {
-      // If anything about the daily-bar shape is unexpected, just leave prevHigh/prevLow absent
+      // If anything about the daily-bar shape is unexpected, just leave these absent
       // rather than failing the whole price request.
     }
 
