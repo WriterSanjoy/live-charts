@@ -705,10 +705,9 @@ async function fetchFundamentals(symbol){
 }
 
 async function refreshPrices(){
-  const tab = activeTab();
-  const rows = tab.rows.filter(r => r.symbol);
+  const rows = state.tabs.flatMap(t => t.rows.filter(r => r.symbol));
   if(!rows.length){ statusEl.textContent = 'No symbols to refresh.'; return; }
-  statusEl.textContent = 'Refreshing 0/' + rows.length + '…';
+  statusEl.textContent = 'Refreshing 0/' + rows.length + ' across ' + state.tabs.length + ' tabs…';
   let done = 0, errors = 0, lastError = '';
   for(const row of rows){
     try {
@@ -735,20 +734,19 @@ async function refreshPrices(){
       console.error('Refresh failed for', row.symbol, e);
     }
     done++;
-    statusEl.textContent = 'Refreshing ' + done + '/' + rows.length + '…';
+    statusEl.textContent = 'Refreshing ' + done + '/' + rows.length + ' across ' + state.tabs.length + ' tabs…';
   }
   save();
   renderTable();
   const now = new Date().toLocaleTimeString();
-  statusEl.textContent = errors ? ('Updated ' + now + ' (' + errors + ' failed — ' + lastError + ')') : ('Updated ' + now);
+  statusEl.textContent = errors ? ('Updated ' + now + ' (' + errors + ' failed — ' + lastError + ')') : ('Updated ' + now + ' (all tabs)');
 }
 document.getElementById('refreshBtn').addEventListener('click', refreshPrices);
 
 async function refreshFundamentals(){
-  const tab = activeTab();
-  const rows = tab.rows.filter(r => r.symbol);
+  const rows = state.tabs.flatMap(t => t.rows.filter(r => r.symbol));
   if(!rows.length){ statusEl.textContent = 'No symbols to refresh.'; return; }
-  statusEl.textContent = 'Fetching fundamentals 0/' + rows.length + '…';
+  statusEl.textContent = 'Fetching fundamentals 0/' + rows.length + ' across ' + state.tabs.length + ' tabs…';
   let done = 0, errors = 0;
   for(const row of rows){
     try {
@@ -761,14 +759,14 @@ async function refreshFundamentals(){
       errors++;
     }
     done++;
-    statusEl.textContent = 'Fetching fundamentals ' + done + '/' + rows.length + '…';
+    statusEl.textContent = 'Fetching fundamentals ' + done + '/' + rows.length + ' across ' + state.tabs.length + ' tabs…';
   }
   save();
   renderTable();
   const now = new Date().toLocaleTimeString();
   statusEl.textContent = errors
     ? ('Fundamentals updated ' + now + ' (' + errors + ' failed — this endpoint needs a Yahoo crumb/cookie and can be flakier than prices)')
-    : ('Fundamentals updated ' + now);
+    : ('Fundamentals updated ' + now + ' (all tabs)');
 }
 document.getElementById('refreshFundBtn').addEventListener('click', refreshFundamentals);
 
