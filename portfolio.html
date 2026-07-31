@@ -709,7 +709,7 @@ async function refreshPrices(){
   const rows = tab.rows.filter(r => r.symbol);
   if(!rows.length){ statusEl.textContent = 'No symbols to refresh.'; return; }
   statusEl.textContent = 'Refreshing 0/' + rows.length + '…';
-  let done = 0, errors = 0;
+  let done = 0, errors = 0, lastError = '';
   for(const row of rows){
     try {
       const { meta, prevHigh, prevLow } = await fetchQuote(row.symbol);
@@ -729,6 +729,8 @@ async function refreshPrices(){
       recomputeRow(row);
     } catch(e){
       errors++;
+      lastError = row.symbol + ': ' + e.message;
+      console.error('Refresh failed for', row.symbol, e);
     }
     done++;
     statusEl.textContent = 'Refreshing ' + done + '/' + rows.length + '…';
@@ -736,7 +738,7 @@ async function refreshPrices(){
   save();
   renderTable();
   const now = new Date().toLocaleTimeString();
-  statusEl.textContent = errors ? ('Updated ' + now + ' (' + errors + ' failed)') : ('Updated ' + now);
+  statusEl.textContent = errors ? ('Updated ' + now + ' (' + errors + ' failed — ' + lastError + ')') : ('Updated ' + now);
 }
 document.getElementById('refreshBtn').addEventListener('click', refreshPrices);
 
