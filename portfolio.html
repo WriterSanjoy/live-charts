@@ -287,7 +287,7 @@ function shortenName(name) {
 }
 
 // Keep a few high-traffic columns compact so more fit on screen without horizontal scroll.
-const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '62px', target: '62px', name: '110px', dayIcon: '36px' };
+const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '62px', target: '62px', name: '110px', dayIcon: '36px', pivotTrend: '48px' };
 
 const DEFAULT_COLUMNS = [
   { key: 'symbol',    label: 'Symbol',       type: 'manual', agg: false, hidden: false },
@@ -301,6 +301,14 @@ const DEFAULT_COLUMNS = [
   { key: 'chgPct',    label: 'Chg %',        type: 'fetched', agg: false, hidden: false },
   { key: 'trend',     label: 'Trend',        type: 'calc', resultType: 'text',
     formula: "chgPct>0 ? '🔼' : (chgPct<0 ? '🔽' : '-')", agg: false, hidden: false },
+  { key: 'pivotP',    label: 'Pivot P',      type: 'calc', formula: '(prevHigh + prevLow + prevClose) / 3', agg: false, hidden: true },
+  { key: 'pivotR1',   label: 'Pivot R1',     type: 'calc', formula: 'pivotP + 0.382*(prevHigh-prevLow)', agg: false, hidden: true },
+  { key: 'pivotR2',   label: 'Pivot R2',     type: 'calc', formula: 'pivotP + 0.618*(prevHigh-prevLow)', agg: false, hidden: true },
+  { key: 'pivotS1',   label: 'Pivot S1',     type: 'calc', formula: 'pivotP - 0.382*(prevHigh-prevLow)', agg: false, hidden: true },
+  { key: 'pivotS2',   label: 'Pivot S2',     type: 'calc', formula: 'pivotP - 0.618*(prevHigh-prevLow)', agg: false, hidden: true },
+  { key: 'pivotTrend', label: 'Pivot',       type: 'calc', resultType: 'text',
+    formula: "(!dayOpen || !pivotP) ? '-' : (dayOpen > pivotP ? (dayOpen > pivotR1 ? '⬆️⬆️' : '⬆️') : (dayOpen < pivotP ? (dayOpen < pivotS1 ? '⬇️⬇️' : '⬇️') : '-'))",
+    agg: false, hidden: false },
   { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false, hidden: false },
   { key: 'fiftyTwoWkLow',  label: '52W Low',  type: 'fetched', agg: false, hidden: false },
   { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false, hidden: false },
@@ -319,6 +327,7 @@ const DEFAULT_COLUMNS = [
   { key: 'dayLow',    label: 'Today Low',    type: 'fetched', agg: false, hidden: true },
   { key: 'prevHigh',  label: 'Prev High',    type: 'fetched', agg: false, hidden: true },
   { key: 'prevLow',   label: 'Prev Low',     type: 'fetched', agg: false, hidden: true },
+  { key: 'dayOpen',   label: 'Today Open',   type: 'fetched', agg: false, hidden: true },
 ];
 
 function defaultTab(name){
@@ -725,6 +734,7 @@ async function refreshPrices(){
       row.fiftyTwoWkLow = typeof meta.fiftyTwoWeekLow === 'number' ? meta.fiftyTwoWeekLow : '';
       row.dayHigh = typeof meta.regularMarketDayHigh === 'number' ? meta.regularMarketDayHigh : '';
       row.dayLow = typeof meta.regularMarketDayLow === 'number' ? meta.regularMarketDayLow : '';
+      row.dayOpen = typeof meta.regularMarketOpen === 'number' ? meta.regularMarketOpen : '';
       row.prevHigh = typeof prevHigh === 'number' ? prevHigh : '';
       row.prevLow = typeof prevLow === 'number' ? prevLow : '';
       recomputeRow(row);
