@@ -55,7 +55,7 @@ export default async function handler(req, res) {
   try {
     const { crumb, cookie } = await getCrumbAndCookie();
 
-    const modules = 'defaultKeyStatistics,financialData,summaryDetail';
+    const modules = 'defaultKeyStatistics,financialData,summaryDetail,price';
     const url = 'https://query1.finance.yahoo.com/v10/finance/quoteSummary/' +
       encodeURIComponent(symbol) + '?modules=' + modules + '&crumb=' + encodeURIComponent(crumb);
 
@@ -76,6 +76,7 @@ export default async function handler(req, res) {
     const stats = result.defaultKeyStatistics || {};
     const fin = result.financialData || {};
     const summary = result.summaryDetail || {};
+    const price = result.price || {};
 
     const out = {
       symbol,
@@ -87,7 +88,8 @@ export default async function handler(req, res) {
       dividendYield: pickRaw(summary, 'dividendYield'),
       marketCap: pickRaw(summary, 'marketCap'),
       priceToBook: pickRaw(stats, 'priceToBook'),
-      returnOnEquity: pickRaw(fin, 'returnOnEquity')
+      returnOnEquity: pickRaw(fin, 'returnOnEquity'),
+      regularMarketOpen: pickRaw(price, 'regularMarketOpen')
     };
 
     // Fundamentals move slowly — cache much longer than the price proxy's 5s.
