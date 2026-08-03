@@ -207,6 +207,7 @@
     </div>
 
     <div class="modal-close-row">
+      <button class="ghost" id="syncColsBtn" title="Re-copies label/formula/result-type for columns that already exist here from the current DEFAULT_COLUMNS in the file — for when you've edited the file directly. Doesn't touch your row data. Won't overwrite columns you added yourself.">Sync labels/formulas from file</button>
       <button class="ghost" id="closeColModal">Close</button>
     </div>
   </div>
@@ -309,13 +310,13 @@ const DEFAULT_COLUMNS = [
   { key: 'pivotTrend', label: 'Pivot',       type: 'calc', resultType: 'text',
     formula: "(!dayOpen || !pivotP) ? '-' : (dayOpen > pivotP ? (dayOpen > pivotR1 ? '⬆️⬆️' : '⬆️') : (dayOpen < pivotP ? (dayOpen < pivotS1 ? '⬇️⬇️' : '⬇️') : '-'))",
     agg: false, hidden: false },
-  { key: 'fiftyTwoWkHigh', label: '52High', type: 'fetched', agg: false, hidden: false },
-  { key: 'fiftyTwoWkLow',  label: '52Low',  type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWkLow',  label: '52W Low',  type: 'fetched', agg: false, hidden: false },
   { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false, hidden: false },
   { key: 'eps',       label: 'EPS',          type: 'fetched', agg: false, hidden: false },
   { key: 'beta',      label: 'Beta',         type: 'fetched', agg: false, hidden: false },
   { key: 'invested',  label: 'Invested',     type: 'calc', formula: 'qty*buyPrice', agg: true, hidden: false },
-  { key: 'curVal',    label: 'Value',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
+  { key: 'curVal',    label: 'Current Value',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
   { key: 'pnl',       label: 'P&L',          type: 'calc', formula: 'curVal-invested', agg: true, hidden: false },
   { key: 'pnlPct',    label: 'P&L %',        type: 'calc', formula: 'invested ? (pnl/invested*100) : 0', agg: false, hidden: false },
   { key: 'alert',     label: 'Alert',        type: 'manual', agg: false, hidden: false },
@@ -347,6 +348,30 @@ function migrateColumns(st){
     }
   });
   st.columns.forEach(c => { if(c.hidden === undefined) c.hidden = false; });
+}
+
+// For when you've edited a column's label/formula in the source file itself (DEFAULT_COLUMNS)
+// after already having saved data — migrateColumns only ever ADDS brand-new columns, it never
+// touches one that already exists by key, so a file edit alone won't reach already-saved state.
+// This re-copies label/formula/resultType from the file into matching existing columns, on demand.
+// Leaves row data and any column you added yourself (not in DEFAULT_COLUMNS) untouched.
+function syncColumnDefsFromDefaults(){
+  const defByKey = {};
+  DEFAULT_COLUMNS.forEach(d => { defByKey[d.key] = d; });
+  let changed = 0;
+  state.columns.forEach(c => {
+    const def = defByKey[c.key];
+    if(!def) return;
+    if(c.label !== def.label){ c.label = def.label; changed++; }
+    if(def.type === 'calc' && c.formula !== def.formula){ c.formula = def.formula; changed++; }
+    if(def.resultType && c.resultType !== def.resultType){ c.resultType = def.resultType; changed++; }
+  });
+  migrateColumns(state);
+  state.tabs.forEach(t => t.rows.forEach(r => recomputeRow(r)));
+  save();
+  renderColModal();
+  renderTable();
+  statusEl.textContent = changed ? ('Synced ' + changed + ' column definition(s) from file.') : 'Already in sync with file — nothing to update.';
 }
 
 function loadState(){
@@ -791,6 +816,7 @@ document.getElementById('autoRefresh').addEventListener('change', (e) => {
 const colModalBackdrop = document.getElementById('colModalBackdrop');
 document.getElementById('manageColsBtn').addEventListener('click', () => { renderColModal(); colModalBackdrop.classList.add('open'); });
 document.getElementById('closeColModal').addEventListener('click', () => colModalBackdrop.classList.remove('open'));
+document.getElementById('syncColsBtn').addEventListener('click', syncColumnDefsFromDefaults);
 colModalBackdrop.addEventListener('click', (e) => { if(e.target === colModalBackdrop) colModalBackdrop.classList.remove('open'); });
 
 // ---------- GitHub sync (mirrors chart.html's pattern; separate keys/file so nothing collides) ----------
