@@ -308,7 +308,7 @@ const DEFAULT_COLUMNS = [
   { key: 'pivotS1',   label: 'Pivot S1',     type: 'calc', formula: 'pivotP - 0.382*(prevHigh-prevLow)', agg: false, hidden: true },
   { key: 'pivotS2',   label: 'Pivot S2',     type: 'calc', formula: 'pivotP - 0.618*(prevHigh-prevLow)', agg: false, hidden: true },
   { key: 'pivotTrend', label: 'Pivot',       type: 'calc', resultType: 'text',
-    formula: "(!dayOpen || !pivotP) ? '-' : (dayOpen > pivotP ? (dayOpen > pivotR1 ? '🟩🟩' : '⬆🟩') : (dayOpen < pivotP ? (dayOpen < pivotS1 ? '🟥🟥' : '🟥') : '-'))",
+    formula: "(!dayOpen || !pivotP) ? '-' : (dayOpen > pivotP ? (dayOpen > pivotR1 ? '🟩🟩' : '🟩') : (dayOpen < pivotP ? (dayOpen < pivotS1 ? '🟥🟥' : '🟥') : '-'))",
     agg: false, hidden: false },
   { key: 'fiftyTwoWkHigh', label: '52High', type: 'fetched', agg: false, hidden: false },
   { key: 'fiftyTwoWkLow',  label: '52Low',  type: 'fetched', agg: false, hidden: false },
