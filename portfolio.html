@@ -734,7 +734,6 @@ async function refreshPrices(){
       row.fiftyTwoWkLow = typeof meta.fiftyTwoWeekLow === 'number' ? meta.fiftyTwoWeekLow : '';
       row.dayHigh = typeof meta.regularMarketDayHigh === 'number' ? meta.regularMarketDayHigh : '';
       row.dayLow = typeof meta.regularMarketDayLow === 'number' ? meta.regularMarketDayLow : '';
-      row.dayOpen = typeof meta.regularMarketOpen === 'number' ? meta.regularMarketOpen : '';
       row.prevHigh = typeof prevHigh === 'number' ? prevHigh : '';
       row.prevLow = typeof prevLow === 'number' ? prevLow : '';
       recomputeRow(row);
@@ -764,6 +763,7 @@ async function refreshFundamentals(){
       row.peRatio = typeof data.trailingPE === 'number' ? data.trailingPE : '';
       row.eps = typeof data.trailingEps === 'number' ? data.trailingEps : '';
       row.beta = typeof data.beta === 'number' ? data.beta : '';
+      row.dayOpen = typeof data.regularMarketOpen === 'number' ? data.regularMarketOpen : row.dayOpen;
       recomputeRow(row);
     } catch(e){
       errors++;
