@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Portfolio Tracker</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1117'/%3E%3Cpolyline points='5,24 12,16 17,20 27,7' fill='none' stroke='%234fb286' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='27' cy='7' r='2.3' fill='%234fb286'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #151b23;
+    --border: #2a323d;
+    --text: #d8dee9;
+    --muted: #8b96a5;
+    --accent: #4fb286;
+    --accent-dim: #2e6b4f;
+    --up: #4fb286;
+    --down: #d9736c;
+    --warn: #d9b25c;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    font-size: 13px;
+  }
+  input[type=text], input[type=number], select, textarea {
+    background: #0a0e14;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 7px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+  button, a.linkbtn {
+    background: var(--accent-dim);
+    color: #eafff3;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+  }
+  button:hover, a.linkbtn:hover { background: var(--accent); color: #06110b; }
+  button.ghost { background: transparent; color: var(--muted); border-color: var(--border); }
+  button.ghost:hover { background: #1c2430; color: var(--text); }
+  button.danger { background: transparent; color: var(--down); border-color: #5a2e2b; padding: 3px 7px; font-size: 12px; }
+  button.danger:hover { background: #2a1614; }
+  button.small { padding: 3px 7px; font-size: 12px; }
+
+  #toolbar { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; flex-shrink: 0; }
+  #toolbarRow1, #toolbarRow2 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  #toolbarRow2 { margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--border); }
+  .label { font-size: 11px; color: var(--muted); margin-right: 2px; }
+  #title { font-weight: 700; font-size: 15px; color: var(--text); margin-right: 6px; }
+  #status { margin-left: auto; font-size: 11px; color: var(--muted); }
+
+  #tabbar { display: flex; align-items: center; gap: 4px; margin-top: 8px; flex-wrap: wrap; flex-shrink: 0; }
+  .tab { position: relative; padding: 6px 26px 6px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 6px 6px 0 0; cursor: pointer; color: var(--muted); }
+  .tab.active { background: #1c2430; color: var(--text); border-bottom: 1px solid #1c2430; font-weight: 600; }
+  .tab .close-x { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 12px; }
+  .tab .close-x:hover { color: var(--down); }
+  #addTabBtn { padding: 5px 10px; }
+
+  #main { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: 0; }
+  #tableWrap { flex: 1; overflow: auto; border: 1px solid var(--border); background: #1c2430; border-radius: 0 6px 6px 6px; }
+  table { border-collapse: collapse; width: 100%; min-width: 600px; }
+  th, td { border-bottom: 1px solid var(--border); padding: 5px 8px; text-align: right; white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { position: sticky; top: 0; background: #212b38; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .03em; z-index: 1; cursor: default; }
+  th .colhead { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+  th:first-child .colhead { justify-content: flex-start; }
+  th .coltype { font-size: 9px; opacity: .6; text-transform: none; }
+  tbody tr { transition: background .08s ease; }
+  tbody tr:hover { background: #2a3c54; box-shadow: inset 3px 0 0 var(--accent); }
+  td input[type=text], td input[type=number] { width: 100%; min-width: 70px; text-align: right; padding: 3px 5px; }
+  td:first-child input[type=text] { text-align: left; }
+  td.readonly { color: var(--text); }
+  td.calc { color: var(--muted); }
+  td.up { color: var(--up); }
+  td.down { color: var(--down); }
+  td.err { color: var(--down); font-style: italic; }
+  td.rowactions { text-align: center; }
+  tfoot td { border-top: 2px solid var(--border); border-bottom: none; font-weight: 700; background: #1c2430; position: sticky; bottom: 0; }
+
+  #footerRow { display: flex; gap: 8px; margin-top: 8px; flex-shrink: 0; align-items: center; }
+
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); align-items: center; justify-content: center; z-index: 50; }
+  .modal-backdrop.open { display: flex; }
+  .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; width: 560px; max-width: 92vw; max-height: 85vh; overflow: auto; }
+  .modal h2 { margin: 0 0 10px; font-size: 15px; }
+  .modal h3 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 16px 0 6px; }
+  .modal-close-row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+  .col-row { display: flex; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .col-row.dragging { opacity: .35; }
+  .col-row.drag-over { border-top: 2px solid var(--accent); }
+  .col-row.is-hidden { opacity: .5; }
+  .col-row .draghandle { cursor: grab; color: var(--muted); font-size: 14px; padding: 0 2px; user-select: none; }
+  .col-row .draghandle:active { cursor: grabbing; }
+  .col-row .colname { flex: 1; }
+  .col-row .coltag { font-size: 10px; color: var(--muted); border: 1px solid var(--border); border-radius: 3px; padding: 1px 5px; }
+  .col-row input.formula-edit { flex: 2; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+  .eyebtn { padding: 3px 7px; font-size: 12px; }
+  #addColForm { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  #addColForm .full { grid-column: 1 / -1; }
+  #addColForm label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 3px; }
+  #addColForm input.formula-edit { width: 100%; font-family: ui-monospace, Consolas, monospace; }
+  .hint { font-size: 11px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .hint code { background: #0a0e14; padding: 1px 4px; border-radius: 3px; }
+  .key-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .key-chip { font-family: ui-monospace, Consolas, monospace; font-size: 11px; background: #0a0e14; border: 1px solid var(--border); border-radius: 3px; padding: 2px 6px; cursor: pointer; color: var(--accent); }
+  .key-chip:hover { background: #1c2430; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <div id="toolbarRow1">
+    <span id="title">Portfolio Tracker</span>
+    <button id="refreshBtn">Refresh Prices</button>
+    <button id="refreshFundBtn" class="ghost">Refresh Fundamentals</button>
+    <button id="addRowBtn" class="ghost">+ Add Row</button>
+    <button id="manageColsBtn" class="ghost">Manage Columns</button>
+    <button id="exportBtn" class="ghost">Export</button>
+    <button id="importBtn" class="ghost">Import</button>
+    <button id="syncBtn" class="ghost">GitHub Sync</button>
+    <input type="file" id="importFile" accept=".json" style="display:none">
+    <span id="status"></span>
+  </div>
+  <div id="toolbarRow2">
+    <span class="label">Yahoo proxy base</span>
+    <input type="text" id="proxyBase" style="width:280px">
+    <span class="label">Fundamentals proxy base</span>
+    <input type="text" id="proxyFundBase" style="width:280px">
+    <span class="label">Auto-refresh</span>
+    <select id="autoRefresh">
+      <option value="0">Off</option>
+      <option value="30">30s</option>
+      <option value="60">1 min</option>
+      <option value="300">5 min</option>
+      <option value="900">15 min</option>
+      <option value="1800">30 min</option>
+      <option value="3600">1 hr</option>
+    </select>
+  </div>
+</div>
+
+<div id="tabbar"></div>
+
+<div id="main">
+  <div id="tableWrap">
+    <table>
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+      <tfoot id="tfoot"></tfoot>
+    </table>
+  </div>
+</div>
+
+<!-- Manage Columns modal -->
+<div class="modal-backdrop" id="colModalBackdrop">
+  <div class="modal">
+    <h2>Manage Columns</h2>
+    <div id="colList"></div>
+
+    <h3>Add Column</h3>
+    <div id="addColForm">
+      <div>
+        <label>Label</label>
+        <input type="text" id="newColLabel" placeholder="e.g. P&amp;L %">
+      </div>
+      <div>
+        <label>Type</label>
+        <select id="newColType">
+          <option value="manual">Manual entry</option>
+          <option value="calc">Calculated (formula)</option>
+        </select>
+      </div>
+      <div class="full" id="newColFormulaWrap" style="display:none">
+        <label>Formula (JS expression, use column keys as variables)</label>
+        <input type="text" id="newColFormula" class="formula-edit" placeholder="e.g. (curVal-invested)/invested*100">
+        <div class="key-chips" id="keyChips"></div>
+        <label style="margin-top:8px">Result type</label>
+        <select id="newColResultType">
+          <option value="number">Number</option>
+          <option value="text">Text (e.g. a BUY/SELL style label)</option>
+        </select>
+        <div class="hint">Click a key to insert it. All column values read as numbers inside the formula (blank/text cells read as <code>0</code>) — pick "Text" if your formula's <em>result</em> should be a word like <code>'BUY'</code> rather than a number. Formulas are evaluated top-to-bottom, so a calc column can reference any column above it.</div>
+      </div>
+      <div class="full">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)">
+          <input type="checkbox" id="newColAgg" style="width:auto"> Include in totals row (sum down the column)
+        </label>
+      </div>
+      <div class="full" style="text-align:right">
+        <button id="addColBtn">Add Column</button>
+      </div>
+    </div>
+
+    <div class="modal-close-row">
+      <button class="ghost" id="closeColModal">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- GitHub Sync modal -->
+<div class="modal-backdrop" id="syncModalBackdrop">
+  <div class="modal">
+    <h2>Sync to GitHub</h2>
+    <div class="hint">Same idea as chart.html's sync — but its own file, so the two never overwrite each other.</div>
+
+    <h3>Personal access token</h3>
+    <input type="password" id="ghToken" style="width:100%">
+
+    <h3>Repo (owner/name)</h3>
+    <input type="text" id="ghRepo" placeholder="writersanjoy/live-charts" style="width:100%">
+
+    <h3>File path in repo</h3>
+    <input type="text" id="ghPath" placeholder="portfolio-data.json" style="width:100%">
+
+    <div class="modal-close-row" style="justify-content:flex-start;margin-top:14px">
+      <button id="saveToGhBtn">Save to GitHub</button>
+      <button class="ghost" id="loadFromGhBtn">Load from GitHub</button>
+    </div>
+    <div id="ghStatus" class="hint"></div>
+    <div class="hint">Use a fine-grained token scoped to just this repo, "Contents: read and write" only. It's stored in this browser's local storage and sent only to GitHub's API.</div>
+
+    <div class="modal-close-row">
+      <button class="ghost" id="closeSyncModal">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- storage ----------
+const LS_KEY = 'portfolioToolData_v1';
+const LS_PROXY = 'portfolioToolProxyBase';
+const LS_PROXY_FUND = 'portfolioToolProxyFundBase';
+const DEFAULT_PROXY = 'https://live-charts.vercel.app/api/quote?symbol=';
+const DEFAULT_PROXY_FUND = 'https://live-charts.vercel.app/api/quoteSummary?symbol=';
+
+function slugify(label){
+  let s = label.trim().replace(/[^a-zA-Z0-9 ]/g,'').split(/\s+/).map((w,i)=>{
+    w = w.toLowerCase();
+    return i===0 ? w : (w.charAt(0).toUpperCase()+w.slice(1));
+  }).join('');
+  if(!s) s = 'col' + Date.now();
+  if(/^[0-9]/.test(s)) s = '_' + s;
+  return s;
+}
+function uniqueKey(base, existing){
+  let k = base, n = 2;
+  while(existing.includes(k)){ k = base + n; n++; }
+  return k;
+}
+function uid(){ return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+// Best-effort: Moneycontrol's scId often (not always) matches the Yahoo symbol with the
+// exchange suffix stripped. The optional, hidden "MC Code" column lets you override it per-row
+// when the guess is wrong — same idea as the manual symbol field in chart.html.
+function mcCodeFromSymbol(symbol){
+  if(!symbol) return '';
+  return String(symbol).replace(/\.(NS|BO)$/i, '').toUpperCase();
+}
+function mcChartUrl(symbol, mcCodeOverride){
+  const code = (mcCodeOverride && String(mcCodeOverride).trim()) ? String(mcCodeOverride).trim() : mcCodeFromSymbol(symbol);
+  return 'https://www.moneycontrol.com/mc/stock/chart?scId=' + encodeURIComponent(code) + '&ex=NSE';
+}
+// Yahoo's longName is often long/all-caps ("VARUN BEVERAGES LIMITED"); keep just the
+// first two words in Sentence case ("Varun beverages") so the column stays narrow.
+function shortenName(name) {
+  if (!name) return '';
+  const words = String(name).trim().split(/\s+/).slice(0, 2);
+  const capitalized = words.map(
+    w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+  );
+  return capitalized.join(' ');
+}
+
+// Keep a few high-traffic columns compact so more fit on screen without horizontal scroll.
+const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '62px', target: '62px', name: '110px', dayIcon: '36px', pivotTrend: '48px' };
+
+const DEFAULT_COLUMNS = [
+  { key: 'symbol',    label: 'Symbol',       type: 'manual', agg: false, hidden: false },
+  { key: 'dayIcon',   label: '',             type: 'calc', resultType: 'text',
+    formula: "dayHigh>prevHigh && dayLow>prevLow ? '⬆️' : (dayHigh<prevHigh && dayLow<prevLow ? '⬇️' : '-')", agg: false, hidden: false },
+  { key: 'qty',       label: 'Qty',          type: 'manual', agg: false, hidden: false },
+  { key: 'buyPrice',  label: 'Buy Price',    type: 'manual', agg: false, hidden: false },
+  { key: 'name',      label: 'Name',         type: 'fetched', agg: false, hidden: false },
+  { key: 'ltp',       label: 'LTP',          type: 'fetched', agg: false, hidden: false },
+  { key: 'prevClose', label: 'Prev Close',   type: 'fetched', agg: false, hidden: false },
+  { key: 'chgPct',    label: 'Chg %',        type: 'fetched', agg: false, hidden: false },
+  { key: 'trend',     label: 'Trend',        type: 'calc', resultType: 'text',
+    formula: "chgPct>0 ? '🔼' : (chgPct<0 ? '🔽' : '-')", agg: false, hidden: false },
+  { key: 'pivotP',    label: 'Pivot P',      type: 'calc', formula: '(prevHigh + prevLow + prevClose) / 3', agg: false, hidden: true },
+  { key: 'pivotR1',   label: 'Pivot R1',     type: 'calc', formula: 'pivotP + 0.382*(prevHigh-prevLow)', agg: false, hidden: true },
+  { key: 'pivotR2',   label: 'Pivot R2',     type: 'calc', formula: 'pivotP + 0.618*(prevHigh-prevLow)', agg: false, hidden: true },
+  { key: 'pivotS1',   label: 'Pivot S1',     type: 'calc', formula: 'pivotP - 0.382*(prevHigh-prevLow)', agg: false, hidden: true },
+  { key: 'pivotS2',   label: 'Pivot S2',     type: 'calc', formula: 'pivotP - 0.618*(prevHigh-prevLow)', agg: false, hidden: true },
+  { key: 'pivotTrend', label: 'Pivot',       type: 'calc', resultType: 'text',
+    formula: "(!dayOpen || !pivotP) ? '-' : (dayOpen > pivotP ? (dayOpen > pivotR1 ? '⬆️⬆️' : '⬆️') : (dayOpen < pivotP ? (dayOpen < pivotS1 ? '⬇️⬇️' : '⬇️') : '-'))",
+    agg: false, hidden: false },
+  { key: 'fiftyTwoWkHigh', label: '52High', type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWkLow',  label: '52Low',  type: 'fetched', agg: false, hidden: false },
+  { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false, hidden: false },
+  { key: 'eps',       label: 'EPS',          type: 'fetched', agg: false, hidden: false },
+  { key: 'beta',      label: 'Beta',         type: 'fetched', agg: false, hidden: false },
+  { key: 'invested',  label: 'Invested',     type: 'calc', formula: 'qty*buyPrice', agg: true, hidden: false },
+  { key: 'curVal',    label: 'Value',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
+  { key: 'pnl',       label: 'P&L',          type: 'calc', formula: 'curVal-invested', agg: true, hidden: false },
+  { key: 'pnlPct',    label: 'P&L %',        type: 'calc', formula: 'invested ? (pnl/invested*100) : 0', agg: false, hidden: false },
+  { key: 'alert',     label: 'Alert',        type: 'manual', agg: false, hidden: false },
+  { key: 'target',    label: 'Target',       type: 'manual', agg: false, hidden: false },
+  { key: 'signal',    label: 'Signal',       type: 'calc', resultType: 'text',
+    formula: "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')", agg: false, hidden: false },
+  { key: 'mcCode',    label: 'MC Code',      type: 'manual', agg: false, hidden: true },
+  { key: 'dayHigh',   label: 'Today High',   type: 'fetched', agg: false, hidden: true },
+  { key: 'dayLow',    label: 'Today Low',    type: 'fetched', agg: false, hidden: true },
+  { key: 'prevHigh',  label: 'Prev High',    type: 'fetched', agg: false, hidden: true },
+  { key: 'prevLow',   label: 'Prev Low',     type: 'fetched', agg: false, hidden: true },
+  { key: 'dayOpen',   label: 'Today Open',   type: 'fetched', agg: false, hidden: true },
+];
+
+function defaultTab(name){
+  return { id: uid(), name: name || 'Portfolio 1', rows: [] };
+}
+
+// Adds any DEFAULT_COLUMNS a saved file is missing (e.g. after an update), without touching
+// columns the user has customized or added themselves.
+function migrateColumns(st){
+  const existingKeys = st.columns.map(c => c.key);
+  DEFAULT_COLUMNS.forEach(defCol => {
+    if(!existingKeys.includes(defCol.key)){
+      st.columns.push(JSON.parse(JSON.stringify(defCol)));
+      st.tabs.forEach(t => t.rows.forEach(r => {
+        if(!(defCol.key in r)) r[defCol.key] = defCol.type === 'manual' ? '' : (defCol.type === 'fetched' ? '' : 0);
+      }));
+    }
+  });
+  st.columns.forEach(c => { if(c.hidden === undefined) c.hidden = false; });
+}
+
+function loadState(){
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(LS_KEY)); } catch(e){}
+  if(!raw || !raw.tabs || !raw.tabs.length){
+    raw = { columns: JSON.parse(JSON.stringify(DEFAULT_COLUMNS)), tabs: [defaultTab('Portfolio 1')], activeTab: null };
+    raw.activeTab = raw.tabs[0].id;
+  }
+  if(!raw.columns || !raw.columns.length) raw.columns = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
+  migrateColumns(raw);
+  return raw;
+}
+let state = loadState();
+function save(){
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+
+// ---------- formula engine ----------
+function coerceNum(v){
+  if(typeof v === 'number') return v;
+  if(v === '' || v === undefined || v === null) return 0;
+  const f = parseFloat(v);
+  return isNaN(f) ? 0 : f;
+}
+function evalFormula(formula, row, columns, resultType){
+  try {
+    const keys = columns.map(c => c.key);
+    const vals = keys.map(k => coerceNum(row[k]));
+    const fn = new Function(...keys, 'return (' + formula + ')');
+    const result = fn(...vals);
+    if(resultType === 'text'){
+      return (result === undefined || result === null) ? '' : String(result);
+    }
+    if(typeof result !== 'number' || !isFinite(result)) return 0;
+    return result;
+  } catch(e){
+    return 'ERR';
+  }
+}
+function newRowObject(){
+  const row = {};
+  state.columns.forEach(c => { row[c.key] = c.type === 'manual' ? '' : (c.type === 'fetched' ? '' : 0); });
+  return row;
+}
+function recomputeRow(row){
+  state.columns.forEach(col => {
+    if(col.type === 'calc'){
+      row[col.key] = evalFormula(col.formula, row, state.columns, col.resultType);
+    }
+  });
+}
+function recomputeActiveTab(){
+  const tab = activeTab();
+  tab.rows.forEach(recomputeRow);
+}
+
+// ---------- tab helpers ----------
+function activeTab(){
+  return state.tabs.find(t => t.id === state.activeTab) || state.tabs[0];
+}
+
+// ---------- rendering ----------
+const thead = document.getElementById('thead');
+const tbody = document.getElementById('tbody');
+const tfoot = document.getElementById('tfoot');
+const tabbar = document.getElementById('tabbar');
+const statusEl = document.getElementById('status');
+
+function renderTabs(){
+  tabbar.innerHTML = '';
+  state.tabs.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'tab' + (t.id === state.activeTab ? ' active' : '');
+    el.textContent = t.name;
+    el.title = 'Click to switch, double-click to rename';
+    el.addEventListener('click', () => { state.activeTab = t.id; save(); renderAll(); });
+    el.addEventListener('dblclick', () => {
+      const nn = prompt('Rename tab', t.name);
+      if(nn && nn.trim()){ t.name = nn.trim(); save(); renderAll(); }
+    });
+    const x = document.createElement('span');
+    x.className = 'close-x';
+    x.textContent = '✕';
+    x.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      if(state.tabs.length === 1){ alert("Can't remove the last tab."); return; }
+      if(!confirm('Delete tab "' + t.name + '" and all its rows?')) return;
+      state.tabs = state.tabs.filter(x2 => x2.id !== t.id);
+      if(state.activeTab === t.id) state.activeTab = state.tabs[0].id;
+      save(); renderAll();
+    });
+    el.appendChild(x);
+    tabbar.appendChild(el);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.id = 'addTabBtn';
+  addBtn.className = 'ghost small';
+  addBtn.textContent = '+ Tab';
+  addBtn.addEventListener('click', () => {
+    const nn = prompt('New tab name', 'Portfolio ' + (state.tabs.length + 1));
+    if(nn && nn.trim()){
+      const t = defaultTab(nn.trim());
+      state.tabs.push(t);
+      state.activeTab = t.id;
+      save(); renderAll();
+    }
+  });
+  tabbar.appendChild(addBtn);
+}
+
+function renderTable(){
+  const tab = activeTab();
+  const visibleColumns = state.columns.filter(c => !c.hidden);
+  thead.innerHTML = '';
+  const trh = document.createElement('tr');
+  visibleColumns.forEach(col => {
+    const th = document.createElement('th');
+    if(NARROW_WIDTHS[col.key]) th.style.width = NARROW_WIDTHS[col.key];
+    const wrap = document.createElement('div');
+    wrap.className = 'colhead';
+    const span = document.createElement('span');
+    span.textContent = col.label;
+    const tag = document.createElement('span');
+    tag.className = 'coltype';
+    tag.textContent = col.type === 'calc' ? 'ƒ' : (col.type === 'fetched' ? '↓' : '');
+    wrap.appendChild(span);
+    if(tag.textContent) wrap.appendChild(tag);
+    th.appendChild(wrap);
+    trh.appendChild(th);
+  });
+  const thAction = document.createElement('th');
+  thAction.textContent = '';
+  trh.appendChild(thAction);
+  thead.appendChild(trh);
+
+  tbody.innerHTML = '';
+  tab.rows.forEach(row => {
+    const tr = document.createElement('tr');
+    visibleColumns.forEach(col => {
+      const td = document.createElement('td');
+      const val = row[col.key];
+      if(col.type === 'manual'){
+        const inp = document.createElement('input');
+        inp.type = (col.key === 'symbol' || col.key === 'name') ? 'text' : 'number';
+        inp.value = val;
+        if(NARROW_WIDTHS[col.key]){ inp.style.width = NARROW_WIDTHS[col.key]; inp.style.minWidth = '0'; }
+        inp.addEventListener('input', () => {
+          row[col.key] = inp.type === 'number' ? (inp.value === '' ? '' : parseFloat(inp.value)) : inp.value;
+          recomputeRow(row);
+          save();
+          renderTableValuesOnly();
+        });
+        td.appendChild(inp);
+      } else if(col.type === 'fetched'){
+        td.className = 'readonly';
+        if(col.key === 'chgPct' && typeof val === 'number'){
+          td.classList.add(val >= 0 ? 'up' : 'down');
+          td.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + '%';
+        } else if(typeof val === 'number'){
+          td.textContent = val.toFixed(2);
+        } else {
+          td.textContent = val || '—';
+        }
+      } else { // calc
+        td.className = 'calc';
+        if(val === 'ERR'){ td.classList.add('err'); td.textContent = 'ERR'; }
+        else if(typeof val === 'number'){
+          if(col.key.toLowerCase().includes('pnl') || col.key.toLowerCase().includes('pct') || col.key.toLowerCase().includes('change')){
+            td.classList.add(val >= 0 ? 'up' : 'down');
+          }
+          td.textContent = val.toFixed(2);
+        } else {
+          td.textContent = val;
+          if(val === 'BUY' || val === '🔼' || val === '🟢' || val === '⬆️') td.classList.add('up');
+          else if(val === 'SELL' || val === '🔽' || val === '🔴' || val === '⬇️') td.classList.add('down');
+          if(col.key === 'trend'){
+            const link = document.createElement('a');
+            link.href = mcChartUrl(row.symbol, row.mcCode);
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.textContent = '↗️';
+            link.title = 'Open ' + (row.symbol || 'chart') + ' on Moneycontrol';
+            link.style.marginLeft = '4px';
+            link.style.textDecoration = 'none';
+            link.addEventListener('click', (e) => e.stopPropagation());
+            td.appendChild(link);
+          }
+        }
+      }
+      tr.appendChild(td);
+    });
+    const tdAction = document.createElement('td');
+    tdAction.className = 'rowactions';
+    const delBtn = document.createElement('button');
+    delBtn.className = 'danger';
+    delBtn.textContent = '✕';
+    delBtn.addEventListener('click', () => {
+      tab.rows = tab.rows.filter(r => r !== row);
+      save(); renderAll();
+    });
+    tdAction.appendChild(delBtn);
+    tr.appendChild(tdAction);
+    tbody.appendChild(tr);
+  });
+
+  // totals
+  tfoot.innerHTML = '';
+  const trf = document.createElement('tr');
+  visibleColumns.forEach((col, i) => {
+    const td = document.createElement('td');
+    if(i === 0){
+      td.textContent = 'Totals';
+    } else if(col.agg){
+      let sum = 0;
+      tab.rows.forEach(r => { const v = r[col.key]; if(typeof v === 'number') sum += v; });
+      td.textContent = sum.toFixed(2);
+    } else {
+      td.textContent = '';
+    }
+    trf.appendChild(td);
+  });
+  trf.appendChild(document.createElement('td'));
+  tfoot.appendChild(trf);
+}
+
+// Fast path: update only text of readonly/calc cells + input values, without full rebuild (keeps focus)
+function renderTableValuesOnly(){
+  const tab = activeTab();
+  const visibleColumns = state.columns.filter(c => !c.hidden);
+  const rows = tbody.querySelectorAll('tr');
+  tab.rows.forEach((row, ri) => {
+    const tr = rows[ri];
+    if(!tr) return;
+    const cells = tr.querySelectorAll('td');
+    visibleColumns.forEach((col, ci) => {
+      const td = cells[ci];
+      if(!td) return;
+      const val = row[col.key];
+      if(col.type === 'manual') return; // input owns its own value
+      if(col.type === 'fetched'){
+        td.className = 'readonly';
+        if(col.key === 'chgPct' && typeof val === 'number'){
+          td.classList.add(val >= 0 ? 'up' : 'down');
+          td.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + '%';
+        } else if(typeof val === 'number'){
+          td.textContent = val.toFixed(2);
+        } else {
+          td.textContent = val || '—';
+        }
+      } else {
+        td.className = 'calc';
+        if(val === 'ERR'){ td.classList.add('err'); td.textContent = 'ERR'; }
+        else if(typeof val === 'number'){
+          if(col.key.toLowerCase().includes('pnl') || col.key.toLowerCase().includes('pct') || col.key.toLowerCase().includes('change')){
+            td.classList.add(val >= 0 ? 'up' : 'down');
+          }
+          td.textContent = val.toFixed(2);
+        } else {
+          td.textContent = val;
+          if(val === 'BUY' || val === '🔼' || val === '🟢' || val === '⬆️') td.classList.add('up');
+          else if(val === 'SELL' || val === '🔽' || val === '🔴' || val === '⬇️') td.classList.add('down');
+          if(col.key === 'trend'){
+            const link = document.createElement('a');
+            link.href = mcChartUrl(row.symbol, row.mcCode);
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.textContent = '↗️';
+            link.title = 'Open ' + (row.symbol || 'chart') + ' on Moneycontrol';
+            link.style.marginLeft = '4px';
+            link.style.textDecoration = 'none';
+            link.addEventListener('click', (e) => e.stopPropagation());
+            td.appendChild(link);
+          }
+        }
+      }
+    });
+  });
+  const trf = tfoot.querySelector('tr');
+  if(trf){
+    const cells = trf.querySelectorAll('td');
+    visibleColumns.forEach((col, i) => {
+      const td = cells[i];
+      if(!td || i === 0) return;
+      if(col.agg){
+        let sum = 0;
+        tab.rows.forEach(r => { const v = r[col.key]; if(typeof v === 'number') sum += v; });
+        td.textContent = sum.toFixed(2);
+      }
+    });
+  }
+}
+
+function renderAll(){
+  renderTabs();
+  renderTable();
+}
+
+// ---------- toolbar actions ----------
+document.getElementById('addRowBtn').addEventListener('click', () => {
+  const sym = prompt('Symbol (as used on Yahoo Finance, e.g. RELIANCE.NS)');
+  if(!sym) return;
+  const row = newRowObject();
+  row.symbol = sym.trim().toUpperCase();
+  recomputeRow(row);
+  activeTab().rows.push(row);
+  save(); renderAll();
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'portfolio-data.json';
+  a.click();
+});
+document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if(!data.tabs || !data.columns) throw new Error('bad file');
+      state = data;
+      if(!state.tabs.find(t => t.id === state.activeTab)) state.activeTab = state.tabs[0].id;
+      save(); renderAll();
+    } catch(err){
+      alert('Could not read that file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+// ---------- proxy / fetch ----------
+const proxyInput = document.getElementById('proxyBase');
+proxyInput.value = localStorage.getItem(LS_PROXY) || DEFAULT_PROXY;
+proxyInput.addEventListener('change', () => localStorage.setItem(LS_PROXY, proxyInput.value));
+
+const proxyFundInput = document.getElementById('proxyFundBase');
+proxyFundInput.value = localStorage.getItem(LS_PROXY_FUND) || DEFAULT_PROXY_FUND;
+proxyFundInput.addEventListener('change', () => localStorage.setItem(LS_PROXY_FUND, proxyFundInput.value));
+
+async function fetchQuote(symbol){
+  const base = proxyInput.value || DEFAULT_PROXY;
+  const url = base + encodeURIComponent(symbol);
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  const meta = data && data.chart && data.chart.result && data.chart.result[0] && data.chart.result[0].meta;
+  if(!meta) throw new Error('no data');
+  return { meta, prevClose: data.prevClose, prevHigh: data.prevHigh, prevLow: data.prevLow };
+}
+
+async function fetchFundamentals(symbol){
+  const base = proxyFundInput.value || DEFAULT_PROXY_FUND;
+  const url = base + encodeURIComponent(symbol);
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  if(data.error) throw new Error(data.error);
+  return data;
+}
+
+async function refreshPrices(){
+  const rows = state.tabs.flatMap(t => t.rows.filter(r => r.symbol));
+  if(!rows.length){ statusEl.textContent = 'No symbols to refresh.'; return; }
+  statusEl.textContent = 'Refreshing 0/' + rows.length + ' across ' + state.tabs.length + ' tabs…';
+  let done = 0, errors = 0, lastError = '';
+  for(const row of rows){
+    try {
+      const { meta, prevClose: barsPrevClose, prevHigh, prevLow } = await fetchQuote(row.symbol);
+      const ltp = meta.regularMarketPrice;
+      // meta.previousClose/chartPreviousClose are unreliable with range=5d (anchored to the
+      // start of the window, not to yesterday) — prefer the value derived from daily bars.
+      const prevClose = (typeof barsPrevClose === 'number') ? barsPrevClose : (meta.previousClose ?? meta.chartPreviousClose);
+      row.ltp = typeof ltp === 'number' ? ltp : '';
+      row.prevClose = typeof prevClose === 'number' ? prevClose : '';
+      row.name = shortenName(meta.longName || meta.shortName || row.name || '');
+      row.chgPct = (typeof ltp === 'number' && typeof prevClose === 'number' && prevClose !== 0)
+        ? ((ltp - prevClose) / prevClose * 100) : '';
+      row.fiftyTwoWkHigh = typeof meta.fiftyTwoWeekHigh === 'number' ? meta.fiftyTwoWeekHigh : '';
+      row.fiftyTwoWkLow = typeof meta.fiftyTwoWeekLow === 'number' ? meta.fiftyTwoWeekLow : '';
+      row.dayHigh = typeof meta.regularMarketDayHigh === 'number' ? meta.regularMarketDayHigh : '';
+      row.dayLow = typeof meta.regularMarketDayLow === 'number' ? meta.regularMarketDayLow : '';
+      row.prevHigh = typeof prevHigh === 'number' ? prevHigh : '';
+      row.prevLow = typeof prevLow === 'number' ? prevLow : '';
+      recomputeRow(row);
+    } catch(e){
+      errors++;
+      lastError = row.symbol + ': ' + e.message;
+      console.error('Refresh failed for', row.symbol, e);
+    }
+    done++;
+    statusEl.textContent = 'Refreshing ' + done + '/' + rows.length + ' across ' + state.tabs.length + ' tabs…';
+  }
+  save();
+  renderTable();
+  const now = new Date().toLocaleTimeString();
+  statusEl.textContent = errors ? ('Updated ' + now + ' (' + errors + ' failed — ' + lastError + ')') : ('Updated ' + now + ' (all tabs)');
+}
+document.getElementById('refreshBtn').addEventListener('click', refreshPrices);
+
+async function refreshFundamentals(){
+  const rows = state.tabs.flatMap(t => t.rows.filter(r => r.symbol));
+  if(!rows.length){ statusEl.textContent = 'No symbols to refresh.'; return; }
+  statusEl.textContent = 'Fetching fundamentals 0/' + rows.length + ' across ' + state.tabs.length + ' tabs…';
+  let done = 0, errors = 0;
+  for(const row of rows){
+    try {
+      const data = await fetchFundamentals(row.symbol);
+      row.peRatio = typeof data.trailingPE === 'number' ? data.trailingPE : '';
+      row.eps = typeof data.trailingEps === 'number' ? data.trailingEps : '';
+      row.beta = typeof data.beta === 'number' ? data.beta : '';
+      row.dayOpen = typeof data.regularMarketOpen === 'number' ? data.regularMarketOpen : row.dayOpen;
+      recomputeRow(row);
+    } catch(e){
+      errors++;
+    }
+    done++;
+    statusEl.textContent = 'Fetching fundamentals ' + done + '/' + rows.length + ' across ' + state.tabs.length + ' tabs…';
+  }
+  save();
+  renderTable();
+  const now = new Date().toLocaleTimeString();
+  statusEl.textContent = errors
+    ? ('Fundamentals updated ' + now + ' (' + errors + ' failed — this endpoint needs a Yahoo crumb/cookie and can be flakier than prices)')
+    : ('Fundamentals updated ' + now + ' (all tabs)');
+}
+document.getElementById('refreshFundBtn').addEventListener('click', refreshFundamentals);
+
+let autoTimer = null;
+document.getElementById('autoRefresh').addEventListener('change', (e) => {
+  if(autoTimer) clearInterval(autoTimer);
+  const secs = parseInt(e.target.value, 10);
+  if(secs > 0) autoTimer = setInterval(refreshPrices, secs * 1000);
+});
+
+// ---------- manage columns modal ----------
+const colModalBackdrop = document.getElementById('colModalBackdrop');
+document.getElementById('manageColsBtn').addEventListener('click', () => { renderColModal(); colModalBackdrop.classList.add('open'); });
+document.getElementById('closeColModal').addEventListener('click', () => colModalBackdrop.classList.remove('open'));
+colModalBackdrop.addEventListener('click', (e) => { if(e.target === colModalBackdrop) colModalBackdrop.classList.remove('open'); });
+
+// ---------- GitHub sync (mirrors chart.html's pattern; separate keys/file so nothing collides) ----------
+const LS_GH = 'portfolioToolGhConfig_v1';
+const syncModalBackdrop = document.getElementById('syncModalBackdrop');
+const ghStatusEl = document.getElementById('ghStatus');
+
+function loadGhConfig(){ try { return JSON.parse(localStorage.getItem(LS_GH)) || {}; } catch(e){ return {}; } }
+function saveGhConfig(){
+  const cfg = {
+    token: document.getElementById('ghToken').value.trim(),
+    repo: document.getElementById('ghRepo').value.trim(),
+    path: document.getElementById('ghPath').value.trim() || 'portfolio-data.json'
+  };
+  try { localStorage.setItem(LS_GH, JSON.stringify(cfg)); } catch(e){}
+}
+function restoreGhConfig(){
+  const cfg = loadGhConfig();
+  document.getElementById('ghToken').value = cfg.token || '';
+  document.getElementById('ghRepo').value = cfg.repo || '';
+  document.getElementById('ghPath').value = cfg.path || 'portfolio-data.json';
+}
+function flashGhStatus(msg){ ghStatusEl.textContent = msg; }
+['ghToken', 'ghRepo', 'ghPath'].forEach(id => document.getElementById(id).addEventListener('input', saveGhConfig));
+
+function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64DecodeUnicode(str){ return decodeURIComponent(escape(atob(str))); }
+
+async function saveToGithub(){
+  const cfg = loadGhConfig();
+  if(!cfg.token || !cfg.repo){ flashGhStatus('Add your token and repo first.'); return; }
+  flashGhStatus('Saving…');
+  const url = 'https://api.github.com/repos/' + cfg.repo + '/contents/' + cfg.path;
+  try {
+    let sha = null;
+    const getRes = await fetch(url, { headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json' } });
+    if(getRes.status === 200){ const existing = await getRes.json(); sha = existing.sha; }
+    const body = {
+      message: 'Update portfolio data ' + new Date().toISOString(),
+      content: b64EncodeUnicode(JSON.stringify(state, null, 2))
+    };
+    if(sha) body.sha = sha;
+    const putRes = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!putRes.ok) throw new Error('GitHub responded ' + putRes.status);
+    flashGhStatus('Saved to GitHub.');
+  } catch(e){
+    flashGhStatus('Save failed — check token, repo name, path, and token permissions.');
+  }
+}
+async function loadFromGithub(){
+  const cfg = loadGhConfig();
+  if(!cfg.token || !cfg.repo){ flashGhStatus('Add your token and repo first.'); return; }
+  flashGhStatus('Loading…');
+  const url = 'https://api.github.com/repos/' + cfg.repo + '/contents/' + cfg.path;
+  try {
+    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json' } });
+    if(!res.ok) throw new Error('GitHub responded ' + res.status);
+    const json = await res.json();
+    const data = JSON.parse(b64DecodeUnicode(json.content));
+    if(!data.tabs || !data.columns) throw new Error('bad file');
+    state = data;
+    migrateColumns(state);
+    if(!state.tabs.find(t => t.id === state.activeTab)) state.activeTab = state.tabs[0].id;
+    save();
+    renderAll();
+    flashGhStatus('Loaded from GitHub.');
+  } catch(e){
+    flashGhStatus('Load failed — check token/repo/path, or the file may not exist yet (try Save first).');
+  }
+}
+
+document.getElementById('syncBtn').addEventListener('click', () => { restoreGhConfig(); flashGhStatus(''); syncModalBackdrop.classList.add('open'); });
+document.getElementById('closeSyncModal').addEventListener('click', () => syncModalBackdrop.classList.remove('open'));
+syncModalBackdrop.addEventListener('click', (e) => { if(e.target === syncModalBackdrop) syncModalBackdrop.classList.remove('open'); });
+document.getElementById('saveToGhBtn').addEventListener('click', saveToGithub);
+document.getElementById('loadFromGhBtn').addEventListener('click', loadFromGithub);
+
+const newColType = document.getElementById('newColType');
+newColType.addEventListener('change', () => {
+  document.getElementById('newColFormulaWrap').style.display = newColType.value === 'calc' ? 'block' : 'none';
+});
+
+let dragSrcKey = null;
+
+function renderColModal(){
+  const list = document.getElementById('colList');
+  list.innerHTML = '';
+  state.columns.forEach((col, idx) => {
+    const row = document.createElement('div');
+    row.className = 'col-row' + (col.hidden ? ' is-hidden' : '');
+    row.draggable = col.key !== 'symbol';
+    row.dataset.key = col.key;
+
+    const handle = document.createElement('span');
+    handle.className = 'draghandle';
+    handle.textContent = col.key === 'symbol' ? '📌' : '⠿';
+    handle.title = col.key === 'symbol' ? 'Symbol stays first (anchors the Totals row)' : 'Drag to reorder';
+    row.appendChild(handle);
+
+    const name = document.createElement('div');
+    name.className = 'colname';
+    name.innerHTML = '<strong>' + col.label + '</strong> <span class="coltag">' + col.type + '</span>' +
+      (col.agg ? ' <span class="coltag">Σ</span>' : '') + '<br><span style="font-family:ui-monospace,monospace;font-size:11px;color:var(--muted)">' + col.key + '</span>';
+    row.appendChild(name);
+    if(col.type === 'calc'){
+      const finput = document.createElement('input');
+      finput.className = 'formula-edit';
+      finput.type = 'text';
+      finput.value = col.formula;
+      finput.addEventListener('change', () => {
+        col.formula = finput.value;
+        recomputeActiveTab();
+        save(); renderTable();
+      });
+      row.appendChild(finput);
+    }
+
+    if(col.key !== 'symbol'){
+      const eyeBtn = document.createElement('button');
+      eyeBtn.className = 'ghost eyebtn';
+      eyeBtn.textContent = col.hidden ? '🙈 Hidden' : '👁 Visible';
+      eyeBtn.title = 'Toggle whether this column shows in the table (data is kept either way)';
+      eyeBtn.addEventListener('click', () => {
+        col.hidden = !col.hidden;
+        save(); renderColModal(); renderTable();
+      });
+      row.appendChild(eyeBtn);
+    } else {
+      const lockNote = document.createElement('span');
+      lockNote.className = 'coltag';
+      lockNote.textContent = 'always shown';
+      row.appendChild(lockNote);
+    }
+
+    if(col.key !== 'symbol'){
+      const del = document.createElement('button');
+      del.className = 'danger';
+      del.textContent = 'Remove';
+      del.addEventListener('click', () => {
+        if(!confirm('Remove column "' + col.label + '"? Data in this column will be lost.')) return;
+        state.columns.splice(idx, 1);
+        state.tabs.forEach(t => t.rows.forEach(r => delete r[col.key]));
+        save(); renderColModal(); renderTable();
+      });
+      row.appendChild(del);
+    }
+
+    row.addEventListener('dragstart', (e) => {
+      dragSrcKey = col.key;
+      row.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', col.key);
+    });
+    row.addEventListener('dragend', () => {
+      row.classList.remove('dragging');
+      list.querySelectorAll('.col-row').forEach(r => r.classList.remove('drag-over'));
+      dragSrcKey = null;
+    });
+    row.addEventListener('dragover', (e) => {
+      if(col.key === 'symbol') return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if(col.key !== dragSrcKey) row.classList.add('drag-over');
+    });
+    row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+    row.addEventListener('drop', (e) => {
+      if(col.key === 'symbol') return;
+      e.preventDefault();
+      row.classList.remove('drag-over');
+      const srcKey = dragSrcKey || e.dataTransfer.getData('text/plain');
+      if(!srcKey || srcKey === col.key) return;
+      const fromIdx = state.columns.findIndex(c => c.key === srcKey);
+      const toIdx = state.columns.findIndex(c => c.key === col.key);
+      if(fromIdx === -1 || toIdx === -1) return;
+      const [moved] = state.columns.splice(fromIdx, 1);
+      const insertAt = state.columns.findIndex(c => c.key === col.key);
+      state.columns.splice(insertAt, 0, moved);
+      save(); renderColModal(); renderTable();
+    });
+
+    list.appendChild(row);
+  });
+  const chips = document.getElementById('keyChips');
+  chips.innerHTML = '';
+  state.columns.forEach(col => {
+    const chip = document.createElement('span');
+    chip.className = 'key-chip';
+    chip.textContent = col.key;
+    chip.addEventListener('click', () => {
+      const inp = document.getElementById('newColFormula');
+      inp.value += col.key;
+      inp.focus();
+    });
+    chips.appendChild(chip);
+  });
+}
+
+document.getElementById('addColBtn').addEventListener('click', () => {
+  const label = document.getElementById('newColLabel').value.trim();
+  if(!label){ alert('Give the column a label.'); return; }
+  const type = document.getElementById('newColType').value;
+  const agg = document.getElementById('newColAgg').checked;
+  const key = uniqueKey(slugify(label), state.columns.map(c => c.key));
+  const col = { key, label, type, agg, hidden: false };
+  if(type === 'calc'){
+    const formula = document.getElementById('newColFormula').value.trim();
+    if(!formula){ alert('Enter a formula for a calculated column.'); return; }
+    col.formula = formula;
+    col.resultType = document.getElementById('newColResultType').value;
+  }
+  state.columns.push(col);
+  state.tabs.forEach(t => t.rows.forEach(r => {
+    r[key] = type === 'calc' ? evalFormula(col.formula, r, state.columns, col.resultType) : '';
+  }));
+  save();
+  document.getElementById('newColLabel').value = '';
+  document.getElementById('newColFormula').value = '';
+  renderColModal(); renderTable();
+});
+
+// ---------- init ----------
+state.tabs.forEach(t => t.rows.forEach(recomputeRow));
+save();
+renderAll();
+</script>
+</body>
+</html>
