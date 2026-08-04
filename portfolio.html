@@ -719,8 +719,8 @@ proxyFundInput.addEventListener('change', () => localStorage.setItem(LS_PROXY_FU
 
 async function fetchQuote(symbol){
   const base = proxyInput.value || DEFAULT_PROXY;
-  const url = base + encodeURIComponent(symbol);
-  const res = await fetch(url);
+  const url = base + encodeURIComponent(symbol) + '&_ts=' + Date.now();
+  const res = await fetch(url, { cache: 'no-store' });
   if(!res.ok) throw new Error('HTTP ' + res.status);
   const data = await res.json();
   const meta = data && data.chart && data.chart.result && data.chart.result[0] && data.chart.result[0].meta;
@@ -731,7 +731,7 @@ async function fetchQuote(symbol){
 async function fetchFundamentals(symbol){
   const base = proxyFundInput.value || DEFAULT_PROXY_FUND;
   const url = base + encodeURIComponent(symbol);
-  const res = await fetch(url);
+  const res = await fetch(url, { cache: 'no-store' });
   if(!res.ok) throw new Error('HTTP ' + res.status);
   const data = await res.json();
   if(data.error) throw new Error(data.error);
