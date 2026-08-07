@@ -151,6 +151,9 @@
       <option value="1800">30 min</option>
       <option value="3600">1 hr</option>
     </select>
+    <span class="label" style="margin-left:14px">Chart link:</span>
+    <label style="font-size:12px;display:inline-flex;align-items:center;gap:3px"><input type="radio" name="chartSrc" id="chartSrcMc" value="mc"> MC</label>
+    <label style="font-size:12px;display:inline-flex;align-items:center;gap:3px"><input type="radio" name="chartSrc" id="chartSrcInv" value="inv"> Inv</label>
   </div>
 </div>
 
@@ -275,6 +278,30 @@ function mcCodeFromSymbol(symbol){
 function mcChartUrl(symbol, mcCodeOverride){
   const code = (mcCodeOverride && String(mcCodeOverride).trim()) ? String(mcCodeOverride).trim() : mcCodeFromSymbol(symbol);
   return 'https://www.moneycontrol.com/mc/stock/chart?scId=' + encodeURIComponent(code) + '&ex=NSE';
+}
+// Investing.com's embeddable widget addresses instruments by their own internal numeric
+// "pair_ID" — no formula from the ticker, has to be looked up per-symbol and stored in the
+// (hidden, opt-in) Inv Code column.
+function investingChartUrl(invCode){
+  return 'https://ssltvc.investing.com/init.php?domain_ID=56&lang_ID=56&pair_ID=' +
+    encodeURIComponent(String(invCode).trim()) + '&timezone_ID=8';
+}
+const LS_CHARTSRC = 'portfolio_chartsrc_v1';
+function loadChartSrc(){
+  try { return localStorage.getItem(LS_CHARTSRC) || 'mc'; } catch(e){ return 'mc'; }
+}
+function saveChartSrc(v){
+  try { localStorage.setItem(LS_CHARTSRC, v); } catch(e){}
+}
+// Picks the link + label for a row's ↗️ based on the toolbar's MC/Inv toggle. Falls back to
+// Moneycontrol if Inv is selected but this particular row has no Inv Code set yet, rather than
+// producing a broken link.
+function chartLinkForRow(row){
+  const src = loadChartSrc();
+  if(src === 'inv' && row.invCode && String(row.invCode).trim()){
+    return { href: investingChartUrl(row.invCode), title: 'Open ' + (row.symbol || 'chart') + ' on Investing.com' };
+  }
+  return { href: mcChartUrl(row.symbol, row.mcCode), title: 'Open ' + (row.symbol || 'chart') + ' on Moneycontrol' };
 }
 // Yahoo's longName is often long/all-caps ("VARUN BEVERAGES LIMITED"); keep just the
 // first two words in Sentence case ("Varun beverages") so the column stays narrow.
@@ -558,11 +585,12 @@ function renderTable(){
         else if(val === 'SELL' || val === '🔽' || val === '🔴' || val === '⬇️') td.classList.add('down');
         if(col.key === 'trend'){
           const link = document.createElement('a');
-          link.href = mcChartUrl(row.symbol, row.mcCode);
+          const chartLink = chartLinkForRow(row);
+          link.href = chartLink.href;
           link.target = '_blank';
           link.rel = 'noopener';
           link.textContent = '↗️';
-          link.title = 'Open ' + (row.symbol || 'chart') + ' on Moneycontrol';
+          link.title = chartLink.title;
           link.style.marginLeft = '4px';
           link.style.textDecoration = 'none';
           link.addEventListener('click', (e) => e.stopPropagation());
@@ -645,11 +673,12 @@ function renderTableValuesOnly(){
         else if(val === 'SELL' || val === '🔽' || val === '🔴' || val === '⬇️') td.classList.add('down');
         if(col.key === 'trend'){
           const link = document.createElement('a');
-          link.href = mcChartUrl(row.symbol, row.mcCode);
+          const chartLink = chartLinkForRow(row);
+          link.href = chartLink.href;
           link.target = '_blank';
           link.rel = 'noopener';
           link.textContent = '↗️';
-          link.title = 'Open ' + (row.symbol || 'chart') + ' on Moneycontrol';
+          link.title = chartLink.title;
           link.style.marginLeft = '4px';
           link.style.textDecoration = 'none';
           link.addEventListener('click', (e) => e.stopPropagation());
@@ -843,6 +872,18 @@ document.getElementById('autoRefresh').addEventListener('change', (e) => {
   const secs = parseInt(e.target.value, 10);
   if(secs > 0) autoTimer = setInterval(refreshPrices, secs * 1000);
 });
+
+const chartSrcMc = document.getElementById('chartSrcMc');
+const chartSrcInv = document.getElementById('chartSrcInv');
+(function restoreChartSrc(){
+  const v = loadChartSrc();
+  chartSrcMc.checked = (v !== 'inv');
+  chartSrcInv.checked = (v === 'inv');
+})();
+[chartSrcMc, chartSrcInv].forEach(el => el.addEventListener('change', () => {
+  saveChartSrc(document.querySelector('input[name="chartSrc"]:checked').value);
+  renderTableValuesOnly(); // link hrefs only — no need to rebuild the whole table
+}));
 
 // ---------- manage columns modal ----------
 const colModalBackdrop = document.getElementById('colModalBackdrop');
