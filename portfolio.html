@@ -400,6 +400,8 @@ function syncColumnDefsFromDefaults(){
     if(c.label !== def.label){ c.label = def.label; changed++; }
     if(def.type === 'calc' && c.formula !== def.formula){ c.formula = def.formula; changed++; }
     if(def.resultType && c.resultType !== def.resultType){ c.resultType = def.resultType; changed++; }
+    if(def.inputType && c.inputType !== def.inputType){ c.inputType = def.inputType; changed++; }
+    if(def.afterActions !== undefined && c.afterActions !== def.afterActions){ c.afterActions = def.afterActions; changed++; }
   });
   migrateColumns(state);
   state.tabs.forEach(t => t.rows.forEach(r => recomputeRow(r)));
@@ -553,7 +555,7 @@ function renderTable(){
     const val = row[col.key];
     if(col.type === 'manual'){
       const inp = document.createElement('input');
-      inp.type = col.inputType === 'text' ? 'text' : 'number';
+      inp.type = (col.inputType === 'text' || col.key === 'symbol' || col.key === 'name') ? 'text' : 'number';
       inp.value = val;
       if(NARROW_WIDTHS[col.key]){ inp.style.width = NARROW_WIDTHS[col.key]; inp.style.minWidth = '0'; }
       inp.addEventListener('input', () => {
