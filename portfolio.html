@@ -279,12 +279,14 @@ function mcChartUrl(symbol, mcCodeOverride){
   const code = (mcCodeOverride && String(mcCodeOverride).trim()) ? String(mcCodeOverride).trim() : mcCodeFromSymbol(symbol);
   return 'https://www.moneycontrol.com/mc/stock/chart?scId=' + encodeURIComponent(code) + '&ex=NSE';
 }
-// Investing.com's embeddable widget addresses instruments by their own internal numeric
-// "pair_ID" — no formula from the ticker, has to be looked up per-symbol and stored in the
-// (hidden, opt-in) Inv Code column.
+// investing.com's own numeric "pair_ID" widget system turned out unreliable to look up (their
+// symbol search couldn't even find HDFC Bank). Confirmed working instead: a human-readable slug
+// URL, verified directly by opening it (e.g. https://in.investing.com/equities/reliance-industries-advanced-chart).
+// This is only ever opened in a new tab (never embedded), so — unlike everything else we tried —
+// it doesn't matter whether investing.com allows iframe framing; direct navigation always works
+// regardless of that. Store the full slug (e.g. "reliance-industries", "hdfc-bank-ltd") in Inv Code.
 function investingChartUrl(invCode){
-  return 'https://ssltvc.investing.com/init.php?domain_ID=56&lang_ID=56&pair_ID=' +
-    encodeURIComponent(String(invCode).trim()) + '&timezone_ID=8';
+  return 'https://in.investing.com/equities/' + String(invCode).trim().toLowerCase() + '-advanced-chart';
 }
 const LS_CHARTSRC = 'portfolio_chartsrc_v1';
 function loadChartSrc(){
@@ -318,7 +320,7 @@ function shortenName(name) {
 const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '62px', target: '62px', name: '110px', dayIcon: '36px', pivotTrend: '48px' };
 
 const DEFAULT_COLUMNS = [
-  { key: 'symbol',    label: 'Symbol',       type: 'manual', agg: false, hidden: false },
+  { key: 'symbol',    label: 'Symbol',       type: 'manual', inputType: 'text', agg: false, hidden: false },
   { key: 'dayIcon',   label: '',             type: 'calc', resultType: 'text',
     formula: "dayHigh>prevHigh && dayLow>prevLow ? '⬆️' : (dayHigh<prevHigh && dayLow<prevLow ? '⬇️' : '-')", agg: false, hidden: false },
   { key: 'qty',       label: 'Qty',          type: 'manual', agg: false, hidden: false },
@@ -355,8 +357,8 @@ const DEFAULT_COLUMNS = [
   { key: 'target',    label: 'Target',       type: 'manual', agg: false, hidden: false },
   { key: 'signal',    label: 'Signal',       type: 'calc', resultType: 'text',
     formula: "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')", agg: false, hidden: false },
-  { key: 'mcCode',    label: 'MC Code',      type: 'manual', agg: false, hidden: true },
-  { key: 'invCode',   label: 'Inv Code',     type: 'manual', agg: false, hidden: true, afterActions: true },
+  { key: 'mcCode',    label: 'MC Code',      type: 'manual', inputType: 'text', agg: false, hidden: true },
+  { key: 'invCode',   label: 'Inv Code',     type: 'manual', inputType: 'text', agg: false, hidden: true, afterActions: true },
   { key: 'dayHigh',   label: 'Today High',   type: 'fetched', agg: false, hidden: true },
   { key: 'dayLow',    label: 'Today Low',    type: 'fetched', agg: false, hidden: true },
   { key: 'prevHigh',  label: 'Prev High',    type: 'fetched', agg: false, hidden: true },
@@ -551,7 +553,7 @@ function renderTable(){
     const val = row[col.key];
     if(col.type === 'manual'){
       const inp = document.createElement('input');
-      inp.type = (col.key === 'symbol' || col.key === 'name') ? 'text' : 'number';
+      inp.type = col.inputType === 'text' ? 'text' : 'number';
       inp.value = val;
       if(NARROW_WIDTHS[col.key]){ inp.style.width = NARROW_WIDTHS[col.key]; inp.style.minWidth = '0'; }
       inp.addEventListener('input', () => {
