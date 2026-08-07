@@ -313,15 +313,15 @@ const DEFAULT_COLUMNS = [
   { key: 'pivotS2',   label: 'Pivot S2',     type: 'calc', resultType: 'text',
     formula: "(!prevHigh || !prevLow) ? '-' : (pivotP - 0.618*(prevHigh-prevLow)).toFixed(2)", agg: false, hidden: true },
   { key: 'pivotTrend', label: 'Pivot',       type: 'calc', resultType: 'text',
-    formula: "(!dayOpen || !pivotP) ? '-' : (dayOpen > pivotP ? (dayOpen > pivotR1 ? '🟩🟩' : '🟩') : (dayOpen < pivotP ? (dayOpen < pivotS1 ? '🟥🟥' : '🟥') : '-'))",
+    formula: "(!dayOpen || !pivotP) ? '-' : (dayOpen > pivotP ? (dayOpen > pivotR1 ? '⬆️⬆️' : '⬆️') : (dayOpen < pivotP ? (dayOpen < pivotS1 ? '⬇️⬇️' : '⬇️') : '-'))",
     agg: false, hidden: false },
-  { key: 'fiftyTwoWkHigh', label: '52High', type: 'fetched', agg: false, hidden: false },
-  { key: 'fiftyTwoWkLow',  label: '52Low',  type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWkLow',  label: '52W Low',  type: 'fetched', agg: false, hidden: false },
   { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false, hidden: false },
   { key: 'eps',       label: 'EPS',          type: 'fetched', agg: false, hidden: false },
   { key: 'beta',      label: 'Beta',         type: 'fetched', agg: false, hidden: false },
   { key: 'invested',  label: 'Invested',     type: 'calc', formula: 'qty*buyPrice', agg: true, hidden: false },
-  { key: 'curVal',    label: 'Value',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
+  { key: 'curVal',    label: 'Current Value',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
   { key: 'pnl',       label: 'P&L',          type: 'calc', formula: 'curVal-invested', agg: true, hidden: false },
   { key: 'pnlPct',    label: 'P&L %',        type: 'calc', formula: 'invested ? (pnl/invested*100) : 0', agg: false, hidden: false },
   { key: 'alert',     label: 'Alert',        type: 'manual', agg: false, hidden: false },
@@ -329,6 +329,7 @@ const DEFAULT_COLUMNS = [
   { key: 'signal',    label: 'Signal',       type: 'calc', resultType: 'text',
     formula: "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')", agg: false, hidden: false },
   { key: 'mcCode',    label: 'MC Code',      type: 'manual', agg: false, hidden: true },
+  { key: 'invCode',   label: 'Inv Code',     type: 'manual', agg: false, hidden: true, afterActions: true },
   { key: 'dayHigh',   label: 'Today High',   type: 'fetched', agg: false, hidden: true },
   { key: 'dayLow',    label: 'Today Low',    type: 'fetched', agg: false, hidden: true },
   { key: 'prevHigh',  label: 'Prev High',    type: 'fetched', agg: false, hidden: true },
@@ -491,9 +492,11 @@ function renderTabs(){
 function renderTable(){
   const tab = activeTab();
   const visibleColumns = state.columns.filter(c => !c.hidden);
+  const mainColumns = visibleColumns.filter(c => !c.afterActions);
+  const afterColumns = visibleColumns.filter(c => c.afterActions);
   thead.innerHTML = '';
   const trh = document.createElement('tr');
-  visibleColumns.forEach(col => {
+  const buildHeaderCell = (col) => {
     const th = document.createElement('th');
     if(NARROW_WIDTHS[col.key]) th.style.width = NARROW_WIDTHS[col.key];
     const wrap = document.createElement('div');
@@ -506,69 +509,72 @@ function renderTable(){
     wrap.appendChild(span);
     if(tag.textContent) wrap.appendChild(tag);
     th.appendChild(wrap);
-    trh.appendChild(th);
-  });
+    return th;
+  };
+  mainColumns.forEach(col => trh.appendChild(buildHeaderCell(col)));
   const thAction = document.createElement('th');
   thAction.textContent = '';
   trh.appendChild(thAction);
+  afterColumns.forEach(col => trh.appendChild(buildHeaderCell(col)));
   thead.appendChild(trh);
 
   tbody.innerHTML = '';
-  tab.rows.forEach(row => {
-    const tr = document.createElement('tr');
-    visibleColumns.forEach(col => {
-      const td = document.createElement('td');
-      const val = row[col.key];
-      if(col.type === 'manual'){
-        const inp = document.createElement('input');
-        inp.type = (col.key === 'symbol' || col.key === 'name') ? 'text' : 'number';
-        inp.value = val;
-        if(NARROW_WIDTHS[col.key]){ inp.style.width = NARROW_WIDTHS[col.key]; inp.style.minWidth = '0'; }
-        inp.addEventListener('input', () => {
-          row[col.key] = inp.type === 'number' ? (inp.value === '' ? '' : parseFloat(inp.value)) : inp.value;
-          recomputeRow(row);
-          save();
-          renderTableValuesOnly();
-        });
-        td.appendChild(inp);
-      } else if(col.type === 'fetched'){
-        td.className = 'readonly';
-        if(col.key === 'chgPct' && typeof val === 'number'){
+  const buildDataCell = (col, row) => {
+    const td = document.createElement('td');
+    const val = row[col.key];
+    if(col.type === 'manual'){
+      const inp = document.createElement('input');
+      inp.type = (col.key === 'symbol' || col.key === 'name') ? 'text' : 'number';
+      inp.value = val;
+      if(NARROW_WIDTHS[col.key]){ inp.style.width = NARROW_WIDTHS[col.key]; inp.style.minWidth = '0'; }
+      inp.addEventListener('input', () => {
+        row[col.key] = inp.type === 'number' ? (inp.value === '' ? '' : parseFloat(inp.value)) : inp.value;
+        recomputeRow(row);
+        save();
+        renderTableValuesOnly();
+      });
+      td.appendChild(inp);
+    } else if(col.type === 'fetched'){
+      td.className = 'readonly';
+      if(col.key === 'chgPct' && typeof val === 'number'){
+        td.classList.add(val >= 0 ? 'up' : 'down');
+        td.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + '%';
+      } else if(typeof val === 'number'){
+        td.textContent = val.toFixed(2);
+      } else {
+        td.textContent = val || '—';
+      }
+    } else { // calc
+      td.className = 'calc';
+      if(val === 'ERR'){ td.classList.add('err'); td.textContent = 'ERR'; }
+      else if(typeof val === 'number'){
+        if(col.key.toLowerCase().includes('pnl') || col.key.toLowerCase().includes('pct') || col.key.toLowerCase().includes('change')){
           td.classList.add(val >= 0 ? 'up' : 'down');
-          td.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + '%';
-        } else if(typeof val === 'number'){
-          td.textContent = val.toFixed(2);
-        } else {
-          td.textContent = val || '—';
         }
-      } else { // calc
-        td.className = 'calc';
-        if(val === 'ERR'){ td.classList.add('err'); td.textContent = 'ERR'; }
-        else if(typeof val === 'number'){
-          if(col.key.toLowerCase().includes('pnl') || col.key.toLowerCase().includes('pct') || col.key.toLowerCase().includes('change')){
-            td.classList.add(val >= 0 ? 'up' : 'down');
-          }
-          td.textContent = val.toFixed(2);
-        } else {
-          td.textContent = val;
-          if(val === 'BUY' || val === '🔼' || val === '🟢' || val === '⬆️') td.classList.add('up');
-          else if(val === 'SELL' || val === '🔽' || val === '🔴' || val === '⬇️') td.classList.add('down');
-          if(col.key === 'trend'){
-            const link = document.createElement('a');
-            link.href = mcChartUrl(row.symbol, row.mcCode);
-            link.target = '_blank';
-            link.rel = 'noopener';
-            link.textContent = '↗️';
-            link.title = 'Open ' + (row.symbol || 'chart') + ' on Moneycontrol';
-            link.style.marginLeft = '4px';
-            link.style.textDecoration = 'none';
-            link.addEventListener('click', (e) => e.stopPropagation());
-            td.appendChild(link);
-          }
+        td.textContent = val.toFixed(2);
+      } else {
+        td.textContent = val;
+        if(val === 'BUY' || val === '🔼' || val === '🟢' || val === '⬆️') td.classList.add('up');
+        else if(val === 'SELL' || val === '🔽' || val === '🔴' || val === '⬇️') td.classList.add('down');
+        if(col.key === 'trend'){
+          const link = document.createElement('a');
+          link.href = mcChartUrl(row.symbol, row.mcCode);
+          link.target = '_blank';
+          link.rel = 'noopener';
+          link.textContent = '↗️';
+          link.title = 'Open ' + (row.symbol || 'chart') + ' on Moneycontrol';
+          link.style.marginLeft = '4px';
+          link.style.textDecoration = 'none';
+          link.addEventListener('click', (e) => e.stopPropagation());
+          td.appendChild(link);
         }
       }
-      tr.appendChild(td);
-    });
+    }
+    return td;
+  };
+  tab.rows.forEach(row => {
+    const tr = document.createElement('tr');
+    mainColumns.forEach(col => tr.appendChild(buildDataCell(col, row)));
     const tdAction = document.createElement('td');
     tdAction.className = 'rowactions';
     const delBtn = document.createElement('button');
@@ -580,15 +586,16 @@ function renderTable(){
     });
     tdAction.appendChild(delBtn);
     tr.appendChild(tdAction);
+    afterColumns.forEach(col => tr.appendChild(buildDataCell(col, row)));
     tbody.appendChild(tr);
   });
 
   // totals
   tfoot.innerHTML = '';
   const trf = document.createElement('tr');
-  visibleColumns.forEach((col, i) => {
+  const buildTotalCell = (col, isFirst) => {
     const td = document.createElement('td');
-    if(i === 0){
+    if(isFirst){
       td.textContent = 'Totals';
     } else if(col.agg){
       let sum = 0;
@@ -597,9 +604,11 @@ function renderTable(){
     } else {
       td.textContent = '';
     }
-    trf.appendChild(td);
-  });
+    return td;
+  };
+  mainColumns.forEach((col, i) => trf.appendChild(buildTotalCell(col, i === 0)));
   trf.appendChild(document.createElement('td'));
+  afterColumns.forEach(col => trf.appendChild(buildTotalCell(col, false)));
   tfoot.appendChild(trf);
 }
 
@@ -607,60 +616,78 @@ function renderTable(){
 function renderTableValuesOnly(){
   const tab = activeTab();
   const visibleColumns = state.columns.filter(c => !c.hidden);
+  const mainColumns = visibleColumns.filter(c => !c.afterActions);
+  const afterColumns = visibleColumns.filter(c => c.afterActions);
   const rows = tbody.querySelectorAll('tr');
+  const updateDataCell = (col, td, val, row) => {
+    if(col.type === 'manual') return; // input owns its own value
+    if(col.type === 'fetched'){
+      td.className = 'readonly';
+      if(col.key === 'chgPct' && typeof val === 'number'){
+        td.classList.add(val >= 0 ? 'up' : 'down');
+        td.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + '%';
+      } else if(typeof val === 'number'){
+        td.textContent = val.toFixed(2);
+      } else {
+        td.textContent = val || '—';
+      }
+    } else {
+      td.className = 'calc';
+      if(val === 'ERR'){ td.classList.add('err'); td.textContent = 'ERR'; }
+      else if(typeof val === 'number'){
+        if(col.key.toLowerCase().includes('pnl') || col.key.toLowerCase().includes('pct') || col.key.toLowerCase().includes('change')){
+          td.classList.add(val >= 0 ? 'up' : 'down');
+        }
+        td.textContent = val.toFixed(2);
+      } else {
+        td.textContent = val;
+        if(val === 'BUY' || val === '🔼' || val === '🟢' || val === '⬆️') td.classList.add('up');
+        else if(val === 'SELL' || val === '🔽' || val === '🔴' || val === '⬇️') td.classList.add('down');
+        if(col.key === 'trend'){
+          const link = document.createElement('a');
+          link.href = mcChartUrl(row.symbol, row.mcCode);
+          link.target = '_blank';
+          link.rel = 'noopener';
+          link.textContent = '↗️';
+          link.title = 'Open ' + (row.symbol || 'chart') + ' on Moneycontrol';
+          link.style.marginLeft = '4px';
+          link.style.textDecoration = 'none';
+          link.addEventListener('click', (e) => e.stopPropagation());
+          td.appendChild(link);
+        }
+      }
+    }
+  };
   tab.rows.forEach((row, ri) => {
     const tr = rows[ri];
     if(!tr) return;
     const cells = tr.querySelectorAll('td');
-    visibleColumns.forEach((col, ci) => {
+    mainColumns.forEach((col, ci) => {
       const td = cells[ci];
-      if(!td) return;
-      const val = row[col.key];
-      if(col.type === 'manual') return; // input owns its own value
-      if(col.type === 'fetched'){
-        td.className = 'readonly';
-        if(col.key === 'chgPct' && typeof val === 'number'){
-          td.classList.add(val >= 0 ? 'up' : 'down');
-          td.textContent = (val >= 0 ? '+' : '') + val.toFixed(2) + '%';
-        } else if(typeof val === 'number'){
-          td.textContent = val.toFixed(2);
-        } else {
-          td.textContent = val || '—';
-        }
-      } else {
-        td.className = 'calc';
-        if(val === 'ERR'){ td.classList.add('err'); td.textContent = 'ERR'; }
-        else if(typeof val === 'number'){
-          if(col.key.toLowerCase().includes('pnl') || col.key.toLowerCase().includes('pct') || col.key.toLowerCase().includes('change')){
-            td.classList.add(val >= 0 ? 'up' : 'down');
-          }
-          td.textContent = val.toFixed(2);
-        } else {
-          td.textContent = val;
-          if(val === 'BUY' || val === '🔼' || val === '🟢' || val === '⬆️') td.classList.add('up');
-          else if(val === 'SELL' || val === '🔽' || val === '🔴' || val === '⬇️') td.classList.add('down');
-          if(col.key === 'trend'){
-            const link = document.createElement('a');
-            link.href = mcChartUrl(row.symbol, row.mcCode);
-            link.target = '_blank';
-            link.rel = 'noopener';
-            link.textContent = '↗️';
-            link.title = 'Open ' + (row.symbol || 'chart') + ' on Moneycontrol';
-            link.style.marginLeft = '4px';
-            link.style.textDecoration = 'none';
-            link.addEventListener('click', (e) => e.stopPropagation());
-            td.appendChild(link);
-          }
-        }
-      }
+      if(td) updateDataCell(col, td, row[col.key], row);
+    });
+    const offset = mainColumns.length + 1; // +1 to skip past the action <td>
+    afterColumns.forEach((col, ci) => {
+      const td = cells[offset + ci];
+      if(td) updateDataCell(col, td, row[col.key], row);
     });
   });
   const trf = tfoot.querySelector('tr');
   if(trf){
     const cells = trf.querySelectorAll('td');
-    visibleColumns.forEach((col, i) => {
+    mainColumns.forEach((col, i) => {
       const td = cells[i];
       if(!td || i === 0) return;
+      if(col.agg){
+        let sum = 0;
+        tab.rows.forEach(r => { const v = r[col.key]; if(typeof v === 'number') sum += v; });
+        td.textContent = sum.toFixed(2);
+      }
+    });
+    const offset = mainColumns.length + 1;
+    afterColumns.forEach((col, i) => {
+      const td = cells[offset + i];
+      if(!td) return;
       if(col.agg){
         let sum = 0;
         tab.rows.forEach(r => { const v = r[col.key]; if(typeof v === 'number') sum += v; });
