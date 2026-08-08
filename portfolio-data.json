@@ -252,6 +252,15 @@
       "type": "fetched",
       "agg": false,
       "hidden": true
+    },
+    {
+      "key": "invCode",
+      "label": "Inv Code",
+      "type": "manual",
+      "inputType": "text",
+      "agg": false,
+      "hidden": false,
+      "afterActions": true
     }
   ],
   "tabs": [
@@ -292,7 +301,8 @@
           "pivotS1": "732.95",
           "pivotS2": "730.74",
           "pivotTrend": "🟩",
-          "dayOpen": 739
+          "dayOpen": 739,
+          "invCode": "hdfc-bank-ltd"
         },
         {
           "symbol": "SBIFUNDS.NS",
@@ -327,7 +337,8 @@
           "pivotS1": "571.84",
           "pivotS2": "570.87",
           "pivotTrend": "🟩🟩",
-          "dayOpen": 576
+          "dayOpen": 576,
+          "invCode": "sbi-funds-management-ltd"
         },
         {
           "symbol": "HINDUNILVR.NS",
@@ -362,7 +373,8 @@
           "pivotS1": "2076.75",
           "pivotS2": "2071.19",
           "pivotTrend": "🟥",
-          "dayOpen": 2081
+          "dayOpen": 2081,
+          "invCode": "hindustan-unilever"
         },
         {
           "symbol": "VEDL.NS",
@@ -397,7 +409,8 @@
           "pivotS1": "270.26",
           "pivotS2": "268.00",
           "pivotTrend": "🟩🟩",
-          "dayOpen": 280.95
+          "dayOpen": 280.95,
+          "invCode": "sesa-goa"
         },
         {
           "symbol": "LEMONTREE.NS",
@@ -432,7 +445,8 @@
           "pivotS1": "112.41",
           "pivotS2": "111.65",
           "pivotTrend": "🟥",
-          "dayOpen": 112.9
+          "dayOpen": 112.9,
+          "invCode": "lemon-tree-hotels-ltd"
         },
         {
           "symbol": "PGINVIT.BO",
@@ -467,7 +481,8 @@
           "pivotS1": "98.07",
           "pivotS2": "97.80",
           "pivotTrend": "🟩",
-          "dayOpen": 98.93
+          "dayOpen": 98.93,
+          "invCode": ""
         },
         {
           "symbol": "HDFCBANK.BO",
@@ -502,7 +517,8 @@
           "pivotS1": "-",
           "pivotS2": "-",
           "pivotTrend": "-",
-          "dayOpen": 739.2
+          "dayOpen": 739.2,
+          "invCode": "hdfc-bank-ltd"
         },
         {
           "symbol": "HDFCLIFE.NS",
@@ -537,7 +553,8 @@
           "pivotS1": "538.73",
           "pivotS2": "536.32",
           "pivotTrend": "🟩",
-          "dayOpen": 545
+          "dayOpen": 545,
+          "invCode": "hdfc-standard-life"
         },
         {
           "symbol": "CELLO.NS",
@@ -572,7 +589,8 @@
           "pivotS1": "364.42",
           "pivotS2": "350.87",
           "pivotTrend": "🟩",
-          "dayOpen": 400.95
+          "dayOpen": 400.95,
+          "invCode": "cello-world"
         },
         {
           "symbol": "LICI.NS",
@@ -607,7 +625,8 @@
           "pivotS1": "387.71",
           "pivotS2": "385.00",
           "pivotTrend": "-",
-          "dayOpen": ""
+          "dayOpen": "",
+          "invCode": "life-insurance"
         }
       ]
     },
@@ -648,7 +667,8 @@
           "pivotS1": "1165.46",
           "pivotS2": "1161.88",
           "pivotTrend": "🟩",
-          "dayOpen": 1174.1
+          "dayOpen": 1174.1,
+          "invCode": "Infosys"
         },
         {
           "symbol": "SBICARD.NS",
@@ -683,7 +703,8 @@
           "pivotS1": "660.37",
           "pivotS2": "657.49",
           "pivotTrend": "🟥",
-          "dayOpen": 664.65
+          "dayOpen": 664.65,
+          "invCode": "sbi-cards-and-payment-services-ltd"
         },
         {
           "symbol": "ICICIBANK.NS",
@@ -718,7 +739,8 @@
           "pivotS1": "1436.36",
           "pivotS2": "1430.84",
           "pivotTrend": "🟩🟩",
-          "dayOpen": 1460
+          "dayOpen": 1460,
+          "invCode": "icici-bank-ltd"
         },
         {
           "symbol": "SBIN.NS",
@@ -753,7 +775,8 @@
           "pivotS1": "1044.48",
           "pivotS2": "1041.02",
           "pivotTrend": "🟩",
-          "dayOpen": 1052.5
+          "dayOpen": 1052.5,
+          "invCode": "state-bank-of-india"
         },
         {
           "symbol": "DLF.NS",
@@ -788,7 +811,8 @@
           "pivotS1": "648.21",
           "pivotS2": "644.25",
           "pivotTrend": "🟥",
-          "dayOpen": 652.65
+          "dayOpen": 652.65,
+          "invCode": "dlf"
         },
         {
           "symbol": "SBILIFE.NS",
@@ -823,7 +847,8 @@
           "pivotS1": "1869.99",
           "pivotS2": "1860.11",
           "pivotTrend": "🟥",
-          "dayOpen": 1870
+          "dayOpen": 1870,
+          "invCode": "sbi-life-insurance"
         },
         {
           "symbol": "TITAN.NS",
@@ -858,7 +883,8 @@
           "pivotS1": "4890.47",
           "pivotS2": "4881.43",
           "pivotTrend": "🟥🟥",
-          "dayOpen": 4883.9
+          "dayOpen": 4883.9,
+          "invCode": "titan-industries"
         },
         {
           "symbol": "ETERNAL.NS",
@@ -893,7 +919,8 @@
           "pivotS1": "309.53",
           "pivotS2": "308.32",
           "pivotTrend": "🟥",
-          "dayOpen": 311
+          "dayOpen": 311,
+          "invCode": "zomato"
         },
         {
           "symbol": "TRENT.NS",
@@ -928,7 +955,8 @@
           "pivotS1": "3093.47",
           "pivotS2": "3079.27",
           "pivotTrend": "🟩",
-          "dayOpen": 3120
+          "dayOpen": 3120,
+          "invCode": "trent"
         }
       ]
     },
@@ -969,7 +997,8 @@
           "pivotS1": "263.91",
           "pivotS2": "262.63",
           "pivotTrend": "🟥",
-          "dayOpen": 265.3
+          "dayOpen": 265.3,
+          "invCode": ""
         },
         {
           "symbol": "BECTORFOOD.NS",
@@ -1004,7 +1033,8 @@
           "pivotS1": "210.34",
           "pivotS2": "208.86",
           "pivotTrend": "🟩",
-          "dayOpen": 213.7
+          "dayOpen": 213.7,
+          "invCode": ""
         },
         {
           "symbol": "BPCL.NS",
@@ -1039,7 +1069,8 @@
           "pivotS1": "324.87",
           "pivotS2": "323.99",
           "pivotTrend": "🟩",
-          "dayOpen": 326.5
+          "dayOpen": 326.5,
+          "invCode": "bharat-petroleum"
         },
         {
           "symbol": "DIXON.NS",
@@ -1074,7 +1105,8 @@
           "pivotS1": "14100.57",
           "pivotS2": "14012.77",
           "pivotTrend": "🟩",
-          "dayOpen": 14310
+          "dayOpen": 14310,
+          "invCode": "dixon-technologies"
         },
         {
           "symbol": "GOLDBEES.NS",
@@ -1109,7 +1141,8 @@
           "pivotS1": "118.42",
           "pivotS2": "118.03",
           "pivotTrend": "🟩🟩",
-          "dayOpen": 122.37
+          "dayOpen": 122.37,
+          "invCode": ""
         },
         {
           "symbol": "INDIGO.NS",
@@ -1144,7 +1177,8 @@
           "pivotS1": "5371.14",
           "pivotS2": "5337.86",
           "pivotTrend": "🟥",
-          "dayOpen": 5400.5
+          "dayOpen": 5400.5,
+          "invCode": "interglobe-aviation-ltd"
         },
         {
           "symbol": "JUBLFOOD.NS",
@@ -1179,7 +1213,8 @@
           "pivotS1": "472.13",
           "pivotS2": "465.61",
           "pivotTrend": "🟥",
-          "dayOpen": 480
+          "dayOpen": 480,
+          "invCode": "jubilant-foodworks"
         },
         {
           "symbol": "IOC.NS",
@@ -1214,7 +1249,8 @@
           "pivotS1": "143.22",
           "pivotS2": "142.82",
           "pivotTrend": "🟩",
-          "dayOpen": 144
+          "dayOpen": 144,
+          "invCode": "indian-oil-corporation"
         },
         {
           "symbol": "RECLTD.NS",
@@ -1249,7 +1285,8 @@
           "pivotS1": "363.98",
           "pivotS2": "361.92",
           "pivotTrend": "🟥",
-          "dayOpen": 366.05
+          "dayOpen": 366.05,
+          "invCode": "rural-electrification"
         },
         {
           "symbol": "TCS.NS",
@@ -1284,7 +1321,8 @@
           "pivotS1": "2407.09",
           "pivotS2": "2394.61",
           "pivotTrend": "🟥",
-          "dayOpen": 2417
+          "dayOpen": 2417,
+          "invCode": "tata-consultancy-services"
         },
         {
           "symbol": "TECHM.NS",
@@ -1319,7 +1357,8 @@
           "pivotS1": "1641.41",
           "pivotS2": "1635.33",
           "pivotTrend": "🟩",
-          "dayOpen": 1655
+          "dayOpen": 1655,
+          "invCode": "tech-Mahindra"
         },
         {
           "symbol": "ONGC.NS",
@@ -1354,7 +1393,8 @@
           "pivotS1": "239.19",
           "pivotS2": "237.80",
           "pivotTrend": "🟩🟩",
-          "dayOpen": 387.25
+          "dayOpen": 387.25,
+          "invCode": "oil---natural-gas-corporation"
         }
       ]
     },
@@ -1395,7 +1435,8 @@
           "pivotS1": "5371.14",
           "pivotS2": "5337.86",
           "pivotTrend": "🟥",
-          "dayOpen": 5400.5
+          "dayOpen": 5400.5,
+          "invCode": "interglobe-aviation-ltd"
         },
         {
           "symbol": "ICICIBANK.NS",
@@ -1430,7 +1471,8 @@
           "pivotS1": "1436.36",
           "pivotS2": "1430.84",
           "pivotTrend": "🟩🟩",
-          "dayOpen": 1460
+          "dayOpen": 1460,
+          "invCode": "icici-bank-ltd"
         },
         {
           "symbol": "HDFCBANK.NS",
@@ -1465,7 +1507,8 @@
           "pivotS1": "732.95",
           "pivotS2": "730.74",
           "pivotTrend": "🟩",
-          "dayOpen": 739
+          "dayOpen": 739,
+          "invCode": "hdfc-bank-ltd"
         },
         {
           "symbol": "TRENT.NS",
@@ -1500,7 +1543,8 @@
           "pivotS1": "3093.47",
           "pivotS2": "3079.27",
           "pivotTrend": "🟩",
-          "dayOpen": 3120
+          "dayOpen": 3120,
+          "invCode": "trenttrent"
         },
         {
           "symbol": "DLF.NS",
@@ -1535,7 +1579,8 @@
           "pivotS1": "648.21",
           "pivotS2": "644.25",
           "pivotTrend": "🟥",
-          "dayOpen": 652.65
+          "dayOpen": 652.65,
+          "invCode": "dlfdlf"
         },
         {
           "symbol": "ETERNAL.NS",
@@ -1570,7 +1615,8 @@
           "pivotS1": "309.53",
           "pivotS2": "308.32",
           "pivotTrend": "🟥",
-          "dayOpen": 311
+          "dayOpen": 311,
+          "invCode": "zomato"
         },
         {
           "symbol": "TECHM.NS",
@@ -1605,7 +1651,8 @@
           "pivotS1": "1641.41",
           "pivotS2": "1635.33",
           "pivotTrend": "🟩",
-          "dayOpen": 1655
+          "dayOpen": 1655,
+          "invCode": "tech-Mahindra"
         },
         {
           "symbol": "RECLTD.NS",
@@ -1640,7 +1687,8 @@
           "pivotS1": "363.98",
           "pivotS2": "361.92",
           "pivotTrend": "🟥",
-          "dayOpen": 366.05
+          "dayOpen": 366.05,
+          "invCode": "rural-electrification"
         },
         {
           "symbol": "INFY.NS",
@@ -1675,7 +1723,8 @@
           "pivotS1": "1165.46",
           "pivotS2": "1161.88",
           "pivotTrend": "🟩",
-          "dayOpen": 1174.1
+          "dayOpen": 1174.1,
+          "invCode": "Infosys"
         },
         {
           "symbol": "JUBLFOOD.NS",
@@ -1710,7 +1759,8 @@
           "pivotS1": "472.13",
           "pivotS2": "465.61",
           "pivotTrend": "🟥",
-          "dayOpen": 480
+          "dayOpen": 480,
+          "invCode": "jubilant-foodworks"
         }
       ]
     },
@@ -1751,7 +1801,8 @@
           "pivotS1": "465.37",
           "pivotS2": "460.83",
           "pivotTrend": "🟥",
-          "dayOpen": 472
+          "dayOpen": 472,
+          "invCode": ""
         },
         {
           "symbol": "KAYNES.NS",
@@ -1786,7 +1837,8 @@
           "pivotS1": "3873.58",
           "pivotS2": "3851.18",
           "pivotTrend": "🟥",
-          "dayOpen": 3900
+          "dayOpen": 3900,
+          "invCode": "kaynes-technology-india"
         },
         {
           "symbol": "CANFINHOME.NS",
@@ -1821,7 +1873,8 @@
           "pivotS1": "805.19",
           "pivotS2": "801.10",
           "pivotTrend": "🟩",
-          "dayOpen": 813.5
+          "dayOpen": 813.5,
+          "invCode": "can-fin-homes"
         },
         {
           "symbol": "DABUR.NS",
@@ -1856,7 +1909,8 @@
           "pivotS1": "408.92",
           "pivotS2": "407.23",
           "pivotTrend": "🟩🟩",
-          "dayOpen": 415
+          "dayOpen": 415,
+          "invCode": "dabur-india"
         },
         {
           "symbol": "COALINDIA.NS",
@@ -1891,7 +1945,8 @@
           "pivotS1": "412.68",
           "pivotS2": "411.28",
           "pivotTrend": "-",
-          "dayOpen": ""
+          "dayOpen": "",
+          "invCode": "coal-india"
         }
       ]
     }
