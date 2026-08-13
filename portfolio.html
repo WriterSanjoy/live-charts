@@ -408,6 +408,7 @@ function syncColumnDefsFromDefaults(){
     const def = defByKey[c.key];
     if(!def) return;
     if(c.label !== def.label){ c.label = def.label; changed++; }
+    if(c.type !== def.type){ c.type = def.type; changed++; }
     if(def.type === 'calc' && c.formula !== def.formula){ c.formula = def.formula; changed++; }
     if(def.resultType && c.resultType !== def.resultType){ c.resultType = def.resultType; changed++; }
     if(def.inputType && c.inputType !== def.inputType){ c.inputType = def.inputType; changed++; }
