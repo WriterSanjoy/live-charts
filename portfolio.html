@@ -354,8 +354,10 @@ const DEFAULT_COLUMNS = [
   { key: 'priceToBook',   label: 'P/B',                    type: 'fetched', agg: false, hidden: false },
   { key: 'fiftyDayAverage',        label: '50D Avg',       type: 'fetched', agg: false, hidden: false },
   { key: 'twoHundredDayAverage',   label: '200D Avg',      type: 'fetched', agg: false, hidden: false },
-  { key: 'fiftyTwoWeekLowChangePercent',  label: '52W Low Chg%',  type: 'fetched', agg: false, hidden: false },
-  { key: 'fiftyTwoWeekHighChangePercent', label: '52W High Chg%', type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWeekLowChangePercent',  label: '52W Low Chg%',  type: 'calc', resultType: 'text',
+    formula: "(!ltp || !fiftyTwoWkLow) ? '-' : (((ltp - fiftyTwoWkLow) / fiftyTwoWkLow) * 100).toFixed(2)", agg: false, hidden: false },
+  { key: 'fiftyTwoWeekHighChangePercent', label: '52W High Chg%', type: 'calc', resultType: 'text',
+    formula: "(!ltp || !fiftyTwoWkHigh) ? '-' : (((fiftyTwoWkHigh - ltp) / fiftyTwoWkHigh) * 100).toFixed(2)", agg: false, hidden: false },
   { key: 'averageAnalystRating',   label: 'Analyst Rating', type: 'fetched', agg: false, hidden: false },
   { key: 'invested',  label: 'Invested',     type: 'calc', formula: 'qty*buyPrice', agg: true, hidden: false },
   { key: 'curVal',    label: 'Current Value',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
@@ -588,7 +590,7 @@ function renderTable(){
         else if(val < row.twoHundredDayAverage) td.classList.add('bg-red');
       }
       if(col.key === 'ltp'){
-        if(typeof row.fiftyTwoWeekLowChangePercent === 'number' && row.fiftyTwoWeekLowChangePercent <= 5){
+        if(row.fiftyTwoWeekLowChangePercent !== '-' && parseFloat(row.fiftyTwoWeekLowChangePercent) <= 5 && !isNaN(parseFloat(row.fiftyTwoWeekLowChangePercent))){
           td.classList.add('bg-green');
         }
         if(typeof val === 'number' && typeof row.fiftyDayAverage === 'number' && val > row.fiftyDayAverage){
@@ -690,7 +692,7 @@ function renderTableValuesOnly(){
         else if(val < row.twoHundredDayAverage) td.classList.add('bg-red');
       }
       if(col.key === 'ltp'){
-        if(typeof row.fiftyTwoWeekLowChangePercent === 'number' && row.fiftyTwoWeekLowChangePercent <= 5){
+        if(row.fiftyTwoWeekLowChangePercent !== '-' && parseFloat(row.fiftyTwoWeekLowChangePercent) <= 5 && !isNaN(parseFloat(row.fiftyTwoWeekLowChangePercent))){
           td.classList.add('bg-green');
         }
         if(typeof val === 'number' && typeof row.fiftyDayAverage === 'number' && val > row.fiftyDayAverage){
@@ -892,8 +894,6 @@ async function refreshFundamentals(){
       row.priceToBook = typeof data.priceToBook === 'number' ? data.priceToBook : '';
       row.fiftyDayAverage = typeof data.fiftyDayAverage === 'number' ? data.fiftyDayAverage : '';
       row.twoHundredDayAverage = typeof data.twoHundredDayAverage === 'number' ? data.twoHundredDayAverage : '';
-      row.fiftyTwoWeekLowChangePercent = typeof data.fiftyTwoWeekLowChangePercent === 'number' ? data.fiftyTwoWeekLowChangePercent : '';
-      row.fiftyTwoWeekHighChangePercent = typeof data.fiftyTwoWeekHighChangePercent === 'number' ? data.fiftyTwoWeekHighChangePercent : '';
       row.averageAnalystRating = typeof data.averageAnalystRating === 'string' ? data.averageAnalystRating : '';
       row.dayOpen = typeof data.regularMarketOpen === 'number' ? data.regularMarketOpen : row.dayOpen;
       recomputeRow(row);
