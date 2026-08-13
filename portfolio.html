@@ -349,6 +349,12 @@ const DEFAULT_COLUMNS = [
   { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false, hidden: false },
   { key: 'eps',       label: 'EPS',          type: 'fetched', agg: false, hidden: false },
   { key: 'beta',      label: 'Beta',         type: 'fetched', agg: false, hidden: false },
+  { key: 'priceToBook',   label: 'P/B',                    type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyDayAverage',        label: '50D Avg',       type: 'fetched', agg: false, hidden: false },
+  { key: 'twoHundredDayAverage',   label: '200D Avg',      type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWeekLowChangePercent',  label: '52W Low Chg%',  type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWeekHighChangePercent', label: '52W High Chg%', type: 'fetched', agg: false, hidden: false },
+  { key: 'averageAnalystRating',   label: 'Analyst Rating', type: 'fetched', agg: false, hidden: false },
   { key: 'invested',  label: 'Invested',     type: 'calc', formula: 'qty*buyPrice', agg: true, hidden: false },
   { key: 'curVal',    label: 'Current Value',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
   { key: 'pnl',       label: 'P&L',          type: 'calc', formula: 'curVal-invested', agg: true, hidden: false },
@@ -853,6 +859,12 @@ async function refreshFundamentals(){
       row.peRatio = typeof data.trailingPE === 'number' ? data.trailingPE : '';
       row.eps = typeof data.trailingEps === 'number' ? data.trailingEps : '';
       row.beta = typeof data.beta === 'number' ? data.beta : '';
+      row.priceToBook = typeof data.priceToBook === 'number' ? data.priceToBook : '';
+      row.fiftyDayAverage = typeof data.fiftyDayAverage === 'number' ? data.fiftyDayAverage : '';
+      row.twoHundredDayAverage = typeof data.twoHundredDayAverage === 'number' ? data.twoHundredDayAverage : '';
+      row.fiftyTwoWeekLowChangePercent = typeof data.fiftyTwoWeekLowChangePercent === 'number' ? data.fiftyTwoWeekLowChangePercent : '';
+      row.fiftyTwoWeekHighChangePercent = typeof data.fiftyTwoWeekHighChangePercent === 'number' ? data.fiftyTwoWeekHighChangePercent : '';
+      row.averageAnalystRating = typeof data.averageAnalystRating === 'string' ? data.averageAnalystRating : '';
       row.dayOpen = typeof data.regularMarketOpen === 'number' ? data.regularMarketOpen : row.dayOpen;
       recomputeRow(row);
     } catch(e){
