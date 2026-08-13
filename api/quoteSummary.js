@@ -44,6 +44,9 @@ async function getCrumbAndCookie() {
 function pickRaw(obj, key) {
   return obj && obj[key] && typeof obj[key].raw === 'number' ? obj[key].raw : null;
 }
+function pickStr(obj, key) {
+  return obj && typeof obj[key] === 'string' ? obj[key] : null;
+}
 
 export default async function handler(req, res) {
   const { symbol } = req.query;
@@ -89,7 +92,12 @@ export default async function handler(req, res) {
       marketCap: pickRaw(summary, 'marketCap'),
       priceToBook: pickRaw(stats, 'priceToBook'),
       returnOnEquity: pickRaw(fin, 'returnOnEquity'),
-      regularMarketOpen: pickRaw(price, 'regularMarketOpen')
+      regularMarketOpen: pickRaw(price, 'regularMarketOpen'),
+      fiftyTwoWeekLowChangePercent: pickRaw(price, 'fiftyTwoWeekLowChangePercent'),
+      fiftyTwoWeekHighChangePercent: pickRaw(price, 'fiftyTwoWeekHighChangePercent'),
+      fiftyDayAverage: pickRaw(summary, 'fiftyDayAverage'),
+      twoHundredDayAverage: pickRaw(summary, 'twoHundredDayAverage'),
+      averageAnalystRating: pickStr(fin, 'averageAnalystRating')
     };
 
     // Fundamentals move slowly — cache much longer than the price proxy's 5s.
