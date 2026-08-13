@@ -89,6 +89,8 @@
   td.up { color: var(--up); }
   td.down { color: var(--down); }
   td.err { color: var(--down); font-style: italic; }
+  td.bg-green { background: rgba(79,178,134,0.18); }
+  td.bg-red { background: rgba(217,115,108,0.18); }
   td.rowactions { text-align: center; }
   tfoot td { border-top: 2px solid var(--border); border-bottom: none; font-weight: 700; background: #1c2430; position: sticky; bottom: 0; }
 
@@ -581,6 +583,20 @@ function renderTable(){
       } else {
         td.textContent = val || '—';
       }
+      if(col.key === 'fiftyDayAverage' && typeof val === 'number' && typeof row.twoHundredDayAverage === 'number'){
+        if(val > row.twoHundredDayAverage) td.classList.add('bg-green');
+        else if(val < row.twoHundredDayAverage) td.classList.add('bg-red');
+      }
+      if(col.key === 'ltp'){
+        if(typeof row.fiftyTwoWeekLowChangePercent === 'number' && row.fiftyTwoWeekLowChangePercent <= 5){
+          td.classList.add('bg-green');
+        }
+        if(typeof val === 'number' && typeof row.fiftyDayAverage === 'number' && val > row.fiftyDayAverage){
+          const star = document.createElement('span');
+          star.textContent = ' ⭐️';
+          td.appendChild(star);
+        }
+      }
     } else { // calc
       td.className = 'calc';
       if(val === 'ERR'){ td.classList.add('err'); td.textContent = 'ERR'; }
@@ -668,6 +684,20 @@ function renderTableValuesOnly(){
         td.textContent = val.toFixed(2);
       } else {
         td.textContent = val || '—';
+      }
+      if(col.key === 'fiftyDayAverage' && typeof val === 'number' && typeof row.twoHundredDayAverage === 'number'){
+        if(val > row.twoHundredDayAverage) td.classList.add('bg-green');
+        else if(val < row.twoHundredDayAverage) td.classList.add('bg-red');
+      }
+      if(col.key === 'ltp'){
+        if(typeof row.fiftyTwoWeekLowChangePercent === 'number' && row.fiftyTwoWeekLowChangePercent <= 5){
+          td.classList.add('bg-green');
+        }
+        if(typeof val === 'number' && typeof row.fiftyDayAverage === 'number' && val > row.fiftyDayAverage){
+          const star = document.createElement('span');
+          star.textContent = ' ⭐️';
+          td.appendChild(star);
+        }
       }
     } else {
       td.className = 'calc';
