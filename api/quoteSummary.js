@@ -93,8 +93,6 @@ export default async function handler(req, res) {
       priceToBook: pickRaw(stats, 'priceToBook'),
       returnOnEquity: pickRaw(fin, 'returnOnEquity'),
       regularMarketOpen: pickRaw(price, 'regularMarketOpen'),
-      fiftyTwoWeekLowChangePercent: pickRaw(price, 'fiftyTwoWeekLowChangePercent'),
-      fiftyTwoWeekHighChangePercent: pickRaw(price, 'fiftyTwoWeekHighChangePercent'),
       fiftyDayAverage: pickRaw(summary, 'fiftyDayAverage'),
       twoHundredDayAverage: pickRaw(summary, 'twoHundredDayAverage'),
       averageAnalystRating: pickStr(fin, 'averageAnalystRating')
