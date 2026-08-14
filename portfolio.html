@@ -328,7 +328,8 @@ const DEFAULT_COLUMNS = [
   { key: 'qty',       label: 'Qty',          type: 'manual', agg: false, hidden: false },
   { key: 'buyPrice',  label: 'Buy Price',    type: 'manual', agg: false, hidden: false },
   { key: 'name',      label: 'Name',         type: 'fetched', agg: false, hidden: false },
-  { key: 'ltp',       label: 'LTP',          type: 'fetched', agg: false, hidden: false },
+  { key: 'ltp',       label: 'LTP',          type: 'fetched', agg: false, hidden: false,
+    tooltip: '⭐️ appears when LTP > 50DMA > 200DMA and price is within 5% of its 52-week low. Hover the star on a specific row for the exact reasoning. Edit the "Star Signal" hidden column\'s formula to change the rule.' },
   { key: 'prevClose', label: 'Prev Close',   type: 'fetched', agg: false, hidden: false },
   { key: 'chgPct',    label: 'Chg %',        type: 'fetched', agg: false, hidden: false },
   { key: 'trend',     label: 'Trend',        type: 'calc', resultType: 'text',
@@ -343,7 +344,7 @@ const DEFAULT_COLUMNS = [
     formula: "(!prevHigh || !prevLow) ? '-' : (pivotP - 0.382*(prevHigh-prevLow)).toFixed(2)", agg: false, hidden: true },
   { key: 'pivotS2',   label: 'Pivot S2',     type: 'calc', resultType: 'text',
     formula: "(!prevHigh || !prevLow) ? '-' : (pivotP - 0.618*(prevHigh-prevLow)).toFixed(2)", agg: false, hidden: true },
-  { key: 'pivotTrend', label: '🚦',       type: 'calc', resultType: 'text',
+  { key: 'pivotTrend', label: 'Pivot',       type: 'calc', resultType: 'text',
     formula: "(!dayOpen || !pivotP) ? '-' : (dayOpen > pivotP ? (dayOpen > pivotR1 ? '⬆️⬆️' : '⬆️') : (dayOpen < pivotP ? (dayOpen < pivotS1 ? '⬇️⬇️' : '⬇️') : '-'))",
     agg: false, hidden: false },
   { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false, hidden: false },
@@ -354,23 +355,29 @@ const DEFAULT_COLUMNS = [
   { key: 'priceToBook',   label: 'P/B',                    type: 'fetched', agg: false, hidden: false },
   { key: 'fiftyDayAverage',        label: '50D Avg',       type: 'fetched', agg: false, hidden: false },
   { key: 'twoHundredDayAverage',   label: '200D Avg',      type: 'fetched', agg: false, hidden: false },
-  { key: 'fiftyTwoWeekLowChangePercent',  label: '↔️52L%',  type: 'calc', resultType: 'text',
+  { key: 'fiftyTwoWeekLowChangePercent',  label: '52W Low Chg%',  type: 'calc', resultType: 'text',
     formula: "(!ltp || !fiftyTwoWkLow) ? '-' : (((ltp - fiftyTwoWkLow) / fiftyTwoWkLow) * 100).toFixed(2) + '%'", agg: false, hidden: false },
-  { key: 'fiftyTwoWeekHighChangePercent', label: '↔️52H%', type: 'calc', resultType: 'text',
+  { key: 'fiftyTwoWeekHighChangePercent', label: '52W High Chg%', type: 'calc', resultType: 'text',
     formula: "(!ltp || !fiftyTwoWkHigh) ? '-' : (((fiftyTwoWkHigh - ltp) / fiftyTwoWkHigh) * 100).toFixed(2) + '%'", agg: false, hidden: false },
+  { key: 'starSignal', label: 'Star Signal', type: 'calc', resultType: 'text', hidden: true,
+    // Edit this formula any time to change what triggers the ⭐️ on LTP. Whatever text this
+    // returns (when true) becomes the star's hover tooltip verbatim — so update the wording
+    // here too when you change the condition, they're the same edit.
+    formula: "(!ltp || !fiftyDayAverage || !twoHundredDayAverage || !fiftyTwoWkLow) ? '' : ((ltp > fiftyDayAverage && fiftyDayAverage > twoHundredDayAverage && fiftyTwoWeekLowChangePercent <= 5) ? 'Uptrend (LTP>50DMA>200DMA) + near 52W low (\u22645%). Possible entry zone \u2014 confirm on chart before acting.' : '')",
+    agg: false },
   { key: 'averageAnalystRating',   label: 'Analyst Rating', type: 'fetched', agg: false, hidden: false },
   { key: 'invested',  label: 'Invested',     type: 'calc', formula: 'qty*buyPrice', agg: true, hidden: false },
-  { key: 'curVal',    label: 'Value',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
+  { key: 'curVal',    label: 'Current Value',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
   { key: 'pnl',       label: 'P&L',          type: 'calc', formula: 'curVal-invested', agg: true, hidden: false },
-  { key: 'pnlPct',    label: '%',        type: 'calc', formula: 'invested ? (pnl/invested*100) : 0', agg: false, hidden: false },
+  { key: 'pnlPct',    label: 'P&L %',        type: 'calc', formula: 'invested ? (pnl/invested*100) : 0', agg: false, hidden: false },
   { key: 'alert',     label: 'Alert',        type: 'manual', agg: false, hidden: false },
   { key: 'target',    label: 'Target',       type: 'manual', agg: false, hidden: false },
-  { key: 'signal',    label: '🚩',       type: 'calc', resultType: 'text',
+  { key: 'signal',    label: 'Signal',       type: 'calc', resultType: 'text',
     formula: "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')", agg: false, hidden: false },
   { key: 'mcCode',    label: 'MC Code',      type: 'manual', inputType: 'text', agg: false, hidden: true },
   { key: 'invCode',   label: 'Inv Code',     type: 'manual', inputType: 'text', agg: false, hidden: true, afterActions: true },
-  { key: 'dayHigh',   label: 'Day High',   type: 'fetched', agg: false, hidden: true },
-  { key: 'dayLow',    label: 'Day Low',    type: 'fetched', agg: false, hidden: true },
+  { key: 'dayHigh',   label: 'Today High',   type: 'fetched', agg: false, hidden: true },
+  { key: 'dayLow',    label: 'Today Low',    type: 'fetched', agg: false, hidden: true },
   { key: 'prevHigh',  label: 'Prev High',    type: 'fetched', agg: false, hidden: true },
   { key: 'prevLow',   label: 'Prev Low',     type: 'fetched', agg: false, hidden: true },
   { key: 'dayOpen',   label: 'Today Open',   type: 'fetched', agg: false, hidden: true },
@@ -413,6 +420,7 @@ function syncColumnDefsFromDefaults(){
     if(def.resultType && c.resultType !== def.resultType){ c.resultType = def.resultType; changed++; }
     if(def.inputType && c.inputType !== def.inputType){ c.inputType = def.inputType; changed++; }
     if(def.afterActions !== undefined && c.afterActions !== def.afterActions){ c.afterActions = def.afterActions; changed++; }
+    if(def.tooltip && c.tooltip !== def.tooltip){ c.tooltip = def.tooltip; changed++; }
   });
   migrateColumns(state);
   state.tabs.forEach(t => t.rows.forEach(r => recomputeRow(r)));
@@ -541,6 +549,7 @@ function renderTable(){
   const buildHeaderCell = (col) => {
     const th = document.createElement('th');
     if(NARROW_WIDTHS[col.key]) th.style.width = NARROW_WIDTHS[col.key];
+    if(col.tooltip) th.title = col.tooltip;
     const wrap = document.createElement('div');
     wrap.className = 'colhead';
     const span = document.createElement('span');
@@ -594,9 +603,10 @@ function renderTable(){
         if(row.fiftyTwoWeekLowChangePercent !== '-' && parseFloat(row.fiftyTwoWeekLowChangePercent) <= 5 && !isNaN(parseFloat(row.fiftyTwoWeekLowChangePercent))){
           td.classList.add('bg-green');
         }
-        if(typeof val === 'number' && typeof row.fiftyDayAverage === 'number' && val > row.fiftyDayAverage){
+        if(row.starSignal){
           const star = document.createElement('span');
           star.textContent = ' ⭐️';
+          star.title = row.starSignal;
           td.appendChild(star);
         }
       }
@@ -696,9 +706,10 @@ function renderTableValuesOnly(){
         if(row.fiftyTwoWeekLowChangePercent !== '-' && parseFloat(row.fiftyTwoWeekLowChangePercent) <= 5 && !isNaN(parseFloat(row.fiftyTwoWeekLowChangePercent))){
           td.classList.add('bg-green');
         }
-        if(typeof val === 'number' && typeof row.fiftyDayAverage === 'number' && val > row.fiftyDayAverage){
+        if(row.starSignal){
           const star = document.createElement('span');
           star.textContent = ' ⭐️';
+          star.title = row.starSignal;
           td.appendChild(star);
         }
       }
