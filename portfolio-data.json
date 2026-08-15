@@ -161,7 +161,7 @@
       "label": "🚩",
       "type": "calc",
       "resultType": "text",
-      "formula": "((alert && ltp && ltp<=alert) || (ltp && peRatio && peRatio <= 15)) ? 'BUY' : ((ltp && fiftyTwoWeekHighChangePercent <= 10) ? '⏸️' : ((target && ltp>=target) ? 'SELL' : '-'))",
+      "formula": "(alert && ltp && peRatio && (ltp<=alert || fiftyTwoWeekLowChangePercent <= 5 || peRatio <= 15)) ? 'BUY' : ((ltp && fiftyTwoWeekHighChangePercent <= 10) ? '⏸️' : ((target && ltp>=target) ? 'SELL' : '-'))",
       "agg": false,
       "hidden": false
     },
@@ -823,7 +823,7 @@
           "beta": 0.414,
           "alert": 725,
           "target": "",
-          "signal": "-",
+          "signal": "BUY",
           "trend": "🔼",
           "mcCode": "",
           "dayIcon": "-",
@@ -2066,5 +2066,5 @@
       ]
     }
   ],
-  "activeTab": "rms4b1byvpwf5p"
+  "activeTab": "rms4dm8vc9g9ce"
 }
