@@ -350,6 +350,7 @@ const DEFAULT_COLUMNS = [
   { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false, hidden: false },
   { key: 'fiftyTwoWkLow',  label: '52W Low',  type: 'fetched', agg: false, hidden: false },
   { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false, hidden: false },
+  { key: 'forwardPE', label: 'Fwd PE',       type: 'fetched', agg: false, hidden: false },
   { key: 'eps',       label: 'EPS',          type: 'fetched', agg: false, hidden: false },
   { key: 'beta',      label: 'Beta',         type: 'fetched', agg: false, hidden: false },
   { key: 'priceToBook',   label: 'P/B',                    type: 'fetched', agg: false, hidden: false },
@@ -901,6 +902,7 @@ async function refreshFundamentals(){
     try {
       const data = await fetchFundamentals(row.symbol);
       row.peRatio = typeof data.trailingPE === 'number' ? data.trailingPE : '';
+      row.forwardPE = typeof data.forwardPE === 'number' ? data.forwardPE : '';
       row.eps = typeof data.trailingEps === 'number' ? data.trailingEps : '';
       row.beta = typeof data.beta === 'number' ? data.beta : '';
       row.priceToBook = typeof data.priceToBook === 'number' ? data.priceToBook : '';
