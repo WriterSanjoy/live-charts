@@ -14,6 +14,14 @@
 // Yahoo's meta.previousClose/chartPreviousClose no longer reliably means "yesterday" (see below),
 // so those are derived from the daily bars instead and exposed as new top-level `prevClose` /
 // `prevHigh` / `prevLow` fields alongside the untouched `chart` object.
+//
+// Also added for portfolio.html's pivot columns: a second, weekly-bar fetch (range=3mo&interval=1wk)
+// to derive the *last fully completed* week's close/high/low, exposed as `prevWeekClose` /
+// `prevWeekHigh` / `prevWeekLow`. This matches how Moneycontrol's own pivot panel is computed —
+// confirmed by back-solving their displayed R1/S1/R2/S2/R3/S3 against the classic pivot formula,
+// which only reconciled once weekly (not daily) H/L/C was used as the input. Wrapped in its own
+// try/catch so a hiccup fetching weekly bars never breaks the daily price data this endpoint
+// already serves to chart.html.
 
 export default async function handler(req, res) {
   const { symbol } = req.query;
@@ -59,6 +67,31 @@ export default async function handler(req, res) {
     } catch (e) {
       // If anything about the daily-bar shape is unexpected, just leave these absent
       // rather than failing the whole price request.
+    }
+
+    // Derive the last fully completed week's close/high/low, for pivot calculations.
+    // Same "second-to-last bar" logic as above: with interval=1wk, the last bar is the
+    // current, still-in-progress week, so the previous entry is the last completed week.
+    try {
+      const weeklyUpstream = await fetch(
+        'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=3mo&interval=1wk',
+        { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' } }
+      );
+      if (weeklyUpstream.ok) {
+        const weeklyData = await weeklyUpstream.json();
+        const wResult = weeklyData.chart && weeklyData.chart.result && weeklyData.chart.result[0];
+        const wQuote = wResult && wResult.indicators && wResult.indicators.quote && wResult.indicators.quote[0];
+        const wTs = wResult && wResult.timestamp;
+        if (wQuote && wTs && wTs.length >= 2) {
+          const wIdx = wTs.length - 2;
+          data.prevWeekClose = typeof wQuote.close[wIdx] === 'number' ? wQuote.close[wIdx] : null;
+          data.prevWeekHigh = typeof wQuote.high[wIdx] === 'number' ? wQuote.high[wIdx] : null;
+          data.prevWeekLow = typeof wQuote.low[wIdx] === 'number' ? wQuote.low[wIdx] : null;
+        }
+      }
+    } catch (e) {
+      // Same principle as the daily-bar derivation above: never let a weekly-bar hiccup
+      // fail the whole price request. Pivot columns just show '-' until refreshed again.
     }
 
     // Allow any origin to read this — it's just public market data, no secrets involved.
