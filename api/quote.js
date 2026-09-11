@@ -15,25 +15,69 @@
 // so those are derived from the daily bars instead and exposed as new top-level `prevClose` /
 // `prevHigh` / `prevLow` fields alongside the untouched `chart` object.
 //
-// Also added for portfolio.html's pivot columns: a second, weekly-bar fetch (range=3mo&interval=1wk)
-// to derive the *last fully completed* week's close/high/low, exposed as `prevWeekClose` /
-// `prevWeekHigh` / `prevWeekLow`. This matches how Moneycontrol's own pivot panel is computed —
-// confirmed by back-solving their displayed R1/S1/R2/S2/R3/S3 against the classic pivot formula,
-// which only reconciled once weekly (not daily) H/L/C was used as the input.
+// Also added for portfolio.html's pivot columns: a WEEKLY fetch (last completed Mon-Fri) and a
+// MONTHLY fetch (last completed calendar month), exposed as `prevWeekHigh/Low/Close` and
+// `prevMonthHigh/Low/Close`. Both are kept, because they map to two different pivot sets on
+// Moneycontrol's own chart (confirmed directly via its indicator settings dialog — it's
+// TradingView's "Pivots Traditional" with Timeframe set to Auto, which steps the pivot period
+// up one level from the chart's own candle interval: <=15min->Daily, 15min-1Day->Weekly,
+// 1Day-1Week->Monthly, >=1Week->Yearly):
+//   - On an HOURLY chart, Auto resolves to Weekly  -> use prevWeek* for those pivots.
+//   - On a DAILY chart, Auto resolves to Monthly   -> use prevMonth* for those pivots.
+// Both were confirmed by back-solving Moneycontrol's displayed R1/R2/R3/S1/S2/S3 against the
+// classic pivot formula and matching the resulting H/L/C against each period.
 //
 // NOTE: an NSE-direct data source was tried and removed — NSE's historical API blocks Vercel's
 // IPs with a bot-detection HTML page instead of JSON, so it added a slow, always-failing round
-// trip on every refresh for no benefit. Yahoo weekly bars, picked correctly below, are the
-// sole source now.
+// trip on every refresh for no benefit. Yahoo bars, picked correctly below, are the sole source.
 //
-// Picking the right weekly bar: NOT "second-to-last array entry", and NOT a single "step back
-// one" either — both were tried and both broke, because Yahoo can append more than one trailing
-// entry for the still-forming current week (confirmed via debugging: a normal 7-day cadence
-// between historical bars, then one extra entry only ~5 days after the previous one, and both
-// of those trailing entries turned out to belong to the current week when cross-checked against
-// the daily bars). The robust fix: walk backward from the end of the array until finding a bar
-// that is genuinely >=7 days old — that self-corrects regardless of how many trailing anomalies
-// Yahoo throws in.
+// Picking the right bar for week/month: walk backward from the end of the array until finding
+// a bar that is NOT part of the still-forming current period. NOT "second-to-last array entry" —
+// Yahoo can append more than one trailing entry for the current period (confirmed via debugging:
+// a normal cadence between historical bars, then one extra entry very close to the last one, and
+// both trailing entries turned out to belong to the current period when cross-checked against
+// daily bars). Walking back to the first bar that's definitively in a prior period is robust to
+// however many of those trailing anomalies Yahoo throws in.
+
+const YAHOO_HEADERS = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
+
+function pickLastCompletedBar(ts, isCurrentPeriod) {
+  for (let i = ts.length - 1; i >= 0; i--) {
+    if (!isCurrentPeriod(ts[i])) return i;
+  }
+  return -1;
+}
+
+// Fetches one Yahoo chart interval and derives the OHLC of the last bar that is NOT still
+// forming, per the caller's isCurrentPeriod(timestampSeconds) predicate. Returns null (never
+// throws past this point) on any upstream/shape problem, so callers can treat missing period
+// data as "just leave the columns blank" rather than failing the whole quote request.
+async function fetchPeriodOHLC(symbol, interval, range, isCurrentPeriod) {
+  const upstream = await fetch(
+    'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=' + range + '&interval=' + interval,
+    { headers: YAHOO_HEADERS }
+  );
+  if (!upstream.ok) return null;
+  const json = await upstream.json();
+  const result = json.chart && json.chart.result && json.chart.result[0];
+  const quote = result && result.indicators && result.indicators.quote && result.indicators.quote[0];
+  const ts = result && result.timestamp;
+  if (!quote || !ts || !ts.length) return null;
+
+  const idx = pickLastCompletedBar(ts, isCurrentPeriod);
+  if (idx < 0) return null;
+
+  return {
+    close: typeof quote.close[idx] === 'number' ? quote.close[idx] : null,
+    high: typeof quote.high[idx] === 'number' ? quote.high[idx] : null,
+    low: typeof quote.low[idx] === 'number' ? quote.low[idx] : null,
+    debug: {
+      chosenIndex: idx,
+      arrayLength: ts.length,
+      allBarDates: ts.map(t => new Date(t * 1000).toISOString().slice(0, 10)),
+    },
+  };
+}
 
 export default async function handler(req, res) {
   const { symbol } = req.query;
@@ -45,7 +89,7 @@ export default async function handler(req, res) {
   try {
     const upstream = await fetch(
       'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=5d&interval=1d',
-      { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' } }
+      { headers: YAHOO_HEADERS }
     );
 
     if (!upstream.ok) {
@@ -81,41 +125,39 @@ export default async function handler(req, res) {
       // rather than failing the whole price request.
     }
 
-    // Derive the last fully completed week's close/high/low, for pivot calculations.
+    const nowSec = Date.now() / 1000;
+    const nowDate = new Date();
+    const curYearMonth = nowDate.getUTCFullYear() * 12 + nowDate.getUTCMonth();
+
+    // Last completed WEEK — feeds Hourly-chart pivots on Moneycontrol.
     try {
-      const weeklyUpstream = await fetch(
-        'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=3mo&interval=1wk',
-        { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' } }
-      );
-      if (weeklyUpstream.ok) {
-        const weeklyData = await weeklyUpstream.json();
-        const wResult = weeklyData.chart && weeklyData.chart.result && weeklyData.chart.result[0];
-        const wQuote = wResult && wResult.indicators && wResult.indicators.quote && wResult.indicators.quote[0];
-        const wTs = wResult && wResult.timestamp;
-        if (wQuote && wTs && wTs.length) {
-          const nowSec = Date.now() / 1000;
-          let wIdx = -1;
-          for (let i = wTs.length - 1; i >= 0; i--) {
-            if (nowSec - wTs[i] >= 7 * 24 * 3600) { wIdx = i; break; }
-          }
-          if (wIdx >= 0) {
-            data.prevWeekClose = typeof wQuote.close[wIdx] === 'number' ? wQuote.close[wIdx] : null;
-            data.prevWeekHigh = typeof wQuote.high[wIdx] === 'number' ? wQuote.high[wIdx] : null;
-            data.prevWeekLow = typeof wQuote.low[wIdx] === 'number' ? wQuote.low[wIdx] : null;
-            data.prevWeekSource = 'yahoo';
-          }
-          // Debug payload — safe to remove once you've confirmed the pivots reconcile.
-          data.prevWeekDebug = {
-            nowIso: new Date(nowSec * 1000).toISOString(),
-            chosenIndex: wIdx,
-            arrayLength: wTs.length,
-            allBarDates: wTs.map(t => new Date(t * 1000).toISOString().slice(0, 10)),
-          };
-        }
+      const weekly = await fetchPeriodOHLC(symbol, '1wk', '3mo', t => (nowSec - t) < 7 * 24 * 3600);
+      if (weekly) {
+        data.prevWeekClose = weekly.close;
+        data.prevWeekHigh = weekly.high;
+        data.prevWeekLow = weekly.low;
+        data.prevWeekSource = 'yahoo';
+        data.prevWeekDebug = weekly.debug; // safe to remove once confirmed reconciling
       }
     } catch (e) {
-      // Same principle as the daily-bar derivation above: never let a weekly-bar hiccup
-      // fail the whole price request. Pivot columns just show '-' until refreshed again.
+      // Never let a weekly-bar hiccup fail the whole price request.
+    }
+
+    // Last completed calendar MONTH — feeds Daily-chart pivots on Moneycontrol.
+    try {
+      const monthly = await fetchPeriodOHLC(symbol, '1mo', '1y', t => {
+        const d = new Date(t * 1000);
+        return (d.getUTCFullYear() * 12 + d.getUTCMonth()) >= curYearMonth;
+      });
+      if (monthly) {
+        data.prevMonthClose = monthly.close;
+        data.prevMonthHigh = monthly.high;
+        data.prevMonthLow = monthly.low;
+        data.prevMonthSource = 'yahoo';
+        data.prevMonthDebug = monthly.debug; // safe to remove once confirmed reconciling
+      }
+    } catch (e) {
+      // Never let a monthly-bar hiccup fail the whole price request.
     }
 
     // Allow any origin to read this — it's just public market data, no secrets involved.
