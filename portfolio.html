@@ -394,6 +394,7 @@ const DEFAULT_COLUMNS = [
   { key: 'prevWeekLow',   label: 'Prev Wk Low',   type: 'fetched', agg: false, hidden: true },
   { key: 'prevWeekClose', label: 'Prev Wk Close', type: 'fetched', agg: false, hidden: true },
   { key: 'prevWeekSource', label: 'Wk Data Src',  type: 'fetched', agg: false, hidden: true },
+  { key: 'prevWeekNSEError', label: 'NSE Error',  type: 'fetched', agg: false, hidden: true },
 ];
 
 function defaultTab(name){
@@ -856,7 +857,7 @@ async function fetchQuote(symbol){
   return {
     meta, prevClose: data.prevClose, prevHigh: data.prevHigh, prevLow: data.prevLow,
     prevWeekClose: data.prevWeekClose, prevWeekHigh: data.prevWeekHigh, prevWeekLow: data.prevWeekLow,
-    prevWeekSource: data.prevWeekSource
+    prevWeekSource: data.prevWeekSource, prevWeekNSEError: data.prevWeekNSEError
   };
 }
 
@@ -877,7 +878,7 @@ async function refreshPrices(){
   let done = 0, errors = 0, lastError = '';
   for(const row of rows){
     try {
-      const { meta, prevClose: barsPrevClose, prevHigh, prevLow, prevWeekClose, prevWeekHigh, prevWeekLow, prevWeekSource } = await fetchQuote(row.symbol);
+      const { meta, prevClose: barsPrevClose, prevHigh, prevLow, prevWeekClose, prevWeekHigh, prevWeekLow, prevWeekSource, prevWeekNSEError } = await fetchQuote(row.symbol);
       const ltp = meta.regularMarketPrice;
       // meta.previousClose/chartPreviousClose are unreliable with range=5d (anchored to the
       // start of the window, not to yesterday) — prefer the value derived from daily bars.
@@ -897,6 +898,7 @@ async function refreshPrices(){
       row.prevWeekHigh = typeof prevWeekHigh === 'number' ? prevWeekHigh : '';
       row.prevWeekLow = typeof prevWeekLow === 'number' ? prevWeekLow : '';
       row.prevWeekSource = prevWeekSource || '';
+      row.prevWeekNSEError = prevWeekNSEError || '';
       recomputeRow(row);
     } catch(e){
       errors++;
