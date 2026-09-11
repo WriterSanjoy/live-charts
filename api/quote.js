@@ -174,6 +174,7 @@ export default async function handler(req, res) {
       try {
         weekly = await fetchNSEWeeklyOHLC(symbol);
       } catch (nseErr) {
+        data.prevWeekNSEError = String((nseErr && nseErr.message) || nseErr);
         weekly = null; // fall through to Yahoo below
       }
 
@@ -200,8 +201,18 @@ export default async function handler(req, res) {
                 close: typeof wQuote.close[wIdx] === 'number' ? wQuote.close[wIdx] : null,
                 high: typeof wQuote.high[wIdx] === 'number' ? wQuote.high[wIdx] : null,
                 low: typeof wQuote.low[wIdx] === 'number' ? wQuote.low[wIdx] : null,
+                source: 'yahoo',
               };
             }
+            // Debug payload so we can see exactly which bar got picked and why, without
+            // guessing again — inspect this in the Network tab response JSON.
+            data.prevWeekDebug = {
+              nowIso: new Date(nowSec * 1000).toISOString(),
+              chosenIndex: wIdx,
+              arrayLength: wTs.length,
+              allBarDates: wTs.map(t => new Date(t * 1000).toISOString().slice(0, 10)),
+              ageOfLastBarDays: Math.round((nowSec - wTs[wTs.length - 1]) / 86400 * 10) / 10,
+            };
           }
         }
       }
