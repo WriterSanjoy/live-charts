@@ -334,26 +334,42 @@ const DEFAULT_COLUMNS = [
   { key: 'chgPct',    label: 'Chg %',        type: 'fetched', agg: false, hidden: false },
   { key: 'trend',     label: 'Trend',        type: 'calc', resultType: 'text',
     formula: "chgPct>0 ? '🔼' : (chgPct<0 ? '🔽' : '-')", agg: false, hidden: false },
-  // Classic pivot formula, fed by the LAST COMPLETED WEEK's H/L/C (not daily) — this combination
-  // is what reconciled exactly against Moneycontrol's own pivot panel (P/R1-R3/S1-S3), confirmed
-  // by back-solving their displayed values. Swapped from an earlier Fibonacci/daily-based version
-  // that didn't match Moneycontrol's numbers at all.
-  { key: 'pivotP',    label: 'Pivot P',      type: 'calc', resultType: 'text',
+  // Classic pivot formula. Moneycontrol's chart uses TradingView's "Pivots Traditional" with
+  // Timeframe=Auto, which steps the pivot period UP one level from the chart's own candle
+  // interval — confirmed directly via the indicator's settings dialog: Hourly chart -> Weekly
+  // pivots, Daily chart -> Monthly pivots. So two parallel pivot sets, one per period:
+  //   hrPivot*  = fed by last completed WEEK's H/L/C  -> matches Moneycontrol's Hourly-chart pivots
+  //   dayPivot* = fed by last completed MONTH's H/L/C -> matches Moneycontrol's Daily-chart pivots
+  { key: 'hrPivotP',    label: 'Hr Pivot P',      type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : ((prevWeekHigh + prevWeekLow + prevWeekClose) / 3).toFixed(2)", agg: false, hidden: true },
-  { key: 'pivotR1',   label: 'Pivot R1',     type: 'calc', resultType: 'text',
-    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*pivotP - prevWeekLow).toFixed(2)", agg: false, hidden: true },
-  { key: 'pivotR2',   label: 'Pivot R2',     type: 'calc', resultType: 'text',
-    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (pivotP + (prevWeekHigh-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
-  { key: 'pivotR3',   label: 'Pivot R3',     type: 'calc', resultType: 'text',
-    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekHigh + 2*(pivotP-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
-  { key: 'pivotS1',   label: 'Pivot S1',     type: 'calc', resultType: 'text',
-    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*pivotP - prevWeekHigh).toFixed(2)", agg: false, hidden: true },
-  { key: 'pivotS2',   label: 'Pivot S2',     type: 'calc', resultType: 'text',
-    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (pivotP - (prevWeekHigh-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
-  { key: 'pivotS3',   label: 'Pivot S3',     type: 'calc', resultType: 'text',
-    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekLow - 2*(prevWeekHigh-pivotP)).toFixed(2)", agg: false, hidden: true },
+  { key: 'hrPivotR1',   label: 'Hr Pivot R1',     type: 'calc', resultType: 'text',
+    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*hrPivotP - prevWeekLow).toFixed(2)", agg: false, hidden: true },
+  { key: 'hrPivotR2',   label: 'Hr Pivot R2',     type: 'calc', resultType: 'text',
+    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (hrPivotP + (prevWeekHigh-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
+  { key: 'hrPivotR3',   label: 'Hr Pivot R3',     type: 'calc', resultType: 'text',
+    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekHigh + 2*(hrPivotP-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
+  { key: 'hrPivotS1',   label: 'Hr Pivot S1',     type: 'calc', resultType: 'text',
+    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*hrPivotP - prevWeekHigh).toFixed(2)", agg: false, hidden: true },
+  { key: 'hrPivotS2',   label: 'Hr Pivot S2',     type: 'calc', resultType: 'text',
+    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (hrPivotP - (prevWeekHigh-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
+  { key: 'hrPivotS3',   label: 'Hr Pivot S3',     type: 'calc', resultType: 'text',
+    formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekLow - 2*(prevWeekHigh-hrPivotP)).toFixed(2)", agg: false, hidden: true },
+  { key: 'dayPivotP',    label: 'Day Pivot P',    type: 'calc', resultType: 'text',
+    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : ((prevMonthHigh + prevMonthLow + prevMonthClose) / 3).toFixed(2)", agg: false, hidden: true },
+  { key: 'dayPivotR1',   label: 'Day Pivot R1',   type: 'calc', resultType: 'text',
+    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (2*dayPivotP - prevMonthLow).toFixed(2)", agg: false, hidden: true },
+  { key: 'dayPivotR2',   label: 'Day Pivot R2',   type: 'calc', resultType: 'text',
+    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (dayPivotP + (prevMonthHigh-prevMonthLow)).toFixed(2)", agg: false, hidden: true },
+  { key: 'dayPivotR3',   label: 'Day Pivot R3',   type: 'calc', resultType: 'text',
+    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthHigh + 2*(dayPivotP-prevMonthLow)).toFixed(2)", agg: false, hidden: true },
+  { key: 'dayPivotS1',   label: 'Day Pivot S1',   type: 'calc', resultType: 'text',
+    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (2*dayPivotP - prevMonthHigh).toFixed(2)", agg: false, hidden: true },
+  { key: 'dayPivotS2',   label: 'Day Pivot S2',   type: 'calc', resultType: 'text',
+    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (dayPivotP - (prevMonthHigh-prevMonthLow)).toFixed(2)", agg: false, hidden: true },
+  { key: 'dayPivotS3',   label: 'Day Pivot S3',   type: 'calc', resultType: 'text',
+    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthLow - 2*(prevMonthHigh-dayPivotP)).toFixed(2)", agg: false, hidden: true },
   { key: 'pivotTrend', label: 'Pivot',       type: 'calc', resultType: 'text',
-    formula: "(!dayOpen || !pivotP) ? '-' : (dayOpen > pivotP ? (dayOpen > pivotR1 ? '⬆️⬆️' : '⬆️') : (dayOpen < pivotP ? (dayOpen < pivotS1 ? '⬇️⬇️' : '⬇️') : '-'))",
+    formula: "(!dayOpen || !dayPivotP) ? '-' : (dayOpen > dayPivotP ? (dayOpen > dayPivotR1 ? '⬆️⬆️' : '⬆️') : (dayOpen < dayPivotP ? (dayOpen < dayPivotS1 ? '⬇️⬇️' : '⬇️') : '-'))",
     agg: false, hidden: false },
   { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false, hidden: false },
   { key: 'fiftyTwoWkLow',  label: '52W Low',  type: 'fetched', agg: false, hidden: false },
@@ -394,6 +410,10 @@ const DEFAULT_COLUMNS = [
   { key: 'prevWeekLow',   label: 'Prev Wk Low',   type: 'fetched', agg: false, hidden: true },
   { key: 'prevWeekClose', label: 'Prev Wk Close', type: 'fetched', agg: false, hidden: true },
   { key: 'prevWeekSource', label: 'Wk Data Src',  type: 'fetched', agg: false, hidden: true },
+  { key: 'prevMonthHigh',  label: 'Prev Mo High',  type: 'fetched', agg: false, hidden: true },
+  { key: 'prevMonthLow',   label: 'Prev Mo Low',   type: 'fetched', agg: false, hidden: true },
+  { key: 'prevMonthClose', label: 'Prev Mo Close', type: 'fetched', agg: false, hidden: true },
+  { key: 'prevMonthSource', label: 'Mo Data Src',  type: 'fetched', agg: false, hidden: true },
 ];
 
 function defaultTab(name){
@@ -856,7 +876,9 @@ async function fetchQuote(symbol){
   return {
     meta, prevClose: data.prevClose, prevHigh: data.prevHigh, prevLow: data.prevLow,
     prevWeekClose: data.prevWeekClose, prevWeekHigh: data.prevWeekHigh, prevWeekLow: data.prevWeekLow,
-    prevWeekSource: data.prevWeekSource
+    prevWeekSource: data.prevWeekSource,
+    prevMonthClose: data.prevMonthClose, prevMonthHigh: data.prevMonthHigh, prevMonthLow: data.prevMonthLow,
+    prevMonthSource: data.prevMonthSource
   };
 }
 
@@ -877,7 +899,7 @@ async function refreshPrices(){
   let done = 0, errors = 0, lastError = '';
   for(const row of rows){
     try {
-      const { meta, prevClose: barsPrevClose, prevHigh, prevLow, prevWeekClose, prevWeekHigh, prevWeekLow, prevWeekSource } = await fetchQuote(row.symbol);
+      const { meta, prevClose: barsPrevClose, prevHigh, prevLow, prevWeekClose, prevWeekHigh, prevWeekLow, prevWeekSource, prevMonthClose, prevMonthHigh, prevMonthLow, prevMonthSource } = await fetchQuote(row.symbol);
       const ltp = meta.regularMarketPrice;
       // meta.previousClose/chartPreviousClose are unreliable with range=5d (anchored to the
       // start of the window, not to yesterday) — prefer the value derived from daily bars.
@@ -897,6 +919,10 @@ async function refreshPrices(){
       row.prevWeekHigh = typeof prevWeekHigh === 'number' ? prevWeekHigh : '';
       row.prevWeekLow = typeof prevWeekLow === 'number' ? prevWeekLow : '';
       row.prevWeekSource = prevWeekSource || '';
+      row.prevMonthClose = typeof prevMonthClose === 'number' ? prevMonthClose : '';
+      row.prevMonthHigh = typeof prevMonthHigh === 'number' ? prevMonthHigh : '';
+      row.prevMonthLow = typeof prevMonthLow === 'number' ? prevMonthLow : '';
+      row.prevMonthSource = prevMonthSource || '';
       recomputeRow(row);
     } catch(e){
       errors++;
