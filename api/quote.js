@@ -70,8 +70,11 @@ export default async function handler(req, res) {
     }
 
     // Derive the last fully completed week's close/high/low, for pivot calculations.
-    // Same "second-to-last bar" logic as above: with interval=1wk, the last bar is the
-    // current, still-in-progress week, so the previous entry is the last completed week.
+    // NOT using "second-to-last array entry" here — Yahoo doesn't consistently keep an
+    // in-progress current week at a predictable array position for weekly bars (unlike
+    // daily bars, where that assumption holds). Instead, pick by actual date: the most
+    // recent weekly bar whose timestamp is strictly before this Monday. That's unambiguous
+    // regardless of whether Yahoo has already appended a partial current-week bar or not.
     try {
       const weeklyUpstream = await fetch(
         'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?range=3mo&interval=1wk',
@@ -82,11 +85,23 @@ export default async function handler(req, res) {
         const wResult = weeklyData.chart && weeklyData.chart.result && weeklyData.chart.result[0];
         const wQuote = wResult && wResult.indicators && wResult.indicators.quote && wResult.indicators.quote[0];
         const wTs = wResult && wResult.timestamp;
-        if (wQuote && wTs && wTs.length >= 2) {
-          const wIdx = wTs.length - 2;
-          data.prevWeekClose = typeof wQuote.close[wIdx] === 'number' ? wQuote.close[wIdx] : null;
-          data.prevWeekHigh = typeof wQuote.high[wIdx] === 'number' ? wQuote.high[wIdx] : null;
-          data.prevWeekLow = typeof wQuote.low[wIdx] === 'number' ? wQuote.low[wIdx] : null;
+        if (wQuote && wTs && wTs.length) {
+          // Most recent Monday 00:00 UTC — start of the current, possibly-incomplete week.
+          const now = new Date();
+          const dayOfWeek = now.getUTCDay(); // 0=Sun..6=Sat
+          const daysSinceMonday = (dayOfWeek + 6) % 7;
+          const monday = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - daysSinceMonday) / 1000;
+
+          let wIdx = -1;
+          for (let i = wTs.length - 1; i >= 0; i--) {
+            if (wTs[i] < monday) { wIdx = i; break; }
+          }
+
+          if (wIdx >= 0) {
+            data.prevWeekClose = typeof wQuote.close[wIdx] === 'number' ? wQuote.close[wIdx] : null;
+            data.prevWeekHigh = typeof wQuote.high[wIdx] === 'number' ? wQuote.high[wIdx] : null;
+            data.prevWeekLow = typeof wQuote.low[wIdx] === 'number' ? wQuote.low[wIdx] : null;
+          }
         }
       }
     } catch (e) {
