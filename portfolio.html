@@ -371,6 +371,49 @@ const DEFAULT_COLUMNS = [
   { key: 'pivotTrend', label: 'Pivot',       type: 'calc', resultType: 'text',
     formula: "(!dayOpen || !dayPivotP) ? '-' : (dayOpen > dayPivotP ? (dayOpen > dayPivotR1 ? '⬆️⬆️' : '⬆️') : (dayOpen < dayPivotP ? (dayOpen < dayPivotS1 ? '⬇️⬇️' : '⬇️') : '-'))",
     agg: false, hidden: false },
+  // --- Screener tools (all three fed by ltp + the hr/day pivot sets above) ---
+  // 1) Proximity Matrix: which of the 14 levels (7 hourly + 7 daily) is closest to price
+  // right now, how far in %, and how many levels cluster within a 1% band (confluence —
+  // multiple independent timeframes agreeing on a level is a stronger S/R signal than one alone).
+  { key: 'proxNearestLevel', label: 'Nearest Lvl', type: 'calc', resultType: 'text',
+    formula: "(function(){ if(!ltp) return '-'; var L=[['Hr P',hrPivotP],['Hr R1',hrPivotR1],['Hr R2',hrPivotR2],['Hr R3',hrPivotR3],['Hr S1',hrPivotS1],['Hr S2',hrPivotS2],['Hr S3',hrPivotS3],['Day P',dayPivotP],['Day R1',dayPivotR1],['Day R2',dayPivotR2],['Day R3',dayPivotR3],['Day S1',dayPivotS1],['Day S2',dayPivotS2],['Day S3',dayPivotS3]]; var best=null,bestAbs=Infinity; for(var i=0;i<L.length;i++){ var v=L[i][1]; if(!v) continue; var a=Math.abs(((v-ltp)/ltp)*100); if(a<bestAbs){bestAbs=a; best=L[i][0];} } return best||'-'; })()",
+    agg: false, hidden: true },
+  { key: 'proxNearestPct', label: 'Nearest %',  type: 'calc', resultType: 'text',
+    formula: "(function(){ if(!ltp) return '-'; var L=[hrPivotP,hrPivotR1,hrPivotR2,hrPivotR3,hrPivotS1,hrPivotS2,hrPivotS3,dayPivotP,dayPivotR1,dayPivotR2,dayPivotR3,dayPivotS1,dayPivotS2,dayPivotS3]; var best=null,bestAbs=Infinity; for(var i=0;i<L.length;i++){ var v=L[i]; if(!v) continue; var pct=((v-ltp)/ltp)*100; var a=Math.abs(pct); if(a<bestAbs){bestAbs=a; best=pct;} } return best===null ? '-' : (best>=0?'+':'')+best.toFixed(2)+'%'; })()",
+    agg: false, hidden: true },
+  { key: 'proxConfluence', label: 'Confluence (1%)', type: 'calc', resultType: 'text',
+    formula: "(function(){ if(!ltp) return '-'; var L=[hrPivotP,hrPivotR1,hrPivotR2,hrPivotR3,hrPivotS1,hrPivotS2,hrPivotS3,dayPivotP,dayPivotR1,dayPivotR2,dayPivotR3,dayPivotS1,dayPivotS2,dayPivotS3]; var c=0; for(var i=0;i<L.length;i++){ var v=L[i]; if(!v) continue; if(Math.abs(((v-ltp)/ltp)*100)<=1) c++; } return String(c); })()",
+    agg: false, hidden: true },
+  // 2) Multi-Timeframe Trend Score: daily pivot set (monthly-based, bigger trend) weighted 2x
+  // over hourly pivot set (weekly-based, short-term confirmation/warning). Range -6..+6.
+  { key: 'mtsScore', label: 'MTS Score', type: 'calc',
+    formula: "(function(){ var s=0; if(dayPivotR1 && ltp>dayPivotR1) s+=2; else if(dayPivotP && ltp>dayPivotP) s+=1; else if(dayPivotS1 && ltp<dayPivotS1) s-=2; else if(dayPivotP && ltp<dayPivotP) s-=1; if(hrPivotR1 && ltp>hrPivotR1) s+=1; else if(hrPivotP && ltp>hrPivotP) s+=0.5; else if(hrPivotS1 && ltp<hrPivotS1) s-=1; else if(hrPivotP && ltp<hrPivotP) s-=0.5; return s; })()",
+    agg: false, hidden: true },
+  { key: 'mtsLabel', label: 'MTS', type: 'calc', resultType: 'text',
+    formula: "(mtsScore>=3?'Strong Bull':(mtsScore>=1?'Mild Bull':(mtsScore<=-3?'Strong Bear':(mtsScore<=-1?'Mild Bear':'Neutral'))))",
+    agg: false, hidden: false },
+  // 3) Runway Ratio: (distance to nearest resistance) / (distance to nearest support), computed
+  // separately per timeframe. Nearest resistance = smallest of [P,R1,R2,R3] that's above price;
+  // nearest support = largest of [P,S1,S2,S3] below price (P doubles as either, whichever side
+  // price sits on). Ratio < 0.5 = thin runway to resistance relative to support cushion, i.e. the
+  // "consider trimming" zone; ratio > 2 = healthy room to run.
+  { key: 'runwayHr', label: 'Runway (Hr)', type: 'calc', resultType: 'text',
+    formula: "(function(){ if(!ltp || !hrPivotP) return '-'; var res=[hrPivotP,hrPivotR1,hrPivotR2,hrPivotR3].filter(function(v){return v&&v>ltp;}); var sup=[hrPivotP,hrPivotS1,hrPivotS2,hrPivotS3].filter(function(v){return v&&v<ltp;}); if(!res.length||!sup.length) return '-'; var nr=Math.min.apply(null,res), ns=Math.max.apply(null,sup); var down=ltp-ns; if(down<=0) return '-'; return ((nr-ltp)/down).toFixed(2); })()",
+    agg: false, hidden: true },
+  { key: 'runwayDay', label: 'Runway (Day)', type: 'calc', resultType: 'text',
+    formula: "(function(){ if(!ltp || !dayPivotP) return '-'; var res=[dayPivotP,dayPivotR1,dayPivotR2,dayPivotR3].filter(function(v){return v&&v>ltp;}); var sup=[dayPivotP,dayPivotS1,dayPivotS2,dayPivotS3].filter(function(v){return v&&v<ltp;}); if(!res.length||!sup.length) return '-'; var nr=Math.min.apply(null,res), ns=Math.max.apply(null,sup); var down=ltp-ns; if(down<=0) return '-'; return ((nr-ltp)/down).toFixed(2); })()",
+    agg: false, hidden: true },
+  // 4) Screener Signal: single pinpoint column combining all three tools above. Fully
+  // self-contained (recomputes nearest-level side, MTS, and daily runway internally from the
+  // raw pivot values) rather than reading the other calc columns' text output, since this
+  // formula engine coerces every referenced column to a number before evaluation — a text
+  // result like "Hr R1" would arrive as 0, not the string, if read directly.
+  // Priority (first match wins): resistance-side confluence + thin runway = Exit Watch;
+  // support-side confluence + intact trend = Entry Watch; thin runway alone = caution;
+  // extreme MTS alone = trend label; otherwise '-'.
+  { key: 'screenerSignal', label: 'Signal', type: 'calc', resultType: 'text',
+    formula: "(function(){ if(!ltp) return '-'; var L=[['R',hrPivotR1],['R',hrPivotR2],['R',hrPivotR3],['R',dayPivotR1],['R',dayPivotR2],['R',dayPivotR3],['S',hrPivotS1],['S',hrPivotS2],['S',hrPivotS3],['S',dayPivotS1],['S',dayPivotS2],['S',dayPivotS3]]; var bestSide=null,bestAbs=Infinity,confCount=0; for(var i=0;i<L.length;i++){ var v=L[i][1]; if(!v) continue; var a=Math.abs(((v-ltp)/ltp)*100); if(a<=1) confCount++; if(a<bestAbs){bestAbs=a; bestSide=L[i][0];} } var mts=0; if(dayPivotR1 && ltp>dayPivotR1) mts+=2; else if(dayPivotP && ltp>dayPivotP) mts+=1; else if(dayPivotS1 && ltp<dayPivotS1) mts-=2; else if(dayPivotP && ltp<dayPivotP) mts-=1; if(hrPivotR1 && ltp>hrPivotR1) mts+=1; else if(hrPivotP && ltp>hrPivotP) mts+=0.5; else if(hrPivotS1 && ltp<hrPivotS1) mts-=1; else if(hrPivotP && ltp<hrPivotP) mts-=0.5; var runwayDayVal=null; if(dayPivotP){ var res=[dayPivotP,dayPivotR1,dayPivotR2,dayPivotR3].filter(function(v){return v&&v>ltp;}); var sup=[dayPivotP,dayPivotS1,dayPivotS2,dayPivotS3].filter(function(v){return v&&v<ltp;}); if(res.length&&sup.length){ var nr=Math.min.apply(null,res), ns=Math.max.apply(null,sup); var down=ltp-ns; if(down>0) runwayDayVal=(nr-ltp)/down; } } if(bestSide==='R' && confCount>=2 && runwayDayVal!==null && runwayDayVal<0.5) return '⚠️ Exit Watch'; if(bestSide==='S' && confCount>=2 && mts>-3) return '🟢 Entry Watch'; if(runwayDayVal!==null && runwayDayVal<0.3) return '⚠️ Thin Runway'; if(mts>=3) return '🟢 Strong Trend'; if(mts<=-3) return '🔴 Weak Trend'; return '-'; })()",
+    agg: false, hidden: false },
   { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false, hidden: false },
   { key: 'fiftyTwoWkLow',  label: '52W Low',  type: 'fetched', agg: false, hidden: false },
   { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false, hidden: false },
