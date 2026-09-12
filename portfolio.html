@@ -337,34 +337,34 @@ const DEFAULT_COLUMNS = [
   // Classic pivot formula. Moneycontrol's chart uses TradingView's "Pivots Traditional" with
   // Timeframe=Auto, which steps the pivot period UP one level from the chart's own candle
   // interval — confirmed directly via the indicator's settings dialog: Hourly chart -> Weekly
-  // pivots, Daily chart -> Monthly pivots. So two parallel pivot sets, one per period:
+  // s, Daily chart -> Monthly s. So two parallel  sets, one per period:
   //   hrPivot*  = fed by last completed WEEK's H/L/C  -> matches Moneycontrol's Hourly-chart pivots
   //   dayPivot* = fed by last completed MONTH's H/L/C -> matches Moneycontrol's Daily-chart pivots
-  { key: 'hrPivotP',    label: 'Hr Pivot P',      type: 'calc', resultType: 'text',
+  { key: 'hrPivotP',    label: 'Hr🔹P',      type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : ((prevWeekHigh + prevWeekLow + prevWeekClose) / 3).toFixed(2)", agg: false, hidden: true },
   { key: 'hrPivotR1',   label: 'Hr Pivot R1',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*hrPivotP - prevWeekLow).toFixed(2)", agg: false, hidden: true },
-  { key: 'hrPivotR2',   label: 'Hr Pivot R2',     type: 'calc', resultType: 'text',
+  { key: 'hrPivotR2',   label: 'Hr🔹R2',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (hrPivotP + (prevWeekHigh-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
   { key: 'hrPivotR3',   label: 'Hr Pivot R3',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekHigh + 2*(hrPivotP-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
   { key: 'hrPivotS1',   label: 'Hr Pivot S1',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*hrPivotP - prevWeekHigh).toFixed(2)", agg: false, hidden: true },
-  { key: 'hrPivotS2',   label: 'Hr Pivot S2',     type: 'calc', resultType: 'text',
+  { key: 'hrPivotS2',   label: 'Hr🔹S2',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (hrPivotP - (prevWeekHigh-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
   { key: 'hrPivotS3',   label: 'Hr Pivot S3',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekLow - 2*(prevWeekHigh-hrPivotP)).toFixed(2)", agg: false, hidden: true },
-  { key: 'dayPivotP',    label: 'Day Pivot P',    type: 'calc', resultType: 'text',
+  { key: 'dayPivotP',    label: 'Day🔹P',    type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : ((prevMonthHigh + prevMonthLow + prevMonthClose) / 3).toFixed(2)", agg: false, hidden: false },
   { key: 'dayPivotR1',   label: 'Day Pivot R1',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (2*dayPivotP - prevMonthLow).toFixed(2)", agg: false, hidden: true },
-  { key: 'dayPivotR2',   label: 'Day Pivot R2',   type: 'calc', resultType: 'text',
+  { key: 'dayPivotR2',   label: 'Day🔹R2',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (dayPivotP + (prevMonthHigh-prevMonthLow)).toFixed(2)", agg: false, hidden: false },
   { key: 'dayPivotR3',   label: 'Day Pivot R3',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthHigh + 2*(dayPivotP-prevMonthLow)).toFixed(2)", agg: false, hidden: true },
   { key: 'dayPivotS1',   label: 'Day Pivot S1',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (2*dayPivotP - prevMonthHigh).toFixed(2)", agg: false, hidden: true },
-  { key: 'dayPivotS2',   label: 'Day Pivot S2',   type: 'calc', resultType: 'text',
+  { key: 'dayPivotS2',   label: 'Day🔹S2',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (dayPivotP - (prevMonthHigh-prevMonthLow)).toFixed(2)", agg: false, hidden: false },
   { key: 'dayPivotS3',   label: 'Day Pivot S3',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthLow - 2*(prevMonthHigh-dayPivotP)).toFixed(2)", agg: false, hidden: true },
@@ -442,9 +442,9 @@ const DEFAULT_COLUMNS = [
   { key: 'priceToBook',   label: 'P/B',                    type: 'fetched', agg: false, hidden: false },
   { key: 'fiftyDayAverage',        label: '50D Avg',       type: 'fetched', agg: false, hidden: false },
   { key: 'twoHundredDayAverage',   label: '200D Avg',      type: 'fetched', agg: false, hidden: false },
-  { key: 'fiftyTwoWeekLowChangePercent',  label: '52W Low Chg%',  type: 'calc', resultType: 'text',
+  { key: 'fiftyTwoWeekLowChangePercent',  label: '52W-L Chg%',  type: 'calc', resultType: 'text',
     formula: "(!ltp || !fiftyTwoWkLow) ? '-' : (((ltp - fiftyTwoWkLow) / fiftyTwoWkLow) * 100).toFixed(2) + '%'", agg: false, hidden: false },
-  { key: 'fiftyTwoWeekHighChangePercent', label: '52W High Chg%', type: 'calc', resultType: 'text',
+  { key: 'fiftyTwoWeekHighChangePercent', label: '52W-H Chg%', type: 'calc', resultType: 'text',
     formula: "(!ltp || !fiftyTwoWkHigh) ? '-' : (((fiftyTwoWkHigh - ltp) / fiftyTwoWkHigh) * 100).toFixed(2) + '%'", agg: false, hidden: false },
   { key: 'starSignal', label: 'Star Signal', type: 'calc', resultType: 'text', hidden: true,
     // Edit this formula any time to change what triggers the ⭐️ on LTP. Whatever text this
