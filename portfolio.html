@@ -458,6 +458,13 @@ const DEFAULT_COLUMNS = [
   { key: 'prevMonthLow',   label: 'Prev Mo Low',   type: 'fetched', agg: false, hidden: true },
   { key: 'prevMonthClose', label: 'Prev Mo Close', type: 'fetched', agg: false, hidden: true },
   { key: 'prevMonthSource', label: 'Mo Data Src',  type: 'fetched', agg: false, hidden: true },
+  // 'mirror' type: NOT a calc column, deliberately — evalFormula coerces every referenced
+  // column to a number before your formula runs, so a calc formula like "symbol" would receive
+  // 0, not the ticker text. This type instead just copies another column's raw value verbatim
+  // in recomputeRow, bypassing the formula engine entirely. Placed last in this array (and not
+  // afterActions) so it renders as the final column before the row's delete X — 'symbol' itself
+  // stays pinned first (anchors the Totals row), so this is how you get it visible at the end too.
+  { key: 'scriptEnd', label: 'Script', type: 'mirror', sourceKey: 'symbol', agg: false, hidden: false },
 ];
 
 function defaultTab(name){
@@ -472,7 +479,7 @@ function migrateColumns(st){
     if(!existingKeys.includes(defCol.key)){
       st.columns.push(JSON.parse(JSON.stringify(defCol)));
       st.tabs.forEach(t => t.rows.forEach(r => {
-        if(!(defCol.key in r)) r[defCol.key] = defCol.type === 'manual' ? '' : (defCol.type === 'fetched' ? '' : 0);
+        if(!(defCol.key in r)) r[defCol.key] = (defCol.type === 'manual' || defCol.type === 'mirror') ? '' : (defCol.type === 'fetched' ? '' : 0);
       }));
     }
   });
@@ -547,13 +554,15 @@ function evalFormula(formula, row, columns, resultType){
 }
 function newRowObject(){
   const row = {};
-  state.columns.forEach(c => { row[c.key] = c.type === 'manual' ? '' : (c.type === 'fetched' ? '' : 0); });
+  state.columns.forEach(c => { row[c.key] = (c.type === 'manual' || c.type === 'mirror') ? '' : (c.type === 'fetched' ? '' : 0); });
   return row;
 }
 function recomputeRow(row){
   state.columns.forEach(col => {
     if(col.type === 'calc'){
       row[col.key] = evalFormula(col.formula, row, state.columns, col.resultType);
+    } else if(col.type === 'mirror'){
+      row[col.key] = row[col.sourceKey];
     }
   });
 }
@@ -662,6 +671,9 @@ function renderTable(){
         renderTableValuesOnly();
       });
       td.appendChild(inp);
+    } else if(col.type === 'mirror'){
+      td.className = 'readonly';
+      td.textContent = val || '—';
     } else if(col.type === 'fetched'){
       td.className = 'readonly';
       if(col.key === 'chgPct' && typeof val === 'number'){
@@ -765,6 +777,11 @@ function renderTableValuesOnly(){
   const rows = tbody.querySelectorAll('tr');
   const updateDataCell = (col, td, val, row) => {
     if(col.type === 'manual') return; // input owns its own value
+    if(col.type === 'mirror'){
+      td.className = 'readonly';
+      td.textContent = val || '—';
+      return;
+    }
     if(col.type === 'fetched'){
       td.className = 'readonly';
       if(col.key === 'chgPct' && typeof val === 'number'){
