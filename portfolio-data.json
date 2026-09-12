@@ -15,7 +15,7 @@
       "resultType": "text",
       "formula": "dayHigh>prevHigh && dayLow>prevLow ? '⬆️' : (dayHigh<prevHigh && dayLow<prevLow ? '⬇️' : '-')",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "qty",
@@ -51,14 +51,14 @@
       "label": "Today High",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dayLow",
       "label": "Today Low",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "chgPct",
@@ -76,21 +76,12 @@
       "hidden": true
     },
     {
-      "key": "trend",
-      "label": "Trend",
-      "type": "calc",
-      "resultType": "text",
-      "formula": "chgPct>0 ? '🔼' : (chgPct<0 ? '🔽' : '-')",
-      "agg": false,
-      "hidden": false
-    },
-    {
       "key": "curVal",
       "label": "Current Value",
       "type": "calc",
       "formula": "qty*ltp",
       "agg": true,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "pnl",
@@ -106,21 +97,21 @@
       "type": "calc",
       "formula": "invested ? (pnl/invested*100) : 0",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "fiftyTwoWkHigh",
       "label": "52W High",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "fiftyTwoWkLow",
       "label": "52W Low",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "peRatio",
@@ -167,48 +158,76 @@
       "resultType": "number"
     },
     {
+      "key": "trend",
+      "label": "Trend",
+      "type": "calc",
+      "resultType": "text",
+      "formula": "peRatio <=10 && forwardPE < peRatio && ltp < grhm && fiftyTwoWeekLowChangePercent <=5 ? '🟢' :  (peRatio >=40 && fiftyDayAverage < twoHundredDayAverage && fiftyTwoWeekHighChangePercent >=10 ? '🔴' : '-')",
+      "agg": false,
+      "hidden": false
+    },
+    {
+      "key": "signalAction",
+      "label": "Action",
+      "type": "mirror",
+      "sourceKey": "screenerSignal",
+      "fallback": "HOLD",
+      "map": {
+        "🚀 Strong Buy": "STRONG BUY",
+        "🔼 Building Bullish": "BUY",
+        "⚠️ Trap/No-Trade": "HOLD",
+        "🌀 Squeeze/Coiling": "HOLD",
+        "⚪ Neutral": "HOLD",
+        "🪤 Bear Trap Risk": "HOLD",
+        "🔽 Building Bearish": "SELL",
+        "📉 Strong Sell": "STRONG SELL"
+      },
+      "agg": false,
+      "hidden": false
+    },
+    {
       "key": "signal",
       "label": "Signal",
       "type": "calc",
       "resultType": "text",
       "formula": "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "alert",
       "label": "Alert",
       "type": "manual",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "target",
       "label": "Target",
       "type": "manual",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevClose",
       "label": "Prev Close",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevHigh",
       "label": "Prev High",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevLow",
       "label": "Prev Low",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "pivotS3",
@@ -217,7 +236,7 @@
       "resultType": "text",
       "formula": "(!prevHigh || !prevLow) ? '-' : (prevLow - 2*(prevHigh-pivotP)).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "pivotS2",
@@ -225,7 +244,7 @@
       "type": "calc",
       "formula": "(!pivotP ||!prevHigh || !prevLow) ? '-' : (pivotP - (prevHigh-prevLow)).toFixed(2)",
       "agg": false,
-      "hidden": false,
+      "hidden": true,
       "resultType": "text"
     },
     {
@@ -234,7 +253,7 @@
       "type": "calc",
       "formula": "(!pivotP || !prevLow) ? '-' : ((2*pivotP)-prevHigh).toFixed(2)",
       "agg": false,
-      "hidden": false,
+      "hidden": true,
       "resultType": "text"
     },
     {
@@ -243,7 +262,7 @@
       "type": "calc",
       "formula": "(!prevHigh || !prevLow || !prevClose) ? '-' : ((prevHigh + prevLow + prevClose) / 3).toFixed(2)",
       "agg": false,
-      "hidden": false,
+      "hidden": true,
       "resultType": "text"
     },
     {
@@ -252,7 +271,7 @@
       "type": "calc",
       "formula": "(!pivotP || !prevLow) ? '-' : ((2*pivotP)-prevLow).toFixed(2)",
       "agg": false,
-      "hidden": false,
+      "hidden": true,
       "resultType": "text"
     },
     {
@@ -261,7 +280,7 @@
       "type": "calc",
       "formula": "(!pivotP ||!prevHigh || !prevLow) ? '-' : (pivotP + (prevHigh-prevLow)).toFixed(2)",
       "agg": false,
-      "hidden": false,
+      "hidden": true,
       "resultType": "text"
     },
     {
@@ -271,7 +290,7 @@
       "resultType": "text",
       "formula": "(!prevHigh || !prevLow) ? '-' : (prevHigh + 2*(pivotP-prevLow)).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "pivotTrend",
@@ -280,14 +299,14 @@
       "resultType": "text",
       "formula": "(!dayOpen || !dayPivotP) ? '-' : (dayOpen > dayPivotP ? (dayOpen > dayPivotR1 ? '⬆️⬆️' : '⬆️') : (dayOpen < dayPivotP ? (dayOpen < dayPivotS1 ? '⬇️⬇️' : '⬇️') : '-'))",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dayOpen",
       "label": "Today Open",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "mcCode",
@@ -359,21 +378,21 @@
       "label": "Prev Wk High",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevWeekLow",
       "label": "Prev Wk Low",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevWeekClose",
       "label": "Prev Wk Close",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevWeekSource",
@@ -405,7 +424,7 @@
       "resultType": "text",
       "formula": "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekLow - 2*(prevWeekHigh-hrPivotP)).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "hrPivotS2",
@@ -423,7 +442,7 @@
       "resultType": "text",
       "formula": "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*hrPivotP - prevWeekHigh).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "hrPivotR1",
@@ -432,7 +451,7 @@
       "resultType": "text",
       "formula": "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*hrPivotP - prevWeekLow).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "hrPivotR2",
@@ -450,28 +469,28 @@
       "resultType": "text",
       "formula": "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekHigh + 2*(hrPivotP-prevWeekLow)).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevMonthHigh",
       "label": "Prev Mo High",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevMonthLow",
       "label": "Prev Mo Low",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevMonthClose",
       "label": "Prev Mo Close",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dayPivotP",
@@ -489,7 +508,7 @@
       "resultType": "text",
       "formula": "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthLow - 2*(prevMonthHigh-dayPivotP)).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dayPivotS2",
@@ -507,7 +526,7 @@
       "resultType": "text",
       "formula": "(!prevMonthHigh || !prevMonthLow) ? '-' : (2*dayPivotP - prevMonthHigh).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dayPivotR1",
@@ -516,7 +535,7 @@
       "resultType": "text",
       "formula": "(!prevMonthHigh || !prevMonthLow) ? '-' : (2*dayPivotP - prevMonthLow).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dayPivotR2",
@@ -534,14 +553,14 @@
       "resultType": "text",
       "formula": "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthHigh + 2*(dayPivotP-prevMonthLow)).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevMonthSource",
       "label": "Mo Data Src",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "mtsScore",
@@ -549,7 +568,7 @@
       "type": "calc",
       "formula": "(function(){ var s=0; if(dayPivotR1 && ltp>dayPivotR1) s+=2; else if(dayPivotP && ltp>dayPivotP) s+=1; else if(dayPivotS1 && ltp<dayPivotS1) s-=2; else if(dayPivotP && ltp<dayPivotP) s-=1; if(hrPivotR1 && ltp>hrPivotR1) s+=1; else if(hrPivotP && ltp>hrPivotP) s+=0.5; else if(hrPivotS1 && ltp<hrPivotS1) s-=1; else if(hrPivotP && ltp<hrPivotP) s-=0.5; return s; })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "mtsLabel",
@@ -558,7 +577,7 @@
       "resultType": "text",
       "formula": "(mtsScore>=3?'Strong Bull':(mtsScore>=1?'Mild Bull':(mtsScore<=-3?'Strong Bear':(mtsScore<=-1?'Mild Bear':'Neutral'))))",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "runwayHr",
@@ -567,7 +586,7 @@
       "resultType": "text",
       "formula": "(!weeklyDistToCeiling || !weeklyDistToFloor) ? '-' : (weeklyDistToCeiling/weeklyDistToFloor).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "runwayDay",
@@ -576,7 +595,7 @@
       "resultType": "text",
       "formula": "(!dailyDistToCeiling || !dailyDistToFloor) ? '-' : (dailyDistToCeiling/dailyDistToFloor).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "screenerSignal",
@@ -585,7 +604,7 @@
       "resultType": "text",
       "formula": "(function(){ if(!ltp) return '-'; if(mtsScore>=3){ if(runwayDay>=2 && dailyDistToCeiling>1.5 && weeklyDistToCeiling>0) return '🚀 Strong Buy'; if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '🔼 Building Bullish'; } if(mtsScore>=1){ if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '🔼 Building Bullish'; } if(mtsScore>-1){ if(((dailyDistToCeiling>0 && dailyDistToCeiling<1) || (dailyDistToFloor>0 && dailyDistToFloor<1)) && ((weeklyDistToCeiling>0 && weeklyDistToCeiling<1) || (weeklyDistToFloor>0 && weeklyDistToFloor<1))) return '🌀 Squeeze/Coiling'; return '⚪ Neutral'; } if(mtsScore>-3){ if(dailyDistToFloor>0 && dailyDistToFloor<1 && weeklyDistToFloor>2) return '🪤 Bear Trap Risk'; return '🔽 Building Bearish'; } if(runwayDay>=2 && dailyDistToFloor>1.5 && weeklyDistToFloor>0) return '📉 Strong Sell'; return '🔽 Building Bearish'; })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dailyDistToCeiling",
@@ -594,7 +613,7 @@
       "resultType": "text",
       "formula": "(function(){ if(!ltp||!dayPivotP) return '-'; var c=[dayPivotP,dayPivotR1,dayPivotR2,dayPivotR3].filter(function(v){return v&&v>ltp;}); if(!c.length) return '-'; var nr=Math.min.apply(null,c); return (((nr-ltp)/ltp)*100).toFixed(2); })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dailyDistToFloor",
@@ -603,7 +622,7 @@
       "resultType": "text",
       "formula": "(function(){ if(!ltp||!dayPivotP) return '-'; var c=[dayPivotP,dayPivotS1,dayPivotS2,dayPivotS3].filter(function(v){return v&&v<ltp;}); if(!c.length) return '-'; var ns=Math.max.apply(null,c); return (((ltp-ns)/ltp)*100).toFixed(2); })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "weeklyDistToCeiling",
@@ -612,7 +631,7 @@
       "resultType": "text",
       "formula": "(function(){ if(!ltp||!hrPivotP) return '-'; var c=[hrPivotP,hrPivotR1,hrPivotR2,hrPivotR3].filter(function(v){return v&&v>ltp;}); if(!c.length) return '-'; var nr=Math.min.apply(null,c); return (((nr-ltp)/ltp)*100).toFixed(2); })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "weeklyDistToFloor",
@@ -621,32 +640,13 @@
       "resultType": "text",
       "formula": "(function(){ if(!ltp||!hrPivotP) return '-'; var c=[hrPivotP,hrPivotS1,hrPivotS2,hrPivotS3].filter(function(v){return v&&v<ltp;}); if(!c.length) return '-'; var ns=Math.max.apply(null,c); return (((ltp-ns)/ltp)*100).toFixed(2); })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "scriptEnd",
       "label": "Script",
       "type": "mirror",
       "sourceKey": "symbol",
-      "agg": false,
-      "hidden": false
-    },
-    {
-      "key": "signalAction",
-      "label": "Action",
-      "type": "mirror",
-      "sourceKey": "screenerSignal",
-      "fallback": "HOLD",
-      "map": {
-        "🚀 Strong Buy": "STRONG BUY",
-        "🔼 Building Bullish": "BUY",
-        "⚠️ Trap/No-Trade": "HOLD",
-        "🌀 Squeeze/Coiling": "HOLD",
-        "⚪ Neutral": "HOLD",
-        "🪤 Bear Trap Risk": "HOLD",
-        "🔽 Building Bearish": "SELL",
-        "📉 Strong Sell": "STRONG SELL"
-      },
       "agg": false,
       "hidden": false
     }
@@ -676,7 +676,7 @@
           "alert": 572,
           "target": "",
           "signal": "BUY",
-          "trend": "🔽",
+          "trend": "-",
           "mcCode": "",
           "dayIcon": "⬇️",
           "dayHigh": 550,
@@ -757,7 +757,7 @@
           "alert": 2031,
           "target": 3574,
           "signal": "BUY",
-          "trend": "🔽",
+          "trend": "🔴",
           "mcCode": "",
           "dayIcon": "⬇️",
           "dayHigh": 1946.6,
@@ -827,7 +827,7 @@
           "prevClose": 269.04998779296875,
           "chgPct": -1.9884735312032509,
           "invested": 56044.05,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 56695.5,
           "pnl": 651.4499999999971,
           "pnlPct": 1.1623892277592305,
@@ -908,7 +908,7 @@
           "prevClose": 102.16999816894531,
           "chgPct": -0.16638756189875673,
           "invested": 103233.19,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 117402,
           "pnl": 14168.809999999998,
           "pnlPct": 13.72505296019623,
@@ -992,7 +992,7 @@
           "chgPct": -0.3698239844534856,
           "prevClose": 405.6000061035156,
           "invested": 20160.399999999998,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 21013.2,
           "pnl": 852.8000000000029,
           "pnlPct": 4.230074800103187,
@@ -1073,7 +1073,7 @@
           "chgPct": -2.0221381045144438,
           "prevClose": 781.3499755859375,
           "invested": 33635.8,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 33684.2,
           "pnl": 48.39999999999418,
           "pnlPct": 0.1438943030937102,
@@ -1154,7 +1154,7 @@
           "chgPct": 4.489081935026865,
           "prevClose": 455.54998779296875,
           "invested": 50016.08,
-          "trend": "🔼",
+          "trend": "-",
           "curVal": 50932,
           "pnl": 915.9199999999983,
           "pnlPct": 1.831251069655995,
@@ -1235,7 +1235,7 @@
           "chgPct": 0.2146304575761713,
           "prevClose": 237.6199951171875,
           "invested": 47488.82,
-          "trend": "🔼",
+          "trend": "🟢",
           "curVal": 46911.61,
           "pnl": -577.2099999999991,
           "pnlPct": -1.2154650294532463,
@@ -1330,7 +1330,7 @@
           "alert": 725,
           "target": 1206,
           "signal": "BUY",
-          "trend": "🔼",
+          "trend": "-",
           "mcCode": "",
           "dayIcon": "-",
           "dayHigh": 709,
@@ -1411,7 +1411,7 @@
           "alert": 1012,
           "target": 1068,
           "signal": "BUY",
-          "trend": "🔽",
+          "trend": "-",
           "mcCode": "",
           "dayIcon": "⬇️",
           "dayHigh": 1001.9,
@@ -1492,7 +1492,7 @@
           "alert": 1375,
           "target": "",
           "signal": "-",
-          "trend": "🔽",
+          "trend": "-",
           "mcCode": "",
           "dayIcon": "⬇️",
           "dayHigh": 1389,
@@ -1573,7 +1573,7 @@
           "alert": 1029,
           "target": 1838,
           "signal": "-",
-          "trend": "🔼",
+          "trend": "-",
           "mcCode": "",
           "dayIcon": "⬆️",
           "dayHigh": 1047.3,
@@ -1727,7 +1727,7 @@
           "chgPct": -0.4776119402985142,
           "prevClose": 335,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -1808,7 +1808,7 @@
           "chgPct": 0.21211424331821238,
           "prevClose": 259.29998779296875,
           "invested": 552266,
-          "trend": "🔼",
+          "trend": "-",
           "curVal": 501770.35000000003,
           "pnl": -50495.649999999965,
           "pnlPct": -9.143356643356636,
@@ -1889,7 +1889,7 @@
           "chgPct": -1.0002840690302635,
           "prevClose": 349.8999938964844,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -1973,7 +1973,7 @@
           "prevClose": 240.0500030517578,
           "chgPct": -0.4790681262811114,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -2054,7 +2054,7 @@
           "prevClose": 2204.10009765625,
           "chgPct": -0.14972539857690706,
           "invested": -2056,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": -2200.8,
           "pnl": -144.80000000000018,
           "pnlPct": 7.042801556420242,
@@ -2135,7 +2135,7 @@
           "prevClose": 1525.800048828125,
           "chgPct": 0.9961954833825812,
           "invested": -1565,
-          "trend": "🔼",
+          "trend": "-",
           "curVal": -1541,
           "pnl": 24,
           "pnlPct": -1.5335463258785942,
@@ -2219,7 +2219,7 @@
           "chgPct": -0.7701019252548079,
           "prevClose": 441.5,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -2300,7 +2300,7 @@
           "chgPct": 0.7317258210193862,
           "prevClose": 526.1500244140625,
           "invested": -82748.8,
-          "trend": "🔼",
+          "trend": "🔴",
           "curVal": -80560,
           "pnl": 2188.800000000003,
           "pnlPct": -2.645113886847909,
@@ -2381,7 +2381,7 @@
           "chgPct": -0.5589481166254674,
           "prevClose": 3077.199951171875,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -2462,7 +2462,7 @@
           "chgPct": -0.9349627081147733,
           "prevClose": 1700.5999755859375,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "🔴",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -2543,7 +2543,7 @@
           "chgPct": 1.46163215590743,
           "prevClose": 410.5,
           "invested": 0,
-          "trend": "🔼",
+          "trend": "🔴",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -2624,7 +2624,7 @@
           "chgPct": 2.2467339381062286,
           "prevClose": 195.83999633789062,
           "invested": 0,
-          "trend": "🔼",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -2705,7 +2705,7 @@
           "chgPct": -0.1604938271604882,
           "prevClose": 405,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "🔴",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -2786,7 +2786,7 @@
           "chgPct": -1.8941907171152252,
           "prevClose": 1224.800048828125,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -2867,7 +2867,7 @@
           "chgPct": -0.8495461628765543,
           "prevClose": 1459.5999755859375,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -2948,7 +2948,7 @@
           "chgPct": 0.06820682068207622,
           "prevClose": 4545,
           "invested": 0,
-          "trend": "🔼",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -3029,7 +3029,7 @@
           "chgPct": -2.0605381165919203,
           "prevClose": 4460,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -3114,7 +3114,7 @@
           "prevClose": 782.2000122070312,
           "chgPct": -0.31322068125751773,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -3197,7 +3197,7 @@
           "chgPct": -0.47850467289720305,
           "prevClose": 668.75,
           "invested": -60754.6,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": -71213.84999999999,
           "pnl": -10459.249999999993,
           "pnlPct": 17.215568862275436,
@@ -3278,7 +3278,7 @@
           "chgPct": -2.3578816069442903,
           "prevClose": 116.62999725341797,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -3359,7 +3359,7 @@
           "chgPct": -3.2894751359424426,
           "prevClose": 1626.4000244140625,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -3440,7 +3440,7 @@
           "chgPct": -0.7806476303792153,
           "prevClose": 1434.699951171875,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -3521,7 +3521,7 @@
           "chgPct": -0.5854466305835742,
           "prevClose": 162.27000427246094,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -3602,7 +3602,7 @@
           "chgPct": -1.7999392169796207,
           "prevClose": 338.8999938964844,
           "invested": -39239.2,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": -32614.4,
           "pnl": 6624.799999999996,
           "pnlPct": -16.883116883116873,
@@ -3683,7 +3683,7 @@
           "chgPct": -0.8703850281970004,
           "prevClose": 105.69999694824219,
           "invested": -43858.24,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": -42331.12,
           "pnl": 1527.1199999999953,
           "pnlPct": -3.4819454679439836,
@@ -3764,7 +3764,7 @@
           "chgPct": -1.8918931562592154,
           "prevClose": 14.800000190734863,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -3851,7 +3851,7 @@
           "chgPct": 0.18424382922957494,
           "prevClose": 352.79998779296875,
           "invested": 69436.59000000001,
-          "trend": "🔼",
+          "trend": "-",
           "curVal": 69629.65,
           "pnl": 193.05999999998312,
           "pnlPct": 0.2780378471926445,
@@ -3932,7 +3932,7 @@
           "chgPct": -0.35053786990408814,
           "prevClose": 313.79998779296875,
           "invested": -31900,
-          "trend": "🔽",
+          "trend": "🟩",
           "curVal": -31270,
           "pnl": 630,
           "pnlPct": -1.974921630094044,
@@ -4013,7 +4013,7 @@
           "chgPct": 0.49504950495049505,
           "prevClose": 303,
           "invested": 0,
-          "trend": "🔼",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -4094,7 +4094,7 @@
           "chgPct": 0.12598010635695678,
           "prevClose": 134.94000244140625,
           "invested": 0,
-          "trend": "🔼",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -4175,7 +4175,7 @@
           "chgPct": -2.010369699738137,
           "prevClose": 237.27000427246094,
           "invested": 45782.8,
-          "trend": "🔽",
+          "trend": "🟩",
           "curVal": 45802.5,
           "pnl": 19.69999999999709,
           "pnlPct": 0.04302925989672342,
@@ -4256,7 +4256,7 @@
           "chgPct": -0.08557849843981002,
           "prevClose": 116.8499984741211,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -4337,7 +4337,7 @@
           "chgPct": -0.48153971225425896,
           "prevClose": 124.5999984741211,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -4424,7 +4424,7 @@
           "chgPct": -1.2962962962963016,
           "prevClose": 432,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -4505,7 +4505,7 @@
           "chgPct": 0.08139221133433187,
           "prevClose": 196.57000732421875,
           "invested": 41113.899999999994,
-          "trend": "🔼",
+          "trend": "🔴",
           "curVal": 38755.81,
           "pnl": -2358.0899999999965,
           "pnlPct": -5.735505510301861,
@@ -4586,7 +4586,7 @@
           "chgPct": -0.07456503728252618,
           "prevClose": 1207,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -4667,7 +4667,7 @@
           "chgPct": -0.7492587345780916,
           "prevClose": 473.79998779296875,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "🔴",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -4754,7 +4754,7 @@
           "chgPct": -1.7187984547327513,
           "prevClose": 235.6300048828125,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -4835,7 +4835,7 @@
           "chgPct": -1.7385183881752628,
           "prevClose": 2841.5,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -4916,7 +4916,7 @@
           "chgPct": 0.8570239427648741,
           "prevClose": 1400.199951171875,
           "invested": 0,
-          "trend": "🔼",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -4997,7 +4997,7 @@
           "chgPct": -0.7582731026943368,
           "prevClose": 174.0800018310547,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -5078,7 +5078,7 @@
           "chgPct": -0.17782866251872076,
           "prevClose": 84.3499984741211,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -5159,7 +5159,7 @@
           "chgPct": -0.3502626970227671,
           "prevClose": 856.5,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -5240,7 +5240,7 @@
           "chgPct": -0.008481764206947332,
           "prevClose": 1179,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -5321,7 +5321,7 @@
           "chgPct": -1.2252168856593284,
           "prevClose": 252.1999969482422,
           "invested": 0,
-          "trend": "🔽",
+          "trend": "-",
           "curVal": 0,
           "pnl": 0,
           "pnlPct": 0,
@@ -5393,5 +5393,5 @@
       ]
     }
   ],
-  "activeTab": "rms4dm8vc9g9ce"
+  "activeTab": "rms4b1byvpwf5p"
 }
