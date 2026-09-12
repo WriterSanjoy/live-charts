@@ -355,17 +355,17 @@ const DEFAULT_COLUMNS = [
   { key: 'hrPivotS3',   label: 'Hr Pivot S3',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekLow - 2*(prevWeekHigh-hrPivotP)).toFixed(2)", agg: false, hidden: true },
   { key: 'dayPivotP',    label: 'Day Pivot P',    type: 'calc', resultType: 'text',
-    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : ((prevMonthHigh + prevMonthLow + prevMonthClose) / 3).toFixed(2)", agg: false, hidden: true },
+    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : ((prevMonthHigh + prevMonthLow + prevMonthClose) / 3).toFixed(2)", agg: false, hidden: false },
   { key: 'dayPivotR1',   label: 'Day Pivot R1',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (2*dayPivotP - prevMonthLow).toFixed(2)", agg: false, hidden: true },
   { key: 'dayPivotR2',   label: 'Day Pivot R2',   type: 'calc', resultType: 'text',
-    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (dayPivotP + (prevMonthHigh-prevMonthLow)).toFixed(2)", agg: false, hidden: true },
+    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (dayPivotP + (prevMonthHigh-prevMonthLow)).toFixed(2)", agg: false, hidden: false },
   { key: 'dayPivotR3',   label: 'Day Pivot R3',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthHigh + 2*(dayPivotP-prevMonthLow)).toFixed(2)", agg: false, hidden: true },
   { key: 'dayPivotS1',   label: 'Day Pivot S1',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (2*dayPivotP - prevMonthHigh).toFixed(2)", agg: false, hidden: true },
   { key: 'dayPivotS2',   label: 'Day Pivot S2',   type: 'calc', resultType: 'text',
-    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (dayPivotP - (prevMonthHigh-prevMonthLow)).toFixed(2)", agg: false, hidden: true },
+    formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (dayPivotP - (prevMonthHigh-prevMonthLow)).toFixed(2)", agg: false, hidden: false },
   { key: 'dayPivotS3',   label: 'Day Pivot S3',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthLow - 2*(prevMonthHigh-dayPivotP)).toFixed(2)", agg: false, hidden: true },
   { key: 'pivotTrend', label: 'Pivot',       type: 'calc', resultType: 'text',
@@ -414,6 +414,24 @@ const DEFAULT_COLUMNS = [
   // hold — only the Neutral band's fallback is genuinely "nothing notable".
   { key: 'screenerSignal', label: 'Signal', type: 'calc', resultType: 'text',
     formula: "(function(){ if(!ltp) return '-'; if(mtsScore>=3){ if(runwayDay>=2 && dailyDistToCeiling>1.5 && weeklyDistToCeiling>0) return '🚀 Strong Buy'; if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '🔼 Building Bullish'; } if(mtsScore>=1){ if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '🔼 Building Bullish'; } if(mtsScore>-1){ if(((dailyDistToCeiling>0 && dailyDistToCeiling<1) || (dailyDistToFloor>0 && dailyDistToFloor<1)) && ((weeklyDistToCeiling>0 && weeklyDistToCeiling<1) || (weeklyDistToFloor>0 && weeklyDistToFloor<1))) return '🌀 Squeeze/Coiling'; return '⚪ Neutral'; } if(mtsScore>-3){ if(dailyDistToFloor>0 && dailyDistToFloor<1 && weeklyDistToFloor>2) return '🪤 Bear Trap Risk'; return '🔽 Building Bearish'; } if(runwayDay>=2 && dailyDistToFloor>1.5 && weeklyDistToFloor>0) return '📉 Strong Sell'; return '🔽 Building Bearish'; })()",
+    agg: false, hidden: false },
+  // Action: 5-way simplified read of Signal (STRONG BUY/BUY/HOLD/SELL/STRONG SELL), via a
+  // 'mirror' column with a lookup map — NOT a calc formula referencing screenerSignal directly,
+  // because the formula engine would coerce that text to 0 (same reason the Script/symbol mirror
+  // needed its own type earlier). Trap, Squeeze, Neutral, and Bear-Trap-Risk all collapse to HOLD:
+  // none of them is a clean directional call on its own — Trap and Bear-Trap-Risk are specifically
+  // warnings against acting on the surface-level direction, not votes for the opposite side.
+  { key: 'signalAction', label: 'Action', type: 'mirror', sourceKey: 'screenerSignal', fallback: 'HOLD',
+    map: {
+      '🚀 Strong Buy': 'STRONG BUY',
+      '🔼 Building Bullish': 'BUY',
+      '⚠️ Trap/No-Trade': 'HOLD',
+      '🌀 Squeeze/Coiling': 'HOLD',
+      '⚪ Neutral': 'HOLD',
+      '🪤 Bear Trap Risk': 'HOLD',
+      '🔽 Building Bearish': 'SELL',
+      '📉 Strong Sell': 'STRONG SELL'
+    },
     agg: false, hidden: false },
   { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false, hidden: false },
   { key: 'fiftyTwoWkLow',  label: '52W Low',  type: 'fetched', agg: false, hidden: false },
@@ -562,7 +580,8 @@ function recomputeRow(row){
     if(col.type === 'calc'){
       row[col.key] = evalFormula(col.formula, row, state.columns, col.resultType);
     } else if(col.type === 'mirror'){
-      row[col.key] = row[col.sourceKey];
+      const raw = row[col.sourceKey];
+      row[col.key] = col.map ? (Object.prototype.hasOwnProperty.call(col.map, raw) ? col.map[raw] : (col.fallback !== undefined ? col.fallback : raw)) : raw;
     }
   });
 }
