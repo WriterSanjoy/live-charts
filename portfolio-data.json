@@ -583,7 +583,7 @@
       "label": "Signal",
       "type": "calc",
       "resultType": "text",
-      "formula": "(function(){ if(!ltp) return '-'; if(mtsScore>=3){ if(runwayDay>=2 && dailyDistToCeiling>1.5 && weeklyDistToCeiling>0) return '🟩 Strong Buy'; if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '⬆️ Building Bullish'; } if(mtsScore>=1){ if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '⬆️ Building Bullish'; } if(mtsScore>-1){ if(((dailyDistToCeiling>0 && dailyDistToCeiling<1) || (dailyDistToFloor>0 && dailyDistToFloor<1)) && ((weeklyDistToCeiling>0 && weeklyDistToCeiling<1) || (weeklyDistToFloor>0 && weeklyDistToFloor<1))) return '🌀 Squeeze/Coiling'; return '⚪ Neutral'; } if(mtsScore>-3){ if(dailyDistToFloor>0 && dailyDistToFloor<1 && weeklyDistToFloor>2) return '🪤 Bear Trap Risk'; return '🔻 Building Bearish'; } if(runwayDay>=2 && dailyDistToFloor>1.5 && weeklyDistToFloor>0) return '🔴 Strong Sell'; return '🔻 Building Bearish'; })()",
+      "formula": "(function(){ if(!ltp) return '-'; if(mtsScore>=3){ if(runwayDay>=2 && dailyDistToCeiling>1.5 && weeklyDistToCeiling>0) return '🚀 Strong Buy'; if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '🔼 Building Bullish'; } if(mtsScore>=1){ if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '🔼 Building Bullish'; } if(mtsScore>-1){ if(((dailyDistToCeiling>0 && dailyDistToCeiling<1) || (dailyDistToFloor>0 && dailyDistToFloor<1)) && ((weeklyDistToCeiling>0 && weeklyDistToCeiling<1) || (weeklyDistToFloor>0 && weeklyDistToFloor<1))) return '🌀 Squeeze/Coiling'; return '⚪ Neutral'; } if(mtsScore>-3){ if(dailyDistToFloor>0 && dailyDistToFloor<1 && weeklyDistToFloor>2) return '🪤 Bear Trap Risk'; return '🔽 Building Bearish'; } if(runwayDay>=2 && dailyDistToFloor>1.5 && weeklyDistToFloor>0) return '📉 Strong Sell'; return '🔽 Building Bearish'; })()",
       "agg": false,
       "hidden": false
     },
@@ -628,6 +628,25 @@
       "label": "Script",
       "type": "mirror",
       "sourceKey": "symbol",
+      "agg": false,
+      "hidden": false
+    },
+    {
+      "key": "signalAction",
+      "label": "Action",
+      "type": "mirror",
+      "sourceKey": "screenerSignal",
+      "fallback": "HOLD",
+      "map": {
+        "🚀 Strong Buy": "STRONG BUY",
+        "🔼 Building Bullish": "BUY",
+        "⚠️ Trap/No-Trade": "HOLD",
+        "🌀 Squeeze/Coiling": "HOLD",
+        "⚪ Neutral": "HOLD",
+        "🪤 Bear Trap Risk": "HOLD",
+        "🔽 Building Bearish": "SELL",
+        "📉 Strong Sell": "STRONG SELL"
+      },
       "agg": false,
       "hidden": false
     }
@@ -710,12 +729,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "1.69",
           "runwayDay": "0.90",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.94",
           "dailyDistToFloor": "2.16",
           "weeklyDistToCeiling": "4.01",
           "weeklyDistToFloor": "2.37",
-          "scriptEnd": "SBIFUNDS.NS"
+          "scriptEnd": "SBIFUNDS.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "HINDUNILVR.NS",
@@ -790,12 +810,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "6.55",
           "runwayDay": "0.97",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.30",
           "dailyDistToFloor": "1.34",
           "weeklyDistToCeiling": "2.62",
           "weeklyDistToFloor": "0.40",
-          "scriptEnd": "HINDUNILVR.NS"
+          "scriptEnd": "HINDUNILVR.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "VEDL.NS",
@@ -870,12 +891,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "2.05",
           "runwayDay": "0.34",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.40",
           "dailyDistToFloor": "4.13",
           "weeklyDistToCeiling": "4.14",
           "weeklyDistToFloor": "2.02",
-          "scriptEnd": "VEDL.NS"
+          "scriptEnd": "VEDL.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "PGINVIT.BO",
@@ -950,12 +972,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "0.32",
           "runwayDay": "7.04",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "1.69",
           "dailyDistToFloor": "0.24",
           "weeklyDistToCeiling": "0.38",
           "weeklyDistToFloor": "1.19",
-          "scriptEnd": "PGINVIT.BO"
+          "scriptEnd": "PGINVIT.BO",
+          "signalAction": "BUY"
         },
         {
           "symbol": "LICI.NS",
@@ -1030,12 +1053,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "2.34",
           "runwayDay": "0.50",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.96",
           "dailyDistToFloor": "1.92",
           "weeklyDistToCeiling": "2.62",
           "weeklyDistToFloor": "1.12",
-          "scriptEnd": "LICI.NS"
+          "scriptEnd": "LICI.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "SHARDACROP.NS",
@@ -1110,12 +1134,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "1.08",
           "runwayDay": "0.82",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.53",
           "dailyDistToFloor": "1.86",
           "weeklyDistToCeiling": "1.17",
           "weeklyDistToFloor": "1.08",
-          "scriptEnd": "SHARDACROP.NS"
+          "scriptEnd": "SHARDACROP.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "SUNTV.NS",
@@ -1190,12 +1215,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "1.25",
           "runwayDay": "2.51",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "3.31",
           "dailyDistToFloor": "1.32",
           "weeklyDistToCeiling": "1.68",
           "weeklyDistToFloor": "1.34",
-          "scriptEnd": "SUNTV.NS"
+          "scriptEnd": "SUNTV.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "BANKBARODA.NS",
@@ -1270,12 +1296,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "0.52",
           "runwayDay": "0.14",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.27",
           "dailyDistToFloor": "1.99",
           "weeklyDistToCeiling": "0.65",
           "weeklyDistToFloor": "1.24",
-          "scriptEnd": "BANKBARODA.NS"
+          "scriptEnd": "BANKBARODA.NS",
+          "signalAction": "SELL"
         }
       ]
     },
@@ -1361,7 +1388,8 @@
           "dailyDistToFloor": "0.85",
           "weeklyDistToCeiling": "1.20",
           "weeklyDistToFloor": "2.04",
-          "scriptEnd": "HDFCBANK.NS"
+          "scriptEnd": "HDFCBANK.NS",
+          "signalAction": "HOLD"
         },
         {
           "symbol": "SBIN.NS",
@@ -1436,12 +1464,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "3.96",
           "runwayDay": "0.84",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.75",
           "dailyDistToFloor": "2.08",
           "weeklyDistToCeiling": "3.52",
           "weeklyDistToFloor": "0.89",
-          "scriptEnd": "SBIN.NS"
+          "scriptEnd": "SBIN.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "ICICIBANK.NS",
@@ -1516,12 +1545,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "12.77",
           "runwayDay": "0.63",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.47",
           "dailyDistToFloor": "2.32",
           "weeklyDistToCeiling": "3.83",
           "weeklyDistToFloor": "0.30",
-          "scriptEnd": "ICICIBANK.NS"
+          "scriptEnd": "ICICIBANK.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "INFY.NS",
@@ -1596,12 +1626,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "-",
           "runwayDay": "0.76",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "3.44",
           "dailyDistToFloor": "4.52",
           "weeklyDistToCeiling": "9.12",
           "weeklyDistToFloor": "-",
-          "scriptEnd": "INFY.NS"
+          "scriptEnd": "INFY.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "AXISBANK.NS",
@@ -1676,12 +1707,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "1.30",
           "runwayDay": "0.28",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.50",
           "dailyDistToFloor": "1.79",
           "weeklyDistToCeiling": "2.27",
           "weeklyDistToFloor": "1.74",
-          "scriptEnd": "AXISBANK.NS"
+          "scriptEnd": "AXISBANK.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "NTPC.NS",
@@ -1756,12 +1788,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "0.94",
           "runwayDay": "2.48",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "2.06",
           "dailyDistToFloor": "0.83",
           "weeklyDistToCeiling": "1.19",
           "weeklyDistToFloor": "1.27",
-          "scriptEnd": "NTPC.NS"
+          "scriptEnd": "NTPC.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "ITC.NS",
@@ -1836,12 +1869,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "0.97",
           "runwayDay": "0.52",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.90",
           "dailyDistToFloor": "1.73",
           "weeklyDistToCeiling": "1.16",
           "weeklyDistToFloor": "1.20",
-          "scriptEnd": "ITC.NS"
+          "scriptEnd": "ITC.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "SENCO.NS",
@@ -1916,12 +1950,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "0.71",
           "runwayDay": "0.48",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.63",
           "dailyDistToFloor": "3.41",
           "weeklyDistToCeiling": "2.40",
           "weeklyDistToFloor": "3.40",
-          "scriptEnd": "SENCO.NS"
+          "scriptEnd": "SENCO.NS",
+          "signalAction": "SELL"
         }
       ]
     },
@@ -2002,12 +2037,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "4.01",
           "runwayDay": "0.63",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "2.42",
           "dailyDistToFloor": "3.83",
           "weeklyDistToCeiling": "6.53",
           "weeklyDistToFloor": "1.63",
-          "scriptEnd": "CRAMC.NS"
+          "scriptEnd": "CRAMC.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "TCS.NS",
@@ -2082,12 +2118,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "5.05",
           "runwayDay": "0.77",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "2.36",
           "dailyDistToFloor": "3.06",
           "weeklyDistToCeiling": "6.11",
           "weeklyDistToFloor": "1.21",
-          "scriptEnd": "TCS.NS"
+          "scriptEnd": "TCS.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "TECHM.NS",
@@ -2162,12 +2199,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "2.32",
           "runwayDay": "0.34",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.41",
           "dailyDistToFloor": "4.20",
           "weeklyDistToCeiling": "4.54",
           "weeklyDistToFloor": "1.96",
-          "scriptEnd": "TECHM.NS"
+          "scriptEnd": "TECHM.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "LTFOODS.NS",
@@ -2242,12 +2280,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "0.71",
           "runwayDay": "0.44",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.53",
           "dailyDistToFloor": "3.48",
           "weeklyDistToCeiling": "1.02",
           "weeklyDistToFloor": "1.44",
-          "scriptEnd": "LTFOODS.NS"
+          "scriptEnd": "LTFOODS.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "HDFCLIFE.NS",
@@ -2327,7 +2366,8 @@
           "dailyDistToFloor": "0.21",
           "weeklyDistToCeiling": "2.20",
           "weeklyDistToFloor": "1.09",
-          "scriptEnd": "HDFCLIFE.NS"
+          "scriptEnd": "HDFCLIFE.NS",
+          "signalAction": "HOLD"
         },
         {
           "symbol": "ADANIENT.NS",
@@ -2402,12 +2442,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "0.79",
           "runwayDay": "2.66",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "4.29",
           "dailyDistToFloor": "1.61",
           "weeklyDistToCeiling": "2.13",
           "weeklyDistToFloor": "2.69",
-          "scriptEnd": "ADANIENT.NS"
+          "scriptEnd": "ADANIENT.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "SBILIFE.NS",
@@ -2482,12 +2523,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "3.02",
           "runwayDay": "0.65",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.52",
           "dailyDistToFloor": "2.33",
           "weeklyDistToCeiling": "4.02",
           "weeklyDistToFloor": "1.33",
-          "scriptEnd": "SBILIFE.NS"
+          "scriptEnd": "SBILIFE.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "VBL.NS",
@@ -2562,12 +2604,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "1.02",
           "runwayDay": "1.10",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "1.73",
           "dailyDistToFloor": "1.57",
           "weeklyDistToCeiling": "2.00",
           "weeklyDistToFloor": "1.96",
-          "scriptEnd": "VBL.NS"
+          "scriptEnd": "VBL.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "GROWW.NS",
@@ -2642,12 +2685,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "0.21",
           "runwayDay": "1.14",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "2.70",
           "dailyDistToFloor": "2.37",
           "weeklyDistToCeiling": "0.88",
           "weeklyDistToFloor": "4.27",
-          "scriptEnd": "GROWW.NS"
+          "scriptEnd": "GROWW.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "BEL.NS",
@@ -2722,12 +2766,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "0.88",
           "runwayDay": "0.30",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.54",
           "dailyDistToFloor": "1.80",
           "weeklyDistToCeiling": "0.80",
           "weeklyDistToFloor": "0.91",
-          "scriptEnd": "BEL.NS"
+          "scriptEnd": "BEL.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "UNOMINDA.NS",
@@ -2802,12 +2847,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "3.17",
           "runwayDay": "0.94",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "2.88",
           "dailyDistToFloor": "3.05",
           "weeklyDistToCeiling": "5.01",
           "weeklyDistToFloor": "1.58",
-          "scriptEnd": "UNOMINDA.NS"
+          "scriptEnd": "UNOMINDA.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "MEDANTA.NS",
@@ -2882,12 +2928,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "0.47",
           "runwayDay": "0.06",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.21",
           "dailyDistToFloor": "3.24",
           "weeklyDistToCeiling": "0.88",
           "weeklyDistToFloor": "1.89",
-          "scriptEnd": "MEDANTA.NS"
+          "scriptEnd": "MEDANTA.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "GVT&D.NS",
@@ -2962,12 +3009,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "0.11",
           "runwayDay": "10.52",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "6.73",
           "dailyDistToFloor": "0.64",
           "weeklyDistToCeiling": "0.56",
           "weeklyDistToFloor": "5.20",
-          "scriptEnd": "GVT&D.NS"
+          "scriptEnd": "GVT&D.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "RADICO.NS",
@@ -3042,12 +3090,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "1.49",
           "runwayDay": "0.92",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.42",
           "dailyDistToFloor": "1.55",
           "weeklyDistToCeiling": "2.92",
           "weeklyDistToFloor": "1.96",
-          "scriptEnd": "RADICO.NS"
+          "scriptEnd": "RADICO.NS",
+          "signalAction": "SELL"
         }
       ]
     },
@@ -3128,12 +3177,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "2.21",
           "runwayDay": "0.40",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.01",
           "dailyDistToFloor": "2.51",
           "weeklyDistToCeiling": "2.83",
           "weeklyDistToFloor": "1.28",
-          "scriptEnd": "CANFINHOME.NS"
+          "scriptEnd": "CANFINHOME.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "JUSTDIAL.NS",
@@ -3208,12 +3258,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "6.10",
           "runwayDay": "0.66",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "2.72",
           "dailyDistToFloor": "4.10",
           "weeklyDistToCeiling": "5.92",
           "weeklyDistToFloor": "0.97",
-          "scriptEnd": "JUSTDIAL.NS"
+          "scriptEnd": "JUSTDIAL.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "IEX.NS",
@@ -3288,12 +3339,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "6.47",
           "runwayDay": "0.72",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "2.01",
           "dailyDistToFloor": "2.78",
           "weeklyDistToCeiling": "4.92",
           "weeklyDistToFloor": "0.76",
-          "scriptEnd": "IEX.NS"
+          "scriptEnd": "IEX.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "CHENNPETRO.NS",
@@ -3368,12 +3420,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "0.51",
           "runwayDay": "4.01",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "8.86",
           "dailyDistToFloor": "2.21",
           "weeklyDistToCeiling": "5.07",
           "weeklyDistToFloor": "9.97",
-          "scriptEnd": "CHENNPETRO.NS"
+          "scriptEnd": "CHENNPETRO.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "BBTC.NS",
@@ -3448,12 +3501,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "2.98",
           "runwayDay": "0.66",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "2.44",
           "dailyDistToFloor": "3.72",
           "weeklyDistToCeiling": "6.65",
           "weeklyDistToFloor": "2.23",
-          "scriptEnd": "BBTC.NS"
+          "scriptEnd": "BBTC.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "GPPL.NS",
@@ -3528,12 +3582,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "0.94",
           "runwayDay": "0.38",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.25",
           "dailyDistToFloor": "3.31",
           "weeklyDistToCeiling": "2.00",
           "weeklyDistToFloor": "2.13",
-          "scriptEnd": "GPPL.NS"
+          "scriptEnd": "GPPL.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "CELLO.NS",
@@ -3608,12 +3663,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "5.49",
           "runwayDay": "0.89",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "2.03",
           "dailyDistToFloor": "2.27",
           "weeklyDistToCeiling": "3.84",
           "weeklyDistToFloor": "0.70",
-          "scriptEnd": "CELLO.NS"
+          "scriptEnd": "CELLO.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "LEMONTREE.NS",
@@ -3688,12 +3744,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "1.07",
           "runwayDay": "0.47",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.63",
           "dailyDistToFloor": "1.33",
           "weeklyDistToCeiling": "1.22",
           "weeklyDistToFloor": "1.14",
-          "scriptEnd": "LEMONTREE.NS"
+          "scriptEnd": "LEMONTREE.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "UTKARSHBNK.NS",
@@ -3768,12 +3825,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "1.23",
           "runwayDay": "0.49",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "3.37",
           "dailyDistToFloor": "6.82",
           "weeklyDistToCeiling": "1.52",
           "weeklyDistToFloor": "1.24",
-          "scriptEnd": "UTKARSHBNK.NS"
+          "scriptEnd": "UTKARSHBNK.NS",
+          "signalAction": "SELL"
         }
       ]
     },
@@ -3854,12 +3912,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "2.80",
           "runwayDay": "3.37",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "2.29",
           "dailyDistToFloor": "0.68",
           "weeklyDistToCeiling": "2.83",
           "weeklyDistToFloor": "1.01",
-          "scriptEnd": "PFC.NS"
+          "scriptEnd": "PFC.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "RECLTD.NS",
@@ -3934,12 +3993,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "4.50",
           "runwayDay": "0.48",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.68",
           "dailyDistToFloor": "1.42",
           "weeklyDistToCeiling": "1.53",
           "weeklyDistToFloor": "0.34",
-          "scriptEnd": "RECLTD.NS"
+          "scriptEnd": "RECLTD.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "BPCL.NS",
@@ -4014,12 +4074,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "13.53",
           "runwayDay": "0.26",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.98",
           "dailyDistToFloor": "3.77",
           "weeklyDistToCeiling": "4.06",
           "weeklyDistToFloor": "0.30",
-          "scriptEnd": "BPCL.NS"
+          "scriptEnd": "BPCL.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "IOC.NS",
@@ -4094,12 +4155,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "9.40",
           "runwayDay": "0.10",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.17",
           "dailyDistToFloor": "1.72",
           "weeklyDistToCeiling": "1.41",
           "weeklyDistToFloor": "0.15",
-          "scriptEnd": "IOC.NS"
+          "scriptEnd": "IOC.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "ONGC.NS",
@@ -4174,12 +4236,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "2.04",
           "runwayDay": "0.93",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.49",
           "dailyDistToFloor": "1.61",
           "weeklyDistToCeiling": "1.16",
           "weeklyDistToFloor": "0.57",
-          "scriptEnd": "ONGC.NS"
+          "scriptEnd": "ONGC.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "PNB.NS",
@@ -4254,12 +4317,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "3.90",
           "runwayDay": "4.39",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "1.67",
           "dailyDistToFloor": "0.38",
           "weeklyDistToCeiling": "2.03",
           "weeklyDistToFloor": "0.52",
-          "scriptEnd": "PNB.NS"
+          "scriptEnd": "PNB.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "CANBK.NS",
@@ -4334,12 +4398,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "7.08",
           "runwayDay": "0.45",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.90",
           "dailyDistToFloor": "1.99",
           "weeklyDistToCeiling": "1.77",
           "weeklyDistToFloor": "0.25",
-          "scriptEnd": "CANBK.NS"
+          "scriptEnd": "CANBK.NS",
+          "signalAction": "SELL"
         }
       ]
     },
@@ -4420,12 +4485,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "0.25",
           "runwayDay": "2.73",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "3.66",
           "dailyDistToFloor": "1.34",
           "weeklyDistToCeiling": "0.71",
           "weeklyDistToFloor": "2.81",
-          "scriptEnd": "COALINDIA.NS"
+          "scriptEnd": "COALINDIA.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "MHRIL.NS",
@@ -4500,12 +4566,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "20.72",
           "runwayDay": "0.51",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.97",
           "dailyDistToFloor": "3.86",
           "weeklyDistToCeiling": "6.01",
           "weeklyDistToFloor": "0.29",
-          "scriptEnd": "MHRIL.NS"
+          "scriptEnd": "MHRIL.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "HCLTECH.NS",
@@ -4580,12 +4647,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "7.05",
           "runwayDay": "0.83",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "4.19",
           "dailyDistToFloor": "5.05",
           "weeklyDistToCeiling": "9.24",
           "weeklyDistToFloor": "1.31",
-          "scriptEnd": "HCLTECH.NS"
+          "scriptEnd": "HCLTECH.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "JUBLFOOD.NS",
@@ -4660,12 +4728,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "3.66",
           "runwayDay": "0.56",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.25",
           "dailyDistToFloor": "2.23",
           "weeklyDistToCeiling": "3.18",
           "weeklyDistToFloor": "0.87",
-          "scriptEnd": "JUBLFOOD.NS"
+          "scriptEnd": "JUBLFOOD.NS",
+          "signalAction": "SELL"
         }
       ]
     },
@@ -4746,12 +4815,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "2.35",
           "runwayDay": "0.55",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.41",
           "dailyDistToFloor": "2.58",
           "weeklyDistToCeiling": "2.82",
           "weeklyDistToFloor": "1.20",
-          "scriptEnd": "BLS.NS"
+          "scriptEnd": "BLS.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "MUTHOOTFIN.NS",
@@ -4826,12 +4896,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "2.14",
           "runwayDay": "0.45",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.83",
           "dailyDistToFloor": "4.11",
           "weeklyDistToCeiling": "5.08",
           "weeklyDistToFloor": "2.37",
-          "scriptEnd": "MUTHOOTFIN.NS"
+          "scriptEnd": "MUTHOOTFIN.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "GESHIP.NS",
@@ -4906,12 +4977,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "0.29",
           "runwayDay": "1.47",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "3.27",
           "dailyDistToFloor": "2.23",
           "weeklyDistToCeiling": "1.35",
           "weeklyDistToFloor": "4.60",
-          "scriptEnd": "GESHIP.NS"
+          "scriptEnd": "GESHIP.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "HUDCO.NS",
@@ -4986,12 +5058,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "1.64",
           "runwayDay": "0.76",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "2.08",
           "dailyDistToFloor": "2.75",
           "weeklyDistToCeiling": "5.20",
           "weeklyDistToFloor": "3.17",
-          "scriptEnd": "HUDCO.NS"
+          "scriptEnd": "HUDCO.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "MAHABANK.NS",
@@ -5066,12 +5139,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "0.37",
           "runwayDay": "0.05",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "0.17",
           "dailyDistToFloor": "3.59",
           "weeklyDistToCeiling": "0.80",
           "weeklyDistToFloor": "2.15",
-          "scriptEnd": "MAHABANK.NS"
+          "scriptEnd": "MAHABANK.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "INDIANB.NS",
@@ -5146,12 +5220,13 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "2.58",
           "runwayDay": "0.39",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.36",
           "dailyDistToFloor": "3.52",
           "weeklyDistToCeiling": "3.54",
           "weeklyDistToFloor": "1.37",
-          "scriptEnd": "INDIANB.NS"
+          "scriptEnd": "INDIANB.NS",
+          "signalAction": "SELL"
         },
         {
           "symbol": "PNBHOUSING.NS",
@@ -5226,12 +5301,13 @@
           "mtsLabel": "Mild Bull",
           "runwayHr": "1.19",
           "runwayDay": "2.28",
-          "screenerSignal": "⬆️ Building Bullish",
+          "screenerSignal": "🔼 Building Bullish",
           "dailyDistToCeiling": "2.42",
           "dailyDistToFloor": "1.06",
           "weeklyDistToCeiling": "1.69",
           "weeklyDistToFloor": "1.42",
-          "scriptEnd": "PNBHOUSING.NS"
+          "scriptEnd": "PNBHOUSING.NS",
+          "signalAction": "BUY"
         },
         {
           "symbol": "APTUS.NS",
@@ -5306,15 +5382,16 @@
           "mtsLabel": "Mild Bear",
           "runwayHr": "0.87",
           "runwayDay": "0.46",
-          "screenerSignal": "🔻 Building Bearish",
+          "screenerSignal": "🔽 Building Bearish",
           "dailyDistToCeiling": "1.24",
           "dailyDistToFloor": "2.69",
           "weeklyDistToCeiling": "2.76",
           "weeklyDistToFloor": "3.18",
-          "scriptEnd": "APTUS.NS"
+          "scriptEnd": "APTUS.NS",
+          "signalAction": "SELL"
         }
       ]
     }
   ],
-  "activeTab": "rmt8gnscf3fsqq"
+  "activeTab": "rms4dm8vc9g9ce"
 }
