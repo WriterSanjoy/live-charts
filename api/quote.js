@@ -100,19 +100,30 @@ export default async function handler(req, res) {
     const data = await upstream.json();
 
     // Derive the previous completed trading day's close/high/low from the daily bars.
-    // The last entry in each array is today's still-forming bar; the one before it
-    // is the last fully completed session. Deliberately NOT using meta.previousClose /
-    // meta.chartPreviousClose here: with range=5d, Yahoo anchors chartPreviousClose to
-    // the close before the whole 5-day window (i.e. ~6 trading days back), not to yesterday.
+    // The last entry in each array is today's still-forming bar; skip that, then walk
+    // backward to find the last entry that actually has real OHLC data. NOT a fixed
+    // "ts.length-2" position — a market holiday inside the 5-day window leaves that index
+    // null (confirmed via a live response: close array had a null at index 3 from a holiday
+    // gap, so the fixed-position pick silently returned null for prevClose/High/Low instead
+    // of skipping past the gap to the actual last trading day). Deliberately NOT using
+    // meta.previousClose / meta.chartPreviousClose either: with range=5d, Yahoo anchors
+    // chartPreviousClose to the close before the whole 5-day window (~6 trading days back),
+    // not to yesterday.
     try {
       const result = data.chart && data.chart.result && data.chart.result[0];
       const quote = result && result.indicators && result.indicators.quote && result.indicators.quote[0];
       const ts = result && result.timestamp;
       if (quote && ts && ts.length >= 2) {
-        const idx = ts.length - 2;
-        data.prevClose = typeof quote.close[idx] === 'number' ? quote.close[idx] : null;
-        data.prevHigh = typeof quote.high[idx] === 'number' ? quote.high[idx] : null;
-        data.prevLow = typeof quote.low[idx] === 'number' ? quote.low[idx] : null;
+        let idx = -1;
+        for (let i = ts.length - 2; i >= 0; i--) {
+          if (typeof quote.close[i] === 'number' && typeof quote.high[i] === 'number' && typeof quote.low[i] === 'number') {
+            idx = i;
+            break;
+          }
+        }
+        data.prevClose = idx >= 0 ? quote.close[idx] : null;
+        data.prevHigh = idx >= 0 ? quote.high[idx] : null;
+        data.prevLow = idx >= 0 ? quote.low[idx] : null;
         // Also patch meta.previousClose itself: chart.html reads meta.previousClose directly
         // and was never changed to know about the new top-level fields above. Without this,
         // chart.html would silently inherit the same "anchored to start of range" bug.
