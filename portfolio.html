@@ -337,39 +337,39 @@ const DEFAULT_COLUMNS = [
   // Classic pivot formula. Moneycontrol's chart uses TradingView's "Pivots Traditional" with
   // Timeframe=Auto, which steps the pivot period UP one level from the chart's own candle
   // interval — confirmed directly via the indicator's settings dialog: Hourly chart -> Weekly
-  // s, Daily chart -> Monthly s. So two parallel  sets, one per period:
+  // pivots, Daily chart -> Monthly pivots. So two parallel pivot sets, one per period:
   //   hrPivot*  = fed by last completed WEEK's H/L/C  -> matches Moneycontrol's Hourly-chart pivots
   //   dayPivot* = fed by last completed MONTH's H/L/C -> matches Moneycontrol's Daily-chart pivots
-  { key: 'hrPivotP',    label: 'Hr🔹P',      type: 'calc', resultType: 'text',
+  { key: 'hrPivotP',    label: 'Hr💎P',      type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : ((prevWeekHigh + prevWeekLow + prevWeekClose) / 3).toFixed(2)", agg: false, hidden: true },
-  { key: 'hrPivotR1',   label: 'Hr Pivot R1',     type: 'calc', resultType: 'text',
+  { key: 'hrPivotR1',   label: 'Hr💎R1',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*hrPivotP - prevWeekLow).toFixed(2)", agg: false, hidden: true },
-  { key: 'hrPivotR2',   label: 'Hr🔹R2',     type: 'calc', resultType: 'text',
+  { key: 'hrPivotR2',   label: 'Hr💎R2',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (hrPivotP + (prevWeekHigh-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
-  { key: 'hrPivotR3',   label: 'Hr Pivot R3',     type: 'calc', resultType: 'text',
+  { key: 'hrPivotR3',   label: 'Hr💎R3',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekHigh + 2*(hrPivotP-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
-  { key: 'hrPivotS1',   label: 'Hr Pivot S1',     type: 'calc', resultType: 'text',
+  { key: 'hrPivotS1',   label: 'Hr💎S1',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*hrPivotP - prevWeekHigh).toFixed(2)", agg: false, hidden: true },
-  { key: 'hrPivotS2',   label: 'Hr🔹S2',     type: 'calc', resultType: 'text',
+  { key: 'hrPivotS2',   label: 'Hr💎S2',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (hrPivotP - (prevWeekHigh-prevWeekLow)).toFixed(2)", agg: false, hidden: true },
-  { key: 'hrPivotS3',   label: 'Hr Pivot S3',     type: 'calc', resultType: 'text',
+  { key: 'hrPivotS3',   label: 'Hr💎S3',     type: 'calc', resultType: 'text',
     formula: "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekLow - 2*(prevWeekHigh-hrPivotP)).toFixed(2)", agg: false, hidden: true },
-  { key: 'dayPivotP',    label: 'Day🔹P',    type: 'calc', resultType: 'text',
+  { key: 'dayPivotP',    label: 'Day💎P',    type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : ((prevMonthHigh + prevMonthLow + prevMonthClose) / 3).toFixed(2)", agg: false, hidden: false },
-  { key: 'dayPivotR1',   label: 'Day Pivot R1',   type: 'calc', resultType: 'text',
+  { key: 'dayPivotR1',   label: 'Day💎R1',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (2*dayPivotP - prevMonthLow).toFixed(2)", agg: false, hidden: true },
-  { key: 'dayPivotR2',   label: 'Day🔹R2',   type: 'calc', resultType: 'text',
+  { key: 'dayPivotR2',   label: 'Day💎R2',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (dayPivotP + (prevMonthHigh-prevMonthLow)).toFixed(2)", agg: false, hidden: false },
-  { key: 'dayPivotR3',   label: 'Day Pivot R3',   type: 'calc', resultType: 'text',
+  { key: 'dayPivotR3',   label: 'Day💎R3',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthHigh + 2*(dayPivotP-prevMonthLow)).toFixed(2)", agg: false, hidden: true },
-  { key: 'dayPivotS1',   label: 'Day Pivot S1',   type: 'calc', resultType: 'text',
+  { key: 'dayPivotS1',   label: 'Day💎S1',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (2*dayPivotP - prevMonthHigh).toFixed(2)", agg: false, hidden: true },
-  { key: 'dayPivotS2',   label: 'Day🔹S2',   type: 'calc', resultType: 'text',
+  { key: 'dayPivotS2',   label: 'Day💎S2',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (dayPivotP - (prevMonthHigh-prevMonthLow)).toFixed(2)", agg: false, hidden: false },
-  { key: 'dayPivotS3',   label: 'Day Pivot S3',   type: 'calc', resultType: 'text',
+  { key: 'dayPivotS3',   label: 'Day💎S3',   type: 'calc', resultType: 'text',
     formula: "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthLow - 2*(prevMonthHigh-dayPivotP)).toFixed(2)", agg: false, hidden: true },
   { key: 'pivotTrend', label: 'Pivot',       type: 'calc', resultType: 'text',
-    formula: "(!dayOpen || !dayPivotP) ? '-' : (dayOpen > dayPivotP ? (dayOpen > dayPivotR1 ? '⬆️⬆️' : '⬆️') : (dayOpen < dayPivotP ? (dayOpen < dayPivotS1 ? '⬇️⬇️' : '⬇️') : '-'))",
+    formula: "(!dayOpen || !dayPivotP) ? '-' : (dayOpen > dayPivotP ? (dayOpen > dayPivotR1 ? '🟩🟩' : '🟩') : (dayOpen < dayPivotP ? (dayOpen < dayPivotS1 ? '🟥🟥' : '🟥') : '-'))",
     agg: false, hidden: false },
   // --- Screener tools ---
   // 1) Timeframe-scoped proximity: FOUR unsigned distances instead of one mixed "nearest across
@@ -412,7 +412,7 @@ const DEFAULT_COLUMNS = [
   // worked table). Each band falls back to a directional "Building" label rather than a dead end
   // if its stronger sub-condition (Trap, Squeeze, Bear Trap, or the Strong confirmation) doesn't
   // hold — only the Neutral band's fallback is genuinely "nothing notable".
-  { key: 'screenerSignal', label: 'Signal', type: 'calc', resultType: 'text',
+  { key: 'screenerSignal', label: ' 📢 ', type: 'calc', resultType: 'text',
     formula: "(function(){ if(!ltp) return '-'; if(mtsScore>=3){ if(runwayDay>=2 && dailyDistToCeiling>1.5 && weeklyDistToCeiling>0) return '🚀 Strong Buy'; if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '🔼 Building Bullish'; } if(mtsScore>=1){ if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '🔼 Building Bullish'; } if(mtsScore>-1){ if(((dailyDistToCeiling>0 && dailyDistToCeiling<1) || (dailyDistToFloor>0 && dailyDistToFloor<1)) && ((weeklyDistToCeiling>0 && weeklyDistToCeiling<1) || (weeklyDistToFloor>0 && weeklyDistToFloor<1))) return '🌀 Squeeze/Coiling'; return '⚪ Neutral'; } if(mtsScore>-3){ if(dailyDistToFloor>0 && dailyDistToFloor<1 && weeklyDistToFloor>2) return '🪤 Bear Trap Risk'; return '🔽 Building Bearish'; } if(runwayDay>=2 && dailyDistToFloor>1.5 && weeklyDistToFloor>0) return '📉 Strong Sell'; return '🔽 Building Bearish'; })()",
     agg: false, hidden: false },
   // Action: 5-way simplified read of Signal (STRONG BUY/BUY/HOLD/SELL/STRONG SELL), via a
@@ -433,18 +433,50 @@ const DEFAULT_COLUMNS = [
       '📉 Strong Sell': 'STRONG SELL'
     },
     agg: false, hidden: false },
-  { key: 'fiftyTwoWkHigh', label: '52W High', type: 'fetched', agg: false, hidden: false },
-  { key: 'fiftyTwoWkLow',  label: '52W Low',  type: 'fetched', agg: false, hidden: false },
+  // Target / Alert: converted from your Excel formulas. Both need the same BUY/SELL
+  // classification your Excel Y3 (Action) cell already gives you for free — but a calc formula
+  // here can't just check signalAction's text (same coercion issue as above: it'd arrive as 0,
+  // not "BUY"/"SELL"). So both formulas rebuild that classification themselves from mtsScore +
+  // the Trap/Bear-Trap-Risk conditions, duplicating Signal's own branch logic exactly — this is
+  // what guarantees Target/Alert only ever fire on rows where Action is genuinely BUY/SELL,
+  // correctly staying blank on Trap/Squeeze/Neutral/Bear-Trap-Risk even though those can share
+  // the same mtsScore range as a real BUY/SELL.
+  // Target: BUY cascades R1->R2->R3 ("Beyond R3" past the top); SELL cascades S2->S3 only,
+  // S1 deliberately skipped per your stated rule that S1 isn't a meaningful re-entry zone.
+  { key: 'targetPrice', label: '📌arget', type: 'calc', resultType: 'text',
+    formula: "(function(){ if(!ltp || !dayPivotP) return '-'; var isBuy=false, isSell=false; if(mtsScore>=3){ if(!(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5)) isBuy=true; } else if(mtsScore>=1){ if(!(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5)) isBuy=true; } else if(mtsScore>-1){ } else if(mtsScore>-3){ if(!(dailyDistToFloor>0 && dailyDistToFloor<1 && weeklyDistToFloor>2)) isSell=true; } else { isSell=true; } if(isBuy){ if(ltp>=dayPivotR3) return 'Beyond R3'; if(ltp>=dayPivotR2) return dayPivotR3; if(ltp>=dayPivotR1) return dayPivotR2; return dayPivotR1; } if(isSell){ if(ltp<=dayPivotS3) return 'Beyond S3'; if(ltp<=dayPivotS2) return dayPivotS3; return dayPivotS2; } return '-'; })()",
+    agg: false, hidden: false },
+  // Alert: your Stoploss (BUY) / Short-Sell entry (SELL) — deliberately one clean value
+  // (Daily Pivot P) for both, per your call to keep this simple rather than adding an
+  // Hourly-P early-warning branch, which risked returning a stop that isn't reliably tighter.
+  { key: 'alertPrice', label: '🔔lert', type: 'calc', resultType: 'text',
+    formula: "(function(){ if(!ltp || !dayPivotP) return '-'; var isBuy=false, isSell=false; if(mtsScore>=3){ if(!(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5)) isBuy=true; } else if(mtsScore>=1){ if(!(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5)) isBuy=true; } else if(mtsScore>-1){ } else if(mtsScore>-3){ if(!(dailyDistToFloor>0 && dailyDistToFloor<1 && weeklyDistToFloor>2)) isSell=true; } else { isSell=true; } return (isBuy||isSell) ? dayPivotP : '-'; })()",
+    agg: false, hidden: false },
+  // Watch: converted from your Excel BT column. Fires only for the three HOLD sub-states that
+  // have a genuine nearby structural level (Trap/No-Trade, Squeeze/Coiling, Bear Trap Risk) —
+  // stays blank for Neutral (nothing nearby) and for BUY/SELL rows (Target already covers those).
+  // Self-contained like Target/Alert above, for the same reason: can't reference signalAction's
+  // text directly, and can't split this into separate "Nearest Weekly Ceiling/Floor" helper
+  // columns either, since either could hold the text "Beyond Hr R3"/"Beyond Hr S3" — referencing
+  // that from another formula would coerce it to 0. So the Hourly-pivot cascade (mirroring your
+  // Excel BR/BS formulas) is computed inline here too. Squeeze picks whichever side (ceiling or
+  // floor) is tighter, matching your Excel BN3<=BO3 comparison but on the Hourly (weekly-based)
+  // distances specifically, since Watch is about the Hourly/weekly structure, not Daily.
+  { key: 'watchLevel', label: ' ⏰ ', type: 'calc', resultType: 'text',
+    formula: "(function(){ if(!ltp || !hrPivotP) return '-'; var isTrap=false, isBearTrap=false, isSqueeze=false; if(mtsScore>=3){ if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) isTrap=true; } else if(mtsScore>=1){ if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) isTrap=true; } else if(mtsScore>-1){ if(((dailyDistToCeiling>0 && dailyDistToCeiling<1) || (dailyDistToFloor>0 && dailyDistToFloor<1)) && ((weeklyDistToCeiling>0 && weeklyDistToCeiling<1) || (weeklyDistToFloor>0 && weeklyDistToFloor<1))) isSqueeze=true; } else if(mtsScore>-3){ if(dailyDistToFloor>0 && dailyDistToFloor<1 && weeklyDistToFloor>2) isBearTrap=true; } function nearestCeiling(){ if(ltp>=hrPivotR3) return 'Beyond Hr R3'; if(ltp>=hrPivotR2) return hrPivotR3; if(ltp>=hrPivotR1) return hrPivotR2; if(ltp>=hrPivotP) return hrPivotR1; return hrPivotP; } function nearestFloor(){ if(ltp<=hrPivotS3) return 'Beyond Hr S3'; if(ltp<=hrPivotS2) return hrPivotS3; if(ltp<=hrPivotS1) return hrPivotS2; if(ltp<=hrPivotP) return hrPivotS1; return hrPivotP; } if(isTrap) return nearestCeiling(); if(isBearTrap) return nearestFloor(); if(isSqueeze) return (weeklyDistToCeiling<=weeklyDistToFloor) ? nearestCeiling() : nearestFloor(); return '-'; })()",
+    agg: false, hidden: false },
+  { key: 'fiftyTwoWkHigh', label: '52W-⬆️', type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWkLow',  label: '52W-⬇️',  type: 'fetched', agg: false, hidden: false },
   { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false, hidden: false },
-  { key: 'forwardPE', label: 'Fwd PE',       type: 'fetched', agg: false, hidden: false },
+  { key: 'forwardPE', label: 'F➡️PE',       type: 'fetched', agg: false, hidden: false },
   { key: 'eps',       label: 'EPS',          type: 'fetched', agg: false, hidden: false },
   { key: 'beta',      label: 'Beta',         type: 'fetched', agg: false, hidden: false },
   { key: 'priceToBook',   label: 'P/B',                    type: 'fetched', agg: false, hidden: false },
-  { key: 'fiftyDayAverage',        label: '50D Avg',       type: 'fetched', agg: false, hidden: false },
-  { key: 'twoHundredDayAverage',   label: '200D Avg',      type: 'fetched', agg: false, hidden: false },
-  { key: 'fiftyTwoWeekLowChangePercent',  label: '52W-L Chg%',  type: 'calc', resultType: 'text',
+  { key: 'fiftyDayAverage',        label: '50D🧮',       type: 'fetched', agg: false, hidden: false },
+  { key: 'twoHundredDayAverage',   label: '200D🧮',      type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWeekLowChangePercent',  label: '52-L↔️%',  type: 'calc', resultType: 'text',
     formula: "(!ltp || !fiftyTwoWkLow) ? '-' : (((ltp - fiftyTwoWkLow) / fiftyTwoWkLow) * 100).toFixed(2) + '%'", agg: false, hidden: false },
-  { key: 'fiftyTwoWeekHighChangePercent', label: '52W-H Chg%', type: 'calc', resultType: 'text',
+  { key: 'fiftyTwoWeekHighChangePercent', label: '52-H↔️%', type: 'calc', resultType: 'text',
     formula: "(!ltp || !fiftyTwoWkHigh) ? '-' : (((fiftyTwoWkHigh - ltp) / fiftyTwoWkHigh) * 100).toFixed(2) + '%'", agg: false, hidden: false },
   { key: 'starSignal', label: 'Star Signal', type: 'calc', resultType: 'text', hidden: true,
     // Edit this formula any time to change what triggers the ⭐️ on LTP. Whatever text this
@@ -454,27 +486,27 @@ const DEFAULT_COLUMNS = [
     agg: false },
   { key: 'averageAnalystRating',   label: 'Analyst Rating', type: 'fetched', agg: false, hidden: false },
   { key: 'invested',  label: 'Invested',     type: 'calc', formula: 'qty*buyPrice', agg: true, hidden: false },
-  { key: 'curVal',    label: 'Current Value',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
+  { key: 'curVal',    label: 'Value Now',type: 'calc', formula: 'qty*ltp', agg: true, hidden: false },
   { key: 'pnl',       label: 'P&L',          type: 'calc', formula: 'curVal-invested', agg: true, hidden: false },
   { key: 'pnlPct',    label: 'P&L %',        type: 'calc', formula: 'invested ? (pnl/invested*100) : 0', agg: false, hidden: false },
   { key: 'alert',     label: 'Alert',        type: 'manual', agg: false, hidden: false },
   { key: 'target',    label: 'Target',       type: 'manual', agg: false, hidden: false },
-  { key: 'signal',    label: 'Signal',       type: 'calc', resultType: 'text',
+  { key: 'signal',    label: ' Signal ',       type: 'calc', resultType: 'text',
     formula: "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')", agg: false, hidden: false },
   { key: 'mcCode',    label: 'MC Code',      type: 'manual', inputType: 'text', agg: false, hidden: true },
   { key: 'invCode',   label: 'Inv Code',     type: 'manual', inputType: 'text', agg: false, hidden: true, afterActions: true },
-  { key: 'dayHigh',   label: 'Today High',   type: 'fetched', agg: false, hidden: true },
-  { key: 'dayLow',    label: 'Today Low',    type: 'fetched', agg: false, hidden: true },
-  { key: 'prevHigh',  label: 'Prev High',    type: 'fetched', agg: false, hidden: true },
-  { key: 'prevLow',   label: 'Prev Low',     type: 'fetched', agg: false, hidden: true },
-  { key: 'dayOpen',   label: 'Today Open',   type: 'fetched', agg: false, hidden: true },
-  { key: 'prevWeekHigh',  label: 'Prev Wk High',  type: 'fetched', agg: false, hidden: true },
-  { key: 'prevWeekLow',   label: 'Prev Wk Low',   type: 'fetched', agg: false, hidden: true },
-  { key: 'prevWeekClose', label: 'Prev Wk Close', type: 'fetched', agg: false, hidden: true },
+  { key: 'dayHigh',   label: 'Today⬆️',   type: 'fetched', agg: false, hidden: true },
+  { key: 'dayLow',    label: 'Today ⬇️',    type: 'fetched', agg: false, hidden: true },
+  { key: 'prevHigh',  label: 'Prev⬆️',    type: 'fetched', agg: false, hidden: true },
+  { key: 'prevLow',   label: 'Prev⬇️',     type: 'fetched', agg: false, hidden: true },
+  { key: 'dayOpen',   label: 'Day-Open',   type: 'fetched', agg: false, hidden: true },
+  { key: 'prevWeekHigh',  label: 'Pre-W⬆️',  type: 'fetched', agg: false, hidden: true },
+  { key: 'prevWeekLow',   label: 'Pre-W⬇️',   type: 'fetched', agg: false, hidden: true },
+  { key: 'prevWeekClose', label: 'Pre-W🚧', type: 'fetched', agg: false, hidden: true },
   { key: 'prevWeekSource', label: 'Wk Data Src',  type: 'fetched', agg: false, hidden: true },
-  { key: 'prevMonthHigh',  label: 'Prev Mo High',  type: 'fetched', agg: false, hidden: true },
-  { key: 'prevMonthLow',   label: 'Prev Mo Low',   type: 'fetched', agg: false, hidden: true },
-  { key: 'prevMonthClose', label: 'Prev Mo Close', type: 'fetched', agg: false, hidden: true },
+  { key: 'prevMonthHigh',  label: 'Prev-M⬆️',  type: 'fetched', agg: false, hidden: true },
+  { key: 'prevMonthLow',   label: 'Prev-M⬇️',   type: 'fetched', agg: false, hidden: true },
+  { key: 'prevMonthClose', label: 'Prev M🚧', type: 'fetched', agg: false, hidden: true },
   { key: 'prevMonthSource', label: 'Mo Data Src',  type: 'fetched', agg: false, hidden: true },
   // 'mirror' type: NOT a calc column, deliberately — evalFormula coerces every referenced
   // column to a number before your formula runs, so a calc formula like "symbol" would receive
