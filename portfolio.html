@@ -88,6 +88,8 @@
   td.calc { color: var(--muted); }
   td.up { color: var(--up); }
   td.down { color: var(--down); }
+  td.up-bold { color: var(--up); font-weight: 700; }
+  td.down-bold { color: var(--down); font-weight: 700; }
   td.err { color: var(--down); font-style: italic; }
   td.bg-green { background: rgba(79,178,134,0.18); }
   td.bg-red { background: rgba(217,115,108,0.18); }
@@ -724,6 +726,10 @@ function renderTable(){
       td.appendChild(inp);
     } else if(col.type === 'mirror'){
       td.className = 'readonly';
+      if(col.key === 'signalAction' && typeof val === 'string'){
+        if(val.includes('BUY')) td.classList.add('up-bold');
+        else if(val.includes('SELL')) td.classList.add('down-bold');
+      }
       td.textContent = val || '—';
     } else if(col.type === 'fetched'){
       td.className = 'readonly';
@@ -830,6 +836,10 @@ function renderTableValuesOnly(){
     if(col.type === 'manual') return; // input owns its own value
     if(col.type === 'mirror'){
       td.className = 'readonly';
+      if(col.key === 'signalAction' && typeof val === 'string'){
+        if(val.includes('BUY')) td.classList.add('up-bold');
+        else if(val.includes('SELL')) td.classList.add('down-bold');
+      }
       td.textContent = val || '—';
       return;
     }
