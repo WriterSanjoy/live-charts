@@ -1,0 +1,33 @@
+# Operating System files
+.DS_Store
+Thumbs.db
+*.local
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Node.js / JavaScript
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# Shared Build & Distribution Directories
+dist/
+build/
+.env
+
+# Custom Local Workspace
+working/
