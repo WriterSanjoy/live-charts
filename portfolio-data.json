@@ -13,9 +13,9 @@
       "label": "",
       "type": "calc",
       "resultType": "text",
-      "formula": "dayHigh>prevHigh && dayLow>prevLow ? '⬆️' : (dayHigh<prevHigh && dayLow<prevLow ? '⬇️' : '-')",
+      "formula": "dayHigh>prevHigh && dayLow>prevLow ? '⬆️' : (dayHigh<prevHigh && dayLow<prevLow ? '🔻' : '-')",
       "agg": false,
-      "hidden": true
+      "hidden": false
     },
     {
       "key": "qty",
@@ -407,21 +407,21 @@
       "label": "Pre-W⬆️",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevWeekLow",
       "label": "Pre-W⬇️",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevWeekClose",
       "label": "Pre-W🚧",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "hrPivotP",
@@ -439,7 +439,7 @@
       "resultType": "text",
       "formula": "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*hrPivotP - prevWeekLow).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "hrPivotR2",
@@ -457,7 +457,7 @@
       "resultType": "text",
       "formula": "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekHigh + 2*(hrPivotP-prevWeekLow)).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "hrPivotS1",
@@ -466,7 +466,7 @@
       "resultType": "text",
       "formula": "(!prevWeekHigh || !prevWeekLow) ? '-' : (2*hrPivotP - prevWeekHigh).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "hrPivotS2",
@@ -484,7 +484,7 @@
       "resultType": "text",
       "formula": "(!prevWeekHigh || !prevWeekLow) ? '-' : (prevWeekLow - 2*(prevWeekHigh-hrPivotP)).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevWeekSource",
@@ -505,21 +505,21 @@
       "label": "Prev-M⬆️",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevMonthLow",
       "label": "Prev-M⬇️",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevMonthClose",
       "label": "Prev M🚧",
       "type": "fetched",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dayPivotP",
@@ -555,7 +555,7 @@
       "resultType": "text",
       "formula": "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthHigh + 2*(dayPivotP-prevMonthLow)).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dayPivotS1",
@@ -582,7 +582,7 @@
       "resultType": "text",
       "formula": "(!prevMonthHigh || !prevMonthLow) ? '-' : (prevMonthLow - 2*(prevMonthHigh-dayPivotP)).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "prevMonthSource",
@@ -597,7 +597,7 @@
       "type": "calc",
       "formula": "(function(){ var s=0; if(dayPivotR1 && ltp>dayPivotR1) s+=2; else if(dayPivotP && ltp>dayPivotP) s+=1; else if(dayPivotS1 && ltp<dayPivotS1) s-=2; else if(dayPivotP && ltp<dayPivotP) s-=1; if(hrPivotR1 && ltp>hrPivotR1) s+=1; else if(hrPivotP && ltp>hrPivotP) s+=0.5; else if(hrPivotS1 && ltp<hrPivotS1) s-=1; else if(hrPivotP && ltp<hrPivotP) s-=0.5; return s; })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "mtsLabel",
@@ -606,7 +606,7 @@
       "resultType": "text",
       "formula": "(mtsScore>=3?'Strong Bull':(mtsScore>=1?'Mild Bull':(mtsScore<=-3?'Strong Bear':(mtsScore<=-1?'Mild Bear':'Neutral'))))",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "runwayHr",
@@ -615,7 +615,7 @@
       "resultType": "text",
       "formula": "(!weeklyDistToCeiling || !weeklyDistToFloor) ? '-' : (weeklyDistToCeiling/weeklyDistToFloor).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "runwayDay",
@@ -624,7 +624,7 @@
       "resultType": "text",
       "formula": "(!dailyDistToCeiling || !dailyDistToFloor) ? '-' : (dailyDistToCeiling/dailyDistToFloor).toFixed(2)",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dailyDistToCeiling",
@@ -633,7 +633,7 @@
       "resultType": "text",
       "formula": "(function(){ if(!ltp||!dayPivotP) return '-'; var c=[dayPivotP,dayPivotR1,dayPivotR2,dayPivotR3].filter(function(v){return v&&v>ltp;}); if(!c.length) return '-'; var nr=Math.min.apply(null,c); return (((nr-ltp)/ltp)*100).toFixed(2); })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "dailyDistToFloor",
@@ -642,7 +642,7 @@
       "resultType": "text",
       "formula": "(function(){ if(!ltp||!dayPivotP) return '-'; var c=[dayPivotP,dayPivotS1,dayPivotS2,dayPivotS3].filter(function(v){return v&&v<ltp;}); if(!c.length) return '-'; var ns=Math.max.apply(null,c); return (((ltp-ns)/ltp)*100).toFixed(2); })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "weeklyDistToCeiling",
@@ -651,7 +651,7 @@
       "resultType": "text",
       "formula": "(function(){ if(!ltp||!hrPivotP) return '-'; var c=[hrPivotP,hrPivotR1,hrPivotR2,hrPivotR3].filter(function(v){return v&&v>ltp;}); if(!c.length) return '-'; var nr=Math.min.apply(null,c); return (((nr-ltp)/ltp)*100).toFixed(2); })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "weeklyDistToFloor",
@@ -660,7 +660,7 @@
       "resultType": "text",
       "formula": "(function(){ if(!ltp||!hrPivotP) return '-'; var c=[hrPivotP,hrPivotS1,hrPivotS2,hrPivotS3].filter(function(v){return v&&v<ltp;}); if(!c.length) return '-'; var ns=Math.max.apply(null,c); return (((ltp-ns)/ltp)*100).toFixed(2); })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "screenerSignal",
@@ -669,7 +669,7 @@
       "resultType": "text",
       "formula": "(function(){ if(!ltp) return '-'; if(mtsScore>=3){ if(runwayDay>=2 && dailyDistToCeiling>1.5 && weeklyDistToCeiling>0) return '🚀 Strong Buy'; if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '🔼 Building Bullish'; } if(mtsScore>=1){ if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) return '⚠️ Trap/No-Trade'; return '🔼 Building Bullish'; } if(mtsScore>-1){ if(((dailyDistToCeiling>0 && dailyDistToCeiling<1) || (dailyDistToFloor>0 && dailyDistToFloor<1)) && ((weeklyDistToCeiling>0 && weeklyDistToCeiling<1) || (weeklyDistToFloor>0 && weeklyDistToFloor<1))) return '🌀 Squeeze/Coiling'; return '⚪ Neutral'; } if(mtsScore>-3){ if(dailyDistToFloor>0 && dailyDistToFloor<1 && weeklyDistToFloor>2) return '🪤 Bear Trap Risk'; return '🔽 Building Bearish'; } if(runwayDay>=2 && dailyDistToFloor>1.5 && weeklyDistToFloor>0) return '📉 Strong Sell'; return '🔽 Building Bearish'; })()",
       "agg": false,
-      "hidden": false
+      "hidden": true
     },
     {
       "key": "scriptEnd",
@@ -706,7 +706,7 @@
           "signal": "BUY",
           "trend": "🔽",
           "mcCode": "",
-          "dayIcon": "⬇️",
+          "dayIcon": "🔻",
           "dayHigh": 234.94,
           "dayLow": 231.92,
           "prevHigh": 235.2899932861328,
@@ -874,7 +874,7 @@
           "signal": "SELL",
           "alert": 250,
           "mcCode": "",
-          "dayIcon": "⬇️",
+          "dayIcon": "🔻",
           "dayHigh": 1959.6,
           "dayLow": 1932,
           "prevHigh": 1968.9000244140625,
@@ -1023,7 +1023,7 @@
         },
         {
           "symbol": "INFY.NS",
-          "dayIcon": "⬇️",
+          "dayIcon": "🔻",
           "qty": 71,
           "buyPrice": 1053.71,
           "name": "Infosys Limited",
@@ -1107,7 +1107,7 @@
         },
         {
           "symbol": "ITC.NS",
-          "dayIcon": "⬇️",
+          "dayIcon": "🔻",
           "qty": 1931,
           "buyPrice": 286,
           "name": "Itc Limited",
@@ -1527,7 +1527,7 @@
         },
         {
           "symbol": "PFC.NS",
-          "dayIcon": "⬇️",
+          "dayIcon": "🔻",
           "qty": 179,
           "buyPrice": 346,
           "name": "Power Finance",
@@ -1779,7 +1779,7 @@
         },
         {
           "symbol": "SBIN.NS",
-          "dayIcon": "⬇️",
+          "dayIcon": "🔻",
           "qty": 71,
           "buyPrice": 980.5,
           "name": "State Bank",
@@ -1863,7 +1863,7 @@
         },
         {
           "symbol": "SHARDACROP.NS",
-          "dayIcon": "⬇️",
+          "dayIcon": "🔻",
           "qty": 53,
           "buyPrice": 764.45,
           "name": "Sharda Cropchem",
