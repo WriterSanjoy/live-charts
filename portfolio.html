@@ -90,6 +90,11 @@
   td.down { color: var(--down); }
   td.up-bold { color: var(--up); font-weight: 700; }
   td.down-bold { color: var(--down); font-weight: 700; }
+  tr.row-buy { background: rgba(34,197,94,0.07); }
+  tr.row-sell { background: rgba(239,68,68,0.07); }
+  #tableWrap.hide-hold tr.row-hold { display: none; }
+  @keyframes cellFlash { from { background-color: rgba(255,215,0,0.5); } to { background-color: transparent; } }
+  td.flash { animation: cellFlash 1.6s ease-out; }
   td.err { color: var(--down); font-style: italic; }
   td.bg-green { background: rgba(79,178,134,0.18); }
   td.bg-red { background: rgba(217,115,108,0.18); }
@@ -131,6 +136,10 @@
   <div id="toolbarRow1">
     <span id="title">Portfolio Tracker</span>
     <button id="refreshBtn">Refresh Prices</button>
+    <span id="actionSummary" style="margin-left:10px;font-size:12px;color:var(--muted)"></span>
+    <label style="font-size:12px;display:inline-flex;align-items:center;gap:4px;margin-left:10px">
+      <input type="checkbox" id="hideHoldToggle"> Only BUY/SELL
+    </label>
     <button id="refreshFundBtn" class="ghost">Refresh Fundamentals</button>
     <button id="addRowBtn" class="ghost">+ Add Row</button>
     <button id="manageColsBtn" class="ghost">Manage Columns</button>
@@ -155,6 +164,7 @@
       <option value="1800">30 min</option>
       <option value="3600">1 hr</option>
     </select>
+    <span style="font-size:11px;color:var(--muted);margin-left:4px">(9:15\u201315:30 IST, Mon\u2013Fri only)</span>
     <span class="label" style="margin-left:14px">Chart link:</span>
     <label style="font-size:12px;display:inline-flex;align-items:center;gap:3px"><input type="radio" name="chartSrc" id="chartSrcMc" value="mc"> MC</label>
     <label style="font-size:12px;display:inline-flex;align-items:center;gap:3px"><input type="radio" name="chartSrc" id="chartSrcInv" value="inv"> Inv</label>
@@ -609,6 +619,17 @@ function newRowObject(){
   state.columns.forEach(c => { row[c.key] = (c.type === 'manual' || c.type === 'mirror') ? '' : (c.type === 'fetched' ? '' : 0); });
   return row;
 }
+// Row-level classification for the BUY/SELL row tint and the "hide HOLD" filter — same
+// includes()-based check as the Action cell's bold-color styling, so a row's tint always
+// agrees with what its own Action cell says.
+function rowActionClass(row){
+  const a = row.signalAction;
+  if(typeof a !== 'string') return '';
+  if(a.includes('BUY')) return 'row-buy';
+  if(a.includes('SELL')) return 'row-sell';
+  if(a === 'HOLD') return 'row-hold';
+  return '';
+}
 function recomputeRow(row){
   state.columns.forEach(col => {
     if(col.type === 'calc'){
@@ -678,6 +699,23 @@ function renderTabs(){
   tabbar.appendChild(addBtn);
 }
 
+// Portfolio-wide BUY/SELL/HOLD pulse, shown next to Refresh Prices. Same includes()-based
+// classification as the row tint and the Action cell's own bold coloring, kept in sync by
+// calling this at the end of both render paths (full rebuild and the lighter values-only pass).
+function updateActionSummary(){
+  const tab = activeTab();
+  const el = document.getElementById('actionSummary');
+  if(!tab || !el) return;
+  let buy = 0, sell = 0, hold = 0;
+  tab.rows.forEach(r => {
+    const a = r.signalAction;
+    if(typeof a !== 'string') return;
+    if(a.includes('BUY')) buy++;
+    else if(a.includes('SELL')) sell++;
+    else if(a === 'HOLD') hold++;
+  });
+  el.textContent = '🟢 ' + buy + ' BUY  ·  🔴 ' + sell + ' SELL  ·  ⚪ ' + hold + ' HOLD';
+}
 function renderTable(){
   const tab = activeTab();
   const visibleColumns = state.columns.filter(c => !c.hidden);
@@ -787,6 +825,7 @@ function renderTable(){
   };
   tab.rows.forEach(row => {
     const tr = document.createElement('tr');
+    tr.className = rowActionClass(row);
     mainColumns.forEach(col => tr.appendChild(buildDataCell(col, row)));
     const tdAction = document.createElement('td');
     tdAction.className = 'rowactions';
@@ -823,6 +862,7 @@ function renderTable(){
   trf.appendChild(document.createElement('td'));
   afterColumns.forEach(col => trf.appendChild(buildTotalCell(col, false)));
   tfoot.appendChild(trf);
+  updateActionSummary();
 }
 
 // Fast path: update only text of readonly/calc cells + input values, without full rebuild (keeps focus)
@@ -899,15 +939,28 @@ function renderTableValuesOnly(){
   tab.rows.forEach((row, ri) => {
     const tr = rows[ri];
     if(!tr) return;
+    tr.className = rowActionClass(row);
     const cells = tr.querySelectorAll('td');
     mainColumns.forEach((col, ci) => {
       const td = cells[ci];
-      if(td) updateDataCell(col, td, row[col.key], row);
+      if(!td) return;
+      const before = td.textContent;
+      updateDataCell(col, td, row[col.key], row);
+      if(before !== '' && td.textContent !== before){
+        td.classList.remove('flash'); void td.offsetWidth; td.classList.add('flash');
+        setTimeout(() => td.classList.remove('flash'), 1600);
+      }
     });
     const offset = mainColumns.length + 1; // +1 to skip past the action <td>
     afterColumns.forEach((col, ci) => {
       const td = cells[offset + ci];
-      if(td) updateDataCell(col, td, row[col.key], row);
+      if(!td) return;
+      const before = td.textContent;
+      updateDataCell(col, td, row[col.key], row);
+      if(before !== '' && td.textContent !== before){
+        td.classList.remove('flash'); void td.offsetWidth; td.classList.add('flash');
+        setTimeout(() => td.classList.remove('flash'), 1600);
+      }
     });
   });
   const trf = tfoot.querySelector('tr');
@@ -933,6 +986,7 @@ function renderTableValuesOnly(){
       }
     });
   }
+  updateActionSummary();
 }
 
 function renderAll(){
@@ -1094,11 +1148,26 @@ async function refreshFundamentals(){
 }
 document.getElementById('refreshFundBtn').addEventListener('click', refreshFundamentals);
 
+document.getElementById('hideHoldToggle').addEventListener('change', (e) => {
+  document.getElementById('tableWrap').classList.toggle('hide-hold', e.target.checked);
+});
+
+// NSE trades 9:15-15:30 IST, Mon-Fri. Computed via UTC arithmetic (no Date/timezone-object
+// juggling) so it's correct regardless of the browser's own local timezone.
+function isMarketHoursIST(){
+  const now = new Date();
+  let istMinutes = now.getUTCHours() * 60 + now.getUTCMinutes() + 330; // UTC+5:30
+  let dayRollover = 0;
+  if(istMinutes >= 1440){ istMinutes -= 1440; dayRollover = 1; }
+  const istDay = (now.getUTCDay() + dayRollover) % 7; // 0=Sun..6=Sat
+  if(istDay === 0 || istDay === 6) return false;
+  return istMinutes >= (9 * 60 + 15) && istMinutes <= (15 * 60 + 30);
+}
 let autoTimer = null;
 document.getElementById('autoRefresh').addEventListener('change', (e) => {
   if(autoTimer) clearInterval(autoTimer);
   const secs = parseInt(e.target.value, 10);
-  if(secs > 0) autoTimer = setInterval(refreshPrices, secs * 1000);
+  if(secs > 0) autoTimer = setInterval(() => { if(isMarketHoursIST()) refreshPrices(); }, secs * 1000);
 });
 
 const chartSrcMc = document.getElementById('chartSrcMc');
