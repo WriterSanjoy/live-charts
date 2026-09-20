@@ -1,0 +1,28 @@
+{
+  "notes": {
+    "HDFCBANK": {
+      "target": "728",
+      "stop": "",
+      "text": "f&o",
+      "tag": "watching",
+      "updatedAt": "2026-07-24T14:20:25.385Z"
+    },
+    "INFY": {
+      "target": "995",
+      "stop": "",
+      "text": "buy f&o",
+      "tag": "watching",
+      "updatedAt": "2026-07-24T14:21:02.498Z"
+    }
+  },
+  "recent": [
+    "INFY",
+    "HDFCBANK",
+    "NIFTY"
+  ],
+  "state": {
+    "symbol": "INFY",
+    "listIndex": "0"
+  },
+  "exportedAt": "2026-07-24T14:24:33.073Z"
+}

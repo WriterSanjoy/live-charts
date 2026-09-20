@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>NSE Chart Viewer</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1117'/%3E%3Cpolyline points='5,24 12,16 17,20 27,7' fill='none' stroke='%234fb286' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='27' cy='7' r='2.3' fill='%234fb286'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #151b23;
+    --border: #2a323d;
+    --text: #d8dee9;
+    --muted: #8b96a5;
+    --accent: #4fb286;
+    --accent-dim: #2e6b4f;
+    --up: #4fb286;
+    --down: #d9736c;
+    --warn: #d9b25c;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  input[type=text], select, textarea {
+    background: #0a0e14;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 5px 7px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+  button, a.linkbtn {
+    background: var(--accent-dim);
+    color: #eafff3;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+  }
+  button:hover, a.linkbtn:hover { background: var(--accent); color: #06110b; }
+  button.ghost, a.linkbtn.ghost { background: transparent; color: var(--muted); border-color: var(--border); }
+  button.ghost:hover, a.linkbtn.ghost:hover { background: #1c2430; color: var(--text); }
+
+  #toolbar { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; flex-shrink: 0; }
+  input[type=text].display-badge {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--muted);
+    cursor: default;
+    pointer-events: none;
+  }
+  input[type=text].display-badge:focus { outline: none; }
+  #toolbarRow1, #toolbarRow2 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  #toolbarRow2 { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+  #toolbarRow2 .label { font-size: 11px; color: var(--muted); margin-right: 2px; }
+
+  #priceStrip { font-size: 13px; color: var(--muted); margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  #priceStrip .price { color: var(--text); font-weight: 600; }
+  #priceStrip .up { color: var(--up); }
+  #priceStrip .down { color: var(--down); }
+
+  #main { display: flex; gap: 10px; margin-top: 8px; flex: 1; min-height: 0; }
+  #chart { border: 1px solid var(--border); border-radius: 6px; background: #fff; flex: 1; width: 100%; height: 100%; }
+
+  #side {
+    width: 300px;
+    flex-shrink: 0;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    overflow-y: auto;
+    transition: width .15s, padding .15s, opacity .15s;
+  }
+  #side.collapsed { width: 0; padding: 0; border: none; overflow: hidden; opacity: 0; }
+
+  #side h3 { margin: 14px 0 8px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  #side h3:first-child { margin-top: 0; }
+  .field { margin-bottom: 8px; }
+  .field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+  .field input, .field textarea, .field select { width: 100%; }
+  .field textarea { resize: vertical; min-height: 50px; }
+  #saveStatus { font-size: 11px; color: var(--accent); min-height: 14px; margin-top: 4px; }
+
+  .tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); }
+  .tag-watching { color: var(--warn); border-color: var(--warn); }
+  .tag-entered { color: var(--up); border-color: var(--up); }
+  .tag-exited { color: var(--muted); }
+
+  #watchTable, #journalTable { width: 100%; font-size: 12px; border-collapse: collapse; }
+  #watchTable td, #watchTable th, #journalTable td, #journalTable th {
+    padding: 4px 4px; border-bottom: 1px solid var(--border); text-align: left;
+  }
+  #watchTable tr:hover, #journalTable tr:hover { background: #1c2430; cursor: pointer; }
+  #watchTable tr.active-row { background: var(--accent-dim); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .badge-hit { font-size: 9px; padding: 1px 4px; border-radius: 3px; margin-left: 3px; }
+  .badge-target { background: var(--accent-dim); color: var(--up); }
+  .badge-stop { background: #3a1f1e; color: var(--down); }
+
+  .hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+  #priceError { font-size: 11px; color: var(--warn); margin-top: 4px; }
+  #iframeNote { font-size: 11px; color: var(--warn); margin-top: 4px; display: none; }
+  #addBanner { font-size: 12px; color: var(--warn); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <div id="toolbarRow1">
+    <input type="text" id="currentScript" value="NIFTY" readonly tabindex="-1" class="display-badge" style="width:110px">
+    <input type="text" id="nextScript" value="NIFTY" style="width:110px" onkeydown="if(event.key==='Enter'){go_to();}">
+    <button onclick="go_to()">Goto</button>
+    <select name="sel1" id="select" onchange="show_chart();"></select>
+    <button onclick="down()">▼</button>
+    <button onclick="up()">▲</button>
+    <span class="label">Watchlist:</span>
+    <select id="listSwitch" onchange="switchList()">
+      <option value="0">List 0 (default)</option>
+      <option value="1">List 1</option>
+      <option value="2">List 2</option>
+      <option value="3">List 3</option>
+      <option value="4">List 4</option>
+    </select>
+    <input type="text" id="addSymbolInput" placeholder="Add symbol" style="width:100px" onkeydown="if(event.key==='Enter'){addSymbolToCurrentList(document.getElementById('addSymbolInput').value); document.getElementById('addSymbolInput').value='';}">
+    <button class="ghost" onclick="addSymbolToCurrentList(document.getElementById('addSymbolInput').value); document.getElementById('addSymbolInput').value='';">+ Add</button>
+    <button class="ghost" onclick="removeSymbolFromCurrentList(document.getElementById('select').value)">- Remove selected</button>
+    <button class="ghost" onclick="resetCurrentListToDefault()">Reset list to file default</button>
+    <button class="ghost" onclick="togglePanel()" id="panelToggleBtn">Hide panel</button>
+    <button class="ghost" onclick="refreshAllPrices()">Refresh prices</button>
+  </div>
+  <div id="toolbarRow2">
+    <span class="label">Source: Moneycontrol (this only loads in embedded frame — others block by design)</span>
+    <span class="label" style="margin-left:10px">Open your account:</span>
+    <a class="linkbtn ghost" id="mcOpenLink" href="https://www.moneycontrol.com/mc/stock/chart?scId=CASTROLIND&ex=NSE" target="_blank" rel="noopener">Moneycontrol ↗</a>
+    <a class="linkbtn ghost" id="tvOpenLink" href="https://www.tradingview.com/chart/?symbol=NSE:NIFTY" target="_blank" rel="noopener">TradingView ↗</a>
+    <a class="linkbtn ghost" href="https://secure.icicidirect.com/" target="_blank" rel="noopener">ICICIdirect ↗</a>
+    <a class="linkbtn ghost" href="https://www.5paisa.com/" target="_blank" rel="noopener">5paisa ↗</a>
+    <div id="priceStrip"></div>
+  </div>
+  <div id="addBanner" style="display:none;">
+    <span class="label" id="addBannerText"></span>
+    <button onclick="confirmAddToWatchlist()">Add to current watchlist</button>
+    <button class="ghost" onclick="hideAddBanner()">Dismiss</button>
+  </div>
+</div>
+
+<div id="main">
+  <iframe id="chart" src="https://www.moneycontrol.com/mc/stock/chart?scId=CASTROLIND&ex=NSE"
+    title="Chart" onload="show()"></iframe>
+
+  <div id="side">
+    <h3>Notes / Journal — <span id="notesSymbol">CASTROLIND</span></h3>
+    <div class="field">
+      <label>Status</label>
+      <select id="noteTag" onchange="saveNotesForCurrent()">
+        <option value="">— none —</option>
+        <option value="watching">Watching</option>
+        <option value="entered">Entered</option>
+        <option value="exited">Exited</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Target</label>
+      <input type="text" id="noteTarget" oninput="saveNotesForCurrent()">
+    </div>
+    <div class="field">
+      <label>Stop loss</label>
+      <input type="text" id="noteStop" oninput="saveNotesForCurrent()">
+    </div>
+    <div class="field">
+      <label>Thesis / notes</label>
+      <textarea id="noteText" oninput="saveNotesForCurrent()"></textarea>
+    </div>
+    <div id="saveStatus"></div>
+    <div id="priceError"></div>
+
+    <h3>Journal (tagged stocks)</h3>
+    <table id="journalTable"><tbody></tbody></table>
+
+    <h3>Recently viewed</h3>
+    <table id="watchTable"><tbody></tbody></table>
+
+    <h3>Live price source</h3>
+    <div class="field">
+      <label>Price proxy base URL (your Vercel project)</label>
+      <input type="text" id="proxyBase" placeholder="https://live-charts-xyz.vercel.app" oninput="saveProxyBase()">
+    </div>
+    <div class="hint">Yahoo blocks direct browser requests, so prices are fetched through a small serverless proxy you deploy on Vercel (see quote.js). Paste your deployed project's URL here — no trailing slash needed. Target/stop badges assume a long position. The embedded chart is Moneycontrol only — TradingView and broker platforms block iframe embedding by design; use the "Open with your account" links above instead, where indicators/drawings save to your own account.</div>
+
+    <h3>Backup your data</h3>
+    <div class="field">
+      <button onclick="exportToFile()">Export to file</button>
+      <button class="ghost" onclick="document.getElementById('importFile').click()">Import from file</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importFromFile(event)">
+    </div>
+    <div class="hint">Downloads a single .json file with your notes, tags, targets/stops and recent list — a real file on your computer, independent of the browser.</div>
+
+    <h3>Sync to GitHub (optional)</h3>
+    <div class="field">
+      <label>Personal access token</label>
+      <input type="password" id="ghToken" oninput="saveGhConfig()">
+    </div>
+    <div class="field">
+      <label>Repo (owner/name)</label>
+      <input type="text" id="ghRepo" placeholder="yourusername/live-charts" oninput="saveGhConfig()">
+    </div>
+    <div class="field">
+      <label>File path in repo</label>
+      <input type="text" id="ghPath" placeholder="chart-journal.json" oninput="saveGhConfig()">
+    </div>
+    <div class="field">
+      <button onclick="saveToGithub()">Save to GitHub</button>
+      <button class="ghost" onclick="loadFromGithub()">Load from GitHub</button>
+    </div>
+    <div id="ghStatus" class="hint"></div>
+    <div class="hint">Use a fine-grained token scoped to just this one repo, "Contents: read and write" only. It's stored in this browser's local storage and sent only to GitHub's API.</div>
+  </div>
+</div>
+
+<script>
+var stocks =[];
+var stocks0 = ["NIFTY","HDFCBANK","RECLTD","HCLTECH","LICI","VEDL","SBICARD","INFY","POWERGRID","ITBEES",
+"TCS","ICICIBANK","M%26M","SBI","NAUKRI","SBILIFE","TECHM","JUBLFOOD","INDUSINDBK","INDIGO","TITAN","PGINVIT","BANDHANBNK","ETERNAL","RELIANCE"];
+
+var stocks1 = ["HDFCBANK","DALMIASUG","ICICIBANK","ELGIEQUIP","INFY","BAJAJ-AUTO","GRINDWELL",
+"M%26M","CARBORUNIV","TRIVENI","HCLTECH","CASTROLIND","DCMSHRIRAM","SBI","HDFC","DWARKESH",
+"RECLTD","TCS","BHARTIARTL","BAJFINANCE","AXISBANK","LTIM","RELIANCE","LT","ITC","GREAVESCOT","NTPC","SBICARD","KOTAKBANK","MARUTI"];
+
+var stocks2 = ["LICI","DMART","INDHOTEL","VEDL","IOC","TATAELXSI","NAUKRI","MOTHERSUMI","SUNPHARMA",
+"TITAN","SBILIFE","TMB","TECHM","SUNDRMFAST","COFORGE","BANKBARODA","CIPLA","IRFC","TATAMOTORS",
+"RAILTEL","ABSLAMC","APOLLOHOSP","ASTRAL","ULTRACEMCO","PIIND","HINDUNILVR","HAL","CROMPTON","POWERGRID"];
+
+var stocks3 = ["JUBLFOOD","SHREECEM","CUMMINSIND","MSUMI","PERSISTENT","SCHAEFFLER","ENDURANCE",
+"MAXHEALTH","NMDC","BEL","ASHOKLEY","GAIL","AUBANK","CHOLAFIN","ASIANPAINT","MFSL","FEDERALBNK",
+"PIDILITIND","SUVENPHAR","SANSERA","HAVELLS"];
+
+var stocks4 =["EICHERMOT","MPHASIS","INDUSINDBK","COALINDIA","PFC","BDL","BPCL","AJANTPHARM",
+"HINDALCO","TATAPOWER","MARICO","DIVISLAB","LUPIN","ONGC","BERGEPAINT","HINDPETRO","IPCALAB",
+"INDIAMART","GLAND","SKFINDIA","NIFTYBEES","NESTLEIND","TIMKEN","TORNTPHARM","KAJARIACER","OBEROIRLTY",
+"TIINDIA","TIINDIA","DABUR","AAVAS","NHPC","NAVINFLUOR","BOSCHLTD","TATASTEEL","M%26MFIN"];
+
+var currentListIndex = "0";
+var LS_STATE = "mc_chart_state_v3";
+var LS_NOTES = "mc_chart_notes_v3";
+var LS_RECENT = "mc_chart_recent_v3";
+var LS_GH = "mc_chart_gh_v1";
+var LS_PROXY = "mc_chart_proxy_v1";
+var LS_LISTS = "mc_chart_lists_v1";
+var LS_PANEL = "mc_chart_panel_v3";
+var priceCache = {};
+
+/* ---------- persistence helpers ---------- */
+function loadState(){ try { return JSON.parse(localStorage.getItem(LS_STATE)) || null; } catch(e){ return null; } }
+function saveState(symbol){ try { localStorage.setItem(LS_STATE, JSON.stringify({ symbol: symbol, listIndex: currentListIndex })); } catch(e){} }
+function loadAllNotes(){ try { return JSON.parse(localStorage.getItem(LS_NOTES)) || {}; } catch(e){ return {}; } }
+function saveAllNotes(notes){ try { localStorage.setItem(LS_NOTES, JSON.stringify(notes)); } catch(e){} }
+function loadRecent(){ try { return JSON.parse(localStorage.getItem(LS_RECENT)) || []; } catch(e){ return []; } }
+function saveRecent(list){ try { localStorage.setItem(LS_RECENT, JSON.stringify(list)); } catch(e){} }
+
+function pushRecent(symbol){
+  var list = loadRecent().filter(function(s){ return s !== symbol; });
+  list.unshift(symbol);
+  if (list.length > 12) list = list.slice(0, 12);
+  saveRecent(list);
+  renderSideLists();
+}
+
+var saveStatusTimer = null;
+function flashSaved(){
+  var el = document.getElementById('saveStatus');
+  el.textContent = 'Saved';
+  if (saveStatusTimer) clearTimeout(saveStatusTimer);
+  saveStatusTimer = setTimeout(function(){ el.textContent = ''; }, 1200);
+}
+
+function loadNotesForCurrent(){
+  var symbol = document.getElementById('currentScript').value;
+  document.getElementById('notesSymbol').textContent = symbol;
+  var notes = loadAllNotes()[symbol] || { target: '', stop: '', text: '', tag: '' };
+  document.getElementById('noteTarget').value = notes.target || '';
+  document.getElementById('noteStop').value = notes.stop || '';
+  document.getElementById('noteText').value = notes.text || '';
+  document.getElementById('noteTag').value = notes.tag || '';
+}
+function saveNotesForCurrent(){
+  var symbol = document.getElementById('currentScript').value;
+  var all = loadAllNotes();
+  all[symbol] = {
+    target: document.getElementById('noteTarget').value,
+    stop: document.getElementById('noteStop').value,
+    text: document.getElementById('noteText').value,
+    tag: document.getElementById('noteTag').value,
+    updatedAt: new Date().toISOString()
+  };
+  saveAllNotes(all);
+  flashSaved();
+  renderSideLists();
+  fetchPrice(symbol);
+}
+
+/* ---------- panel toggle ---------- */
+function togglePanel(){
+  var side = document.getElementById('side');
+  var collapsed = side.classList.toggle('collapsed');
+  document.getElementById('panelToggleBtn').textContent = collapsed ? 'Show panel' : 'Hide panel';
+  try { localStorage.setItem(LS_PANEL, collapsed ? '1' : '0'); } catch(e){}
+}
+function restorePanelState(){
+  var collapsed = false;
+  try { collapsed = localStorage.getItem(LS_PANEL) === '1'; } catch(e){}
+  if (collapsed) {
+    document.getElementById('side').classList.add('collapsed');
+    document.getElementById('panelToggleBtn').textContent = 'Show panel';
+  }
+}
+
+/* ---------- chart source switching ---------- */
+function toTvSymbol(mcSymbol){
+  var indexMap = { "NIFTY":"NSE:NIFTY", "BANKNIFTY":"NSE:BANKNIFTY", "SENSEX":"BSE:SENSEX", "FINNIFTY":"NSE:FINNIFTY" };
+  if (indexMap[mcSymbol]) return indexMap[mcSymbol];
+  var decoded = decodeURIComponent(mcSymbol.replace(/%26/g, '&'));
+  return "NSE:" + decoded;
+}
+function mcGetSrc(test) {
+    var src="https://www.moneycontrol.com/mc/stock/chart?scId="+test+"&ex=NSE";
+	if (test == "NIFTY"){ src="https://www.moneycontrol.com/mc/indianindices/chart?indice_id=9" }
+	if (test == "SENSEX"){ src="https://www.moneycontrol.com/mc/indianindices/chart?indice_id=4" }
+	if (test == "BANKNIFTY"){ src="https://www.moneycontrol.com/mc/indianindices/chart?indice_id=23" }
+	if (test == "FINNIFTY"){ src="https://www.moneycontrol.com/mc/indianindices/chart?indice_id=47" }
+	if (test == "NITYVIX"){ src="https://www.moneycontrol.com/mc/indianindices/chart?indice_id=36" }
+	if (test == "CNXIT"){ src="https://www.moneycontrol.com/mc/indianindices/chart?indice_id=19" }
+    return src;
+}
+function buildChartSrc(symbol){
+  return mcGetSrc(symbol);
+}
+
+/* ---------- price / % change (Yahoo Finance, client-side, best-effort) ---------- */
+function toYahooSymbol(mcSymbol){
+  var indexMap = { "NIFTY":"^NSEI", "BANKNIFTY":"^NSEBANK", "SENSEX":"^BSESN" };
+  if (indexMap[mcSymbol]) return indexMap[mcSymbol];
+  var decoded = decodeURIComponent(mcSymbol.replace(/%26/g, '&'));
+  return decoded + ".NS";
+}
+function formatPct(p){
+  if (p === null || p === undefined || isNaN(p)) return '—';
+  var s = p.toFixed(2) + '%';
+  return (p >= 0 ? '+' : '') + s;
+}
+function loadProxyBase(){ try { return (localStorage.getItem(LS_PROXY) || '').replace(/\/$/, ''); } catch(e){ return ''; } }
+async function fetchPrice(mcSymbol){
+  var ySym = toYahooSymbol(mcSymbol);
+  var proxyBase = loadProxyBase();
+  var cacheBust = "&_ts=" + Date.now();
+  var url = proxyBase
+    ? (proxyBase + "/api/quote?symbol=" + encodeURIComponent(ySym) + cacheBust)
+    : ("https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(ySym)); // will fail from a browser origin — Yahoo blocks this; set the proxy URL below
+  try {
+    var res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error('bad status ' + res.status);
+    var data = await res.json();
+    var meta = data.chart.result[0].meta;
+    var price = meta.regularMarketPrice;
+    var prevClose = meta.previousClose || meta.chartPreviousClose;
+    var pct = prevClose ? ((price - prevClose) / prevClose) * 100 : null;
+    priceCache[mcSymbol] = { price: price, pct: pct, fetchedAt: Date.now(), ok: true };
+    document.getElementById('priceError').textContent = '';
+  } catch (e) {
+    priceCache[mcSymbol] = { price: null, pct: null, fetchedAt: Date.now(), ok: false };
+    document.getElementById('priceError').textContent = proxyBase
+      ? 'Live price unavailable right now (proxy or upstream error). Chart and notes still work normally.'
+      : 'Live price needs the proxy URL set below — Yahoo blocks direct browser requests. Chart and notes still work normally.';
+  }
+  renderPriceStrip(document.getElementById('currentScript').value);
+  renderSideLists();
+}
+function renderPriceStrip(activeSymbol){
+  var el = document.getElementById('priceStrip');
+  var p = priceCache[activeSymbol];
+  if (!p || !p.ok) { el.innerHTML = ''; return; }
+  var cls = p.pct >= 0 ? 'up' : 'down';
+  var asOf = new Date(p.fetchedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  el.innerHTML = '<span class="price">' + p.price.toFixed(2) + '</span> <span class="' + cls + '">' + formatPct(p.pct) + '</span>' +
+    '<span style="color:var(--muted);font-size:10px">as of ' + asOf + '</span>';
+}
+function alertBadgeFor(symbol, notes){
+  var p = priceCache[symbol];
+  if (!p || !p.ok || !notes) return '';
+  var badges = '';
+  var target = parseFloat(notes.target);
+  var stop = parseFloat(notes.stop);
+  if (!isNaN(target) && p.price >= target) badges += '<span class="badge-hit badge-target">TARGET</span>';
+  if (!isNaN(stop) && p.price <= stop) badges += '<span class="badge-hit badge-stop">STOP</span>';
+  return badges;
+}
+function refreshAllPrices(){
+  var symbols = {};
+  loadRecent().forEach(function(s){ symbols[s] = true; });
+  var notes = loadAllNotes();
+  Object.keys(notes).forEach(function(s){ if (notes[s].tag) symbols[s] = true; });
+  symbols[document.getElementById('currentScript').value] = true;
+  Object.keys(symbols).forEach(function(s){ fetchPrice(s); });
+}
+
+/* ---------- side lists: journal (tagged) + recently viewed ---------- */
+function tagLabel(tag){
+  if (tag === 'watching') return '<span class="tag tag-watching">Watching</span>';
+  if (tag === 'entered') return '<span class="tag tag-entered">Entered</span>';
+  if (tag === 'exited') return '<span class="tag tag-exited">Exited</span>';
+  return '';
+}
+function priceCell(symbol){
+  var p = priceCache[symbol];
+  if (!p || !p.ok) return '<td class="num">—</td><td class="num">—</td>';
+  var cls = p.pct >= 0 ? 'up' : 'down';
+  return '<td class="num">' + p.price.toFixed(2) + '</td><td class="num ' + cls + '">' + formatPct(p.pct) + '</td>';
+}
+function renderSideLists(){
+  var current = document.getElementById('currentScript').value;
+  var notes = loadAllNotes();
+
+  var journalBody = document.querySelector('#journalTable tbody');
+  journalBody.innerHTML = '';
+  var tagged = Object.keys(notes).filter(function(s){ return notes[s].tag; });
+  if (tagged.length === 0) {
+    journalBody.innerHTML = '<tr><td class="hint" style="padding:4px 0">No tagged stocks yet — set a status above.</td></tr>';
+  } else {
+    tagged.sort(function(a,b){ return (notes[b].updatedAt||'').localeCompare(notes[a].updatedAt||''); });
+    tagged.forEach(function(symbol){
+      var tr = document.createElement('tr');
+      if (symbol === current) tr.className = 'active-row';
+      tr.innerHTML = '<td>' + symbol + ' ' + tagLabel(notes[symbol].tag) + alertBadgeFor(symbol, notes[symbol]) + '</td>' + priceCell(symbol);
+      tr.onclick = function(){ document.getElementById('nextScript').value = symbol; go_to(); };
+      journalBody.appendChild(tr);
+    });
+  }
+
+  var watchBody = document.querySelector('#watchTable tbody');
+  watchBody.innerHTML = '';
+  loadRecent().forEach(function(symbol){
+    var tr = document.createElement('tr');
+    if (symbol === current) tr.className = 'active-row';
+    tr.innerHTML = '<td>' + symbol + '</td>' + priceCell(symbol) +
+      '<td><button class="ghost" style="padding:1px 6px;font-size:10px" onclick="event.stopPropagation();removeFromRecent(\'' + symbol + '\')">−</button></td>';
+    tr.onclick = function(){ document.getElementById('nextScript').value = symbol; go_to(); };
+    watchBody.appendChild(tr);
+  });
+}
+function removeFromRecent(symbol){
+  saveRecent(loadRecent().filter(function(s){ return s !== symbol; }));
+  renderSideLists();
+}
+
+/* ---------- backup: export/import to local file, and GitHub sync ---------- */
+function collectAllData(){
+  return {
+    notes: loadAllNotes(),
+    recent: loadRecent(),
+    state: loadState(),
+    exportedAt: new Date().toISOString()
+  };
+}
+function applyImportedData(data){
+  if (data.notes) saveAllNotes(data.notes);
+  if (data.recent) saveRecent(data.recent);
+  if (data.state && data.state.symbol) saveState(data.state.symbol);
+  loadNotesForCurrent();
+  renderSideLists();
+  refreshAllPrices();
+}
+function exportToFile(){
+  var data = collectAllData();
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'chart-journal-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function importFromFile(evt){
+  var file = evt.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    try {
+      var data = JSON.parse(reader.result);
+      applyImportedData(data);
+      flashGhStatus('Imported from file.');
+    } catch(e){
+      flashGhStatus('Could not read that file — is it a valid export?');
+    }
+  };
+  reader.readAsText(file);
+  evt.target.value = '';
+}
+
+function loadGhConfig(){ try { return JSON.parse(localStorage.getItem(LS_GH)) || {}; } catch(e){ return {}; } }
+function saveProxyBase(){
+  try { localStorage.setItem(LS_PROXY, document.getElementById('proxyBase').value.trim()); } catch(e){}
+}
+function restoreProxyBase(){
+  try { document.getElementById('proxyBase').value = localStorage.getItem(LS_PROXY) || ''; } catch(e){}
+}
+function saveGhConfig(){
+  var cfg = {
+    token: document.getElementById('ghToken').value.trim(),
+    repo: document.getElementById('ghRepo').value.trim(),
+    path: document.getElementById('ghPath').value.trim() || 'chart-journal.json'
+  };
+  try { localStorage.setItem(LS_GH, JSON.stringify(cfg)); } catch(e){}
+}
+function restoreGhConfig(){
+  var cfg = loadGhConfig();
+  document.getElementById('ghToken').value = cfg.token || '';
+  document.getElementById('ghRepo').value = cfg.repo || '';
+  document.getElementById('ghPath').value = cfg.path || 'chart-journal.json';
+}
+function flashGhStatus(msg){ document.getElementById('ghStatus').textContent = msg; }
+
+function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64DecodeUnicode(str){ return decodeURIComponent(escape(atob(str))); }
+
+async function saveToGithub(){
+  var cfg = loadGhConfig();
+  if (!cfg.token || !cfg.repo) { flashGhStatus('Add your token and repo first.'); return; }
+  flashGhStatus('Saving…');
+  var url = 'https://api.github.com/repos/' + cfg.repo + '/contents/' + cfg.path;
+  try {
+    var sha = null;
+    var getRes = await fetch(url, { headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json' } });
+    if (getRes.status === 200) { var existing = await getRes.json(); sha = existing.sha; }
+    var body = {
+      message: 'Update chart journal ' + new Date().toISOString(),
+      content: b64EncodeUnicode(JSON.stringify(collectAllData(), null, 2))
+    };
+    if (sha) body.sha = sha;
+    var putRes = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!putRes.ok) throw new Error('GitHub responded ' + putRes.status);
+    flashGhStatus('Saved to GitHub.');
+  } catch(e){
+    flashGhStatus('Save failed — check token, repo name, path, and token permissions.');
+  }
+}
+async function loadFromGithub(){
+  var cfg = loadGhConfig();
+  if (!cfg.token || !cfg.repo) { flashGhStatus('Add your token and repo first.'); return; }
+  flashGhStatus('Loading…');
+  var url = 'https://api.github.com/repos/' + cfg.repo + '/contents/' + cfg.path;
+  try {
+    var res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json' } });
+    if (!res.ok) throw new Error('GitHub responded ' + res.status);
+    var json = await res.json();
+    var data = JSON.parse(b64DecodeUnicode(json.content));
+    applyImportedData(data);
+    flashGhStatus('Loaded from GitHub.');
+  } catch(e){
+    flashGhStatus('Load failed — check token/repo/path, or the file may not exist yet (try Save first).');
+  }
+}
+
+/* ---------- original navigation logic (kept, lightly adjusted) ---------- */
+function down(){
+	if (document.getElementById("select").length < 1) { stocks.forEach(loadValues); }
+	let text = document.getElementById('select').value;
+	let a = stocks.indexOf(text);
+	if (a < stocks.length -1) {
+		a = a+1;
+		valueToSelect = stocks[a];
+		document.getElementById('nextScript').value = valueToSelect;
+		document.getElementById('select').value = stocks[a];
+		show_chart();
+	}
+}
+function up(){
+	if (document.getElementById("select").length < 1) { stocks.forEach(loadValues); }
+	let text = document.getElementById('select').value;
+	let a = stocks.indexOf(text);
+	if (a > 0) {
+		a = a-1;
+		valueToSelect = stocks[a];
+		document.getElementById('nextScript').value = valueToSelect;
+		document.getElementById('select').value = stocks[a];
+		show_chart();
+	}
+}
+function go_to(){
+	if (document.getElementById("select").length < 1) { stocks.forEach(loadValues); }
+	var symbol = document.getElementById('nextScript').value.trim().toUpperCase();
+	document.getElementById('nextScript').value = symbol;
+	document.getElementById('chart').src = buildChartSrc(symbol);
+	document.getElementById('currentScript').value = symbol;
+	var sel = document.getElementById('select');
+	if (stocks.indexOf(symbol) > -1) {
+		sel.value = symbol;
+		hideAddBanner();
+	} else {
+		showAddBanner(symbol);
+	}
+	afterChartChange();
+}
+var pendingAddSymbol = null;
+function showAddBanner(symbol){
+	pendingAddSymbol = symbol;
+	document.getElementById('addBannerText').textContent = symbol + ' isn\'t in the current watchlist.';
+	document.getElementById('addBanner').style.display = 'flex';
+}
+function hideAddBanner(){
+	pendingAddSymbol = null;
+	document.getElementById('addBanner').style.display = 'none';
+}
+function confirmAddToWatchlist(){
+	if (!pendingAddSymbol) return;
+	var symbol = pendingAddSymbol;
+	hideAddBanner();
+	addSymbolToCurrentList(symbol);
+}
+function show(){
+	if (document.getElementById("select").length < 1) {
+		var saved = loadState();
+		if (saved && saved.listIndex) currentListIndex = saved.listIndex;
+		var listToLoad = getListByIndex(currentListIndex);
+		listToLoad.forEach(loadValues);
+		document.getElementById('listSwitch').value = currentListIndex;
+
+		if (saved && saved.symbol) {
+			document.getElementById('nextScript').value = saved.symbol;
+			document.getElementById('currentScript').value = saved.symbol;
+			var sel = document.getElementById('select');
+			if (stocks.indexOf(saved.symbol) > -1) sel.value = saved.symbol;
+			document.getElementById('chart').src = buildChartSrc(saved.symbol);
+		}
+		afterChartChange();
+	}
+}
+function loadValues(value){
+	stocks.push(value);
+	var x = document.getElementById("select");
+	var option = document.createElement("option");
+	option.text = value;
+	x.add(option);
+}
+function show_chart() {
+    var txt=document.getElementById('select').value;
+	document.getElementById('currentScript').value = txt;
+    document.getElementById('chart').src = buildChartSrc(txt);
+    afterChartChange();
+}
+function loadCustomLists(){ try { return JSON.parse(localStorage.getItem(LS_LISTS)) || {}; } catch(e){ return {}; } }
+function saveCustomLists(obj){ try { localStorage.setItem(LS_LISTS, JSON.stringify(obj)); } catch(e){} }
+function getListByIndex(idx){
+  var custom = loadCustomLists();
+  if (custom[idx]) return custom[idx].slice();
+  var defaults = { "0": stocks0, "1": stocks1, "2": stocks2, "3": stocks3, "4": stocks4 };
+  return defaults[idx].slice();
+}
+function switchList(){
+	var x = document.getElementById('listSwitch').value;
+	changeValues(getListByIndex(x));
+	currentListIndex = x;
+	saveState(document.getElementById('currentScript').value);
+}
+function changeValues(list){
+	var x = document.getElementById("select");
+	while (x.length >1){ x.remove(1); }
+	stocks =[];
+	list.forEach(loadValues);
+	show_chart();
+}
+function resetCurrentListToDefault(){
+	var custom = loadCustomLists();
+	delete custom[currentListIndex];
+	saveCustomLists(custom);
+	changeValues(getListByIndex(currentListIndex));
+}
+function addSymbolToCurrentList(symbol){
+	symbol = (symbol || '').trim().toUpperCase();
+	if (!symbol) return;
+	var current = getListByIndex(currentListIndex);
+	if (current.indexOf(symbol) === -1) current.push(symbol);
+	var custom = loadCustomLists();
+	custom[currentListIndex] = current;
+	saveCustomLists(custom);
+	var x = document.getElementById("select");
+	while (x.length >1){ x.remove(1); }
+	stocks = [];
+	current.forEach(loadValues);
+	document.getElementById('nextScript').value = symbol;
+	go_to();
+}
+function removeSymbolFromCurrentList(symbol){
+	if (!symbol) return;
+	var current = getListByIndex(currentListIndex);
+	var idx = current.indexOf(symbol);
+	if (idx === -1) return;
+	current.splice(idx, 1);
+	var custom = loadCustomLists();
+	custom[currentListIndex] = current;
+	saveCustomLists(custom);
+	var x = document.getElementById("select");
+	while (x.length >1){ x.remove(1); }
+	stocks = [];
+	current.forEach(loadValues);
+	show_chart();
+}
+
+/* ---------- ties navigation to persistence + notes + lists + price + external links ---------- */
+function afterChartChange(){
+	var symbol = document.getElementById('currentScript').value;
+	saveState(symbol);
+	loadNotesForCurrent();
+	pushRecent(symbol);
+	fetchPrice(symbol);
+	document.getElementById('mcOpenLink').href = mcGetSrc(symbol);
+	document.getElementById('tvOpenLink').href = "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent(toTvSymbol(symbol));
+}
+
+document.addEventListener('keydown', function(e){
+	var tag = document.activeElement.tagName;
+	if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+	if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { down(); }
+	if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { up(); }
+});
+
+restorePanelState();
+restoreGhConfig();
+restoreProxyBase();
+setInterval(function(){
+	if (document.visibilityState === 'visible') refreshAllPrices();
+}, 60000);
+</script>
+</body>
+</html>
