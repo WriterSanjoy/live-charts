@@ -19,6 +19,7 @@ Maximum Downside Risk: Capped at 32.65 points (722.65 entry − 690 Put strike)
 •	No Change : 690 PE. If above 755, Sell 690 PE and buy 720.
 
 📉 Downward Scenario: How to Adjust if Resistance Rejects Price
-
+🟥 If closes below DMA50 (734.78) and going to Pivot (723.35):
+•	The Adjustment (Create a Synthetic Bear Spread):
 o	Square off your 690 PE (which will be gaining value as the stock falls) and roll it up to a 720 PE or 730 PE to capture defensive intrinsic value much earlier.
 o	Simultaneously, roll down your 770 CE to a 740 CE or 750 CE to harvest a massive chunk of extra call premium credit, which acts as a cushion against the dropping future.
