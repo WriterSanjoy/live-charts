@@ -11,3 +11,4 @@ Short Call (Financing): 770 CE sold at 10.4 (Caps your maximum profit at 770, bu
 Effective Future Entry Price: 722.65
 Maximum Downside Risk: Capped at 32.65 points (722.65 entry − 690 Put strike)
 
+📈 Upward Scenario: 
