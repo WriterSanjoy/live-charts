@@ -19,5 +19,5 @@ Maximum Downside Risk: Capped at 32.65 points (722.65 entry − 690 Put strike)
 •	No Change : 690 PE. If above 755, Sell 690 PE and buy 720.
 
 📉 Downward Scenario: How to Adjust if Resistance Rejects Price
-o	Sell 690 PE and buy 720.
+o	Sell 690 PE and buy 720/730 PE
 o	Simultaneously, roll down your 770 CE to a 740 CE or 750 CE to harvest a massive chunk of extra call premium credit, which acts as a cushion against the dropping future.
