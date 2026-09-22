@@ -13,7 +13,7 @@ Maximum Downside Risk: Capped at 32.65 points (722.65 entry − 690 Put strike)
 
 📈 Upward Scenario: 
 🟥 If closes above R1 (742.50) + strong volume:
-•	Do not change the future. The long future will print profits.
+
 •	The Problem: Your 770 CE short position will start rapidly gaining delta value and will act as a hard brake, capping your future's profits once HDFC Bank hits 770.
 •	The Adjustment (Roll Up): If the breakout shows heavy institutional volume, square off your 770 CE to cut its liability and roll it up to a 790 CE or 800 CE strike.
 o	Trade-off: This will cost you a debit to execute, which raises your effective future breakeven slightly, but it clears the path to capture a larger run up toward R2 (776.05) and R3 (795.20).
