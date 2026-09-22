@@ -15,7 +15,7 @@ Maximum Downside Risk: Capped at 32.65 points (722.65 entry − 690 Put strike)
 🟥 If closes above R1 (742.50) + strong volume:
 •	Do not change the future. The long future will print profits.
 •	Problem: 770 CE caps profit
-•	BUY 770 CE > Sell 790 / 800 CE or 800 CE strike.
+•	BUY 770 CE > Sell 790 / 800 CE.
 o	Trade-off: This will cost you a debit to execute, which raises your effective future breakeven slightly, but it clears the path to capture a larger run up toward R2 (776.05) and R3 (795.20).
 •	Managing the Put: Leave the 690 PE alone for now. If HDFC Bank firmly clears 755, roll the 690 PE up to 720 PE to lock in a higher price floor.
 
