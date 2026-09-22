@@ -1,10 +1,4 @@
-🟢Stock-Strategy
-Delta Rule of Thumb:
-📌 Short Call Strike: 0.30 to 0.40 Delta 
-(collects meaningful premium & allowing upside buffer)
 
-📌 Long Put Strike: -0.20 to -0.25 Delta 
-(insures the tail risk cheaply).
 
 
 HDFC : Collar / Covered Combo Strategy
