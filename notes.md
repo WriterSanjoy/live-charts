@@ -18,6 +18,7 @@ Maximum Downside Risk: Capped at 32.65 points (722.65 entry − 690 Put strike)
 •	Sell 690 PE and buy 720.
 •	BUY 770 CE > Sell 740 / 750 CE. can capture R2 (776.05) and R3 (795.20).
 
+
 🟢🟢Stock-Strategy
 Delta Rule of Thumb:
 📌 Short Call Strike: 0.30 to 0.40 Delta 
