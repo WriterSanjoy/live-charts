@@ -111,6 +111,13 @@ document.getElementById('ghRepo').addEventListener('input', () => {
   try { localStorage.setItem(LS_GH, JSON.stringify(cfg)); } catch(e){}
 });
 document.getElementById('notesPath').addEventListener('input', (e) => saveNotesPath(e.target.value.trim()));
+document.getElementById('notesPath').addEventListener('change', () => {
+  // Path actually changed (fires on blur/Enter, not every keystroke) — the sha we're holding
+  // belongs to the OLD path's file, and reusing it against a different path would make the
+  // next save fail. Reset it and load whatever's at the new path instead, same as Reload.
+  sha = null;
+  loadFromCurrentPath();
+});
 
 let sha = null; // current known GitHub file SHA, for updates-in-place
 
@@ -172,16 +179,17 @@ bodyEl.addEventListener('input', () => {
   saveTimer = setTimeout(saveToGithub, 2000);
 });
 
-document.getElementById('reloadBtn').addEventListener('click', async () => {
-  setStatus('Reloading from GitHub…');
+async function loadFromCurrentPath(){
+  setStatus('Loading ' + loadNotesPath() + '…');
   const remote = await fetchFromGithub();
   if(remote !== null){
     bodyEl.value = remote;
     try { localStorage.setItem(LS_NOTES_CACHE, remote); } catch(e){}
     updateWordCount();
-    setStatus('Reloaded ' + new Date().toLocaleTimeString());
+    setStatus('Loaded ' + new Date().toLocaleTimeString());
   }
-});
+}
+document.getElementById('reloadBtn').addEventListener('click', loadFromCurrentPath);
 
 (async function init(){
   const cfg = loadGhBase();
