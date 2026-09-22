@@ -20,7 +20,6 @@ Maximum Downside Risk: Capped at 32.65 points (722.65 entry − 690 Put strike)
 
 📉 Downward Scenario: How to Adjust if Resistance Rejects Price
 🟥 If closes below DMA50 (734.78) and going to Pivot (723.35):
-•	The Danger: The daily chart shows a minor overhead rejection wick forming at R1. A breakdown below 734 indicates a failed breakout, risking a slide back down to the S1 support level at 689.80.
 •	The Adjustment (Create a Synthetic Bear Spread):
 o	Square off your 690 PE (which will be gaining value as the stock falls) and roll it up to a 720 PE or 730 PE to capture defensive intrinsic value much earlier.
 o	Simultaneously, roll down your 770 CE to a 740 CE or 750 CE to harvest a massive chunk of extra call premium credit, which acts as a cushion against the dropping future.
