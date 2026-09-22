@@ -3,5 +3,5 @@ Delta Rule of Thumb:
 
 
 
-HDFC 
+HDFC : Collar / Covered Combo Strategy
 Fut
