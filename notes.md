@@ -18,6 +18,6 @@ Maximum Downside Risk: Capped at 32.65 points (722.65 entry − 690 Put strike)
 •	BUY 770 CE > Sell 790 / 800 CE. can capture R2 (776.05) and R3 (795.20).
 •	No Change : 690 PE. If above 755, Sell 690 PE and buy 720 PE
 
-📉 Downward Scenario: if 
+📉 Downward Scenario: if Below 
 o	Sell 690 PE and buy 720/730 PE
 o	Buy 770 CE and Sell 790 / 800 CE.
