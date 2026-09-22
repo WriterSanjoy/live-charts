@@ -146,6 +146,7 @@
     <button id="exportBtn" class="ghost">Export</button>
     <button id="importBtn" class="ghost">Import</button>
     <button id="syncBtn" class="ghost">GitHub Sync</button>
+    <button id="notesBtn" class="ghost" title="Open your notes.md in a new tab">📝</button>
     <input type="file" id="importFile" accept=".json" style="display:none">
     <span id="status"></span>
   </div>
@@ -1263,6 +1264,7 @@ async function loadFromGithub(){
 }
 
 document.getElementById('syncBtn').addEventListener('click', () => { restoreGhConfig(); flashGhStatus(''); syncModalBackdrop.classList.add('open'); });
+document.getElementById('notesBtn').addEventListener('click', () => { window.open('notes.html', '_blank'); });
 document.getElementById('closeSyncModal').addEventListener('click', () => syncModalBackdrop.classList.remove('open'));
 syncModalBackdrop.addEventListener('click', (e) => { if(e.target === syncModalBackdrop) syncModalBackdrop.classList.remove('open'); });
 document.getElementById('saveToGhBtn').addEventListener('click', saveToGithub);

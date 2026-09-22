@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notes</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #151b23;
+    --border: #2a323d;
+    --text: #d8dee9;
+    --muted: #8b96a5;
+    --accent: #4fb286;
+    --accent-dim: #2e6b4f;
+    --up: #4fb286;
+    --down: #d9736c;
+    --warn: #d9b25c;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, "Noto Sans Bengali", Arial, sans-serif;
+    display: flex; flex-direction: column; height: 100%;
+  }
+  header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--panel);
+    flex: 0 0 auto;
+  }
+  header h1 { font-size: 15px; margin: 0; font-weight: 700; }
+  #status { font-size: 12px; color: var(--muted); }
+  #wordCount { font-size: 12px; color: var(--muted); margin-left: auto; }
+  button.ghost {
+    background: transparent; border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 5px 10px; font-size: 12px; cursor: pointer;
+  }
+  button.ghost:hover { border-color: var(--accent); }
+  textarea {
+    flex: 1 1 auto; width: 100%; resize: none; border: none; outline: none;
+    background: var(--bg); color: var(--text);
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 14px; line-height: 1.6; padding: 20px 24px;
+  }
+  #settingsPanel {
+    display: none; padding: 12px 16px; background: var(--panel); border-bottom: 1px solid var(--border);
+    gap: 10px; flex-wrap: wrap; align-items: center; flex: 0 0 auto;
+  }
+  #settingsPanel.open { display: flex; }
+  #settingsPanel label { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  #settingsPanel input {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    border-radius: 4px; padding: 4px 8px; font-size: 12px;
+  }
+  #settingsPanel .hint { width: 100%; font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>📝 Notes</h1>
+  <span id="status">Loading…</span>
+  <button class="ghost" id="settingsBtn" title="Configure GitHub repo/path">⚙️</button>
+  <span id="wordCount"></span>
+</header>
+<div id="settingsPanel">
+  <label>Token <input type="password" id="ghToken" style="width:220px"></label>
+  <label>Repo <input type="text" id="ghRepo" placeholder="username/repo" style="width:160px"></label>
+  <label>Notes path <input type="text" id="notesPath" placeholder="notes.md" style="width:120px"></label>
+  <button class="ghost" id="reloadBtn">Reload from GitHub</button>
+  <div class="hint">Token/repo are shared with portfolio.html's GitHub Sync (same fine-grained PAT, "Contents: read and write" only). Notes path is separate from your portfolio data file.</div>
+</div>
+<textarea id="noteBody" placeholder="Start typing… auto-saves locally instantly, and to GitHub a couple seconds after you pause."></textarea>
+
+<script>
+const LS_GH = 'portfolioToolGhConfig_v1';          // shared with portfolio.html — token + repo only
+const LS_NOTES_PATH = 'portfolioNotesPath_v1';      // this page's own setting
+const LS_NOTES_CACHE = 'portfolioNotesCache_v1';    // instant local backup of note content
+
+const statusEl = document.getElementById('status');
+const bodyEl = document.getElementById('noteBody');
+const wordCountEl = document.getElementById('wordCount');
+const settingsPanel = document.getElementById('settingsPanel');
+
+function loadGhBase(){ try { return JSON.parse(localStorage.getItem(LS_GH)) || {}; } catch(e){ return {}; } }
+function loadNotesPath(){ return localStorage.getItem(LS_NOTES_PATH) || 'notes.md'; }
+function saveNotesPath(p){ try { localStorage.setItem(LS_NOTES_PATH, p || 'notes.md'); } catch(e){} }
+
+function b64EncodeUnicode(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64DecodeUnicode(str){ return decodeURIComponent(escape(atob(str))); }
+
+function updateWordCount(){
+  const text = bodyEl.value;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  wordCountEl.textContent = words + ' words · ' + text.length + ' chars';
+}
+
+function setStatus(msg){ statusEl.textContent = msg; }
+
+document.getElementById('settingsBtn').addEventListener('click', () => {
+  settingsPanel.classList.toggle('open');
+});
+document.getElementById('ghToken').addEventListener('input', () => {
+  const cfg = loadGhBase();
+  cfg.token = document.getElementById('ghToken').value.trim();
+  try { localStorage.setItem(LS_GH, JSON.stringify(cfg)); } catch(e){}
+});
+document.getElementById('ghRepo').addEventListener('input', () => {
+  const cfg = loadGhBase();
+  cfg.repo = document.getElementById('ghRepo').value.trim();
+  try { localStorage.setItem(LS_GH, JSON.stringify(cfg)); } catch(e){}
+});
+document.getElementById('notesPath').addEventListener('input', (e) => saveNotesPath(e.target.value.trim()));
+
+let sha = null; // current known GitHub file SHA, for updates-in-place
+
+async function fetchFromGithub(){
+  const cfg = loadGhBase();
+  const path = loadNotesPath();
+  if(!cfg.token || !cfg.repo){
+    setStatus('No GitHub config yet — using local copy only. Click ⚙️ to add token/repo.');
+    return null;
+  }
+  const url = 'https://api.github.com/repos/' + cfg.repo + '/contents/' + path;
+  try {
+    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json' } });
+    if(res.status === 404){ sha = null; setStatus('No notes.md in the repo yet — start typing to create it.'); return null; }
+    if(!res.ok) throw new Error('GitHub responded ' + res.status);
+    const json = await res.json();
+    sha = json.sha;
+    return b64DecodeUnicode(json.content);
+  } catch(e){
+    setStatus('Could not reach GitHub — showing your last local copy. Check token/repo in ⚙️.');
+    return null;
+  }
+}
+
+async function saveToGithub(){
+  const cfg = loadGhBase();
+  const path = loadNotesPath();
+  if(!cfg.token || !cfg.repo){ setStatus('Saved locally only — add GitHub token/repo in ⚙️ to sync.'); return; }
+  setStatus('Saving to GitHub…');
+  const url = 'https://api.github.com/repos/' + cfg.repo + '/contents/' + path;
+  try {
+    const body = {
+      message: 'Update notes ' + new Date().toISOString(),
+      content: b64EncodeUnicode(bodyEl.value)
+    };
+    if(sha) body.sha = sha;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error('GitHub responded ' + res.status);
+    const json = await res.json();
+    sha = json.content && json.content.sha ? json.content.sha : sha;
+    setStatus('Saved to GitHub ' + new Date().toLocaleTimeString());
+  } catch(e){
+    setStatus('GitHub save failed (saved locally though) — check token/repo permissions in ⚙️.');
+  }
+}
+
+let saveTimer = null;
+let userHasEdited = false;
+bodyEl.addEventListener('input', () => {
+  userHasEdited = true;
+  try { localStorage.setItem(LS_NOTES_CACHE, bodyEl.value); } catch(e){}
+  updateWordCount();
+  setStatus('Saving…');
+  if(saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToGithub, 2000);
+});
+
+document.getElementById('reloadBtn').addEventListener('click', async () => {
+  setStatus('Reloading from GitHub…');
+  const remote = await fetchFromGithub();
+  if(remote !== null){
+    bodyEl.value = remote;
+    try { localStorage.setItem(LS_NOTES_CACHE, remote); } catch(e){}
+    updateWordCount();
+    setStatus('Reloaded ' + new Date().toLocaleTimeString());
+  }
+});
+
+(async function init(){
+  const cfg = loadGhBase();
+  document.getElementById('ghToken').value = cfg.token || '';
+  document.getElementById('ghRepo').value = cfg.repo || '';
+  document.getElementById('notesPath').value = loadNotesPath();
+
+  // Show local cache instantly — no waiting on a network round trip to start reading/writing.
+  const cached = localStorage.getItem(LS_NOTES_CACHE);
+  if(cached !== null){ bodyEl.value = cached; updateWordCount(); }
+
+  const remote = await fetchFromGithub();
+  // Only overwrite with GitHub's copy if the user hasn't already started typing in the meantime —
+  // never clobber an active edit with a slower-arriving network response.
+  if(remote !== null && !userHasEdited){
+    bodyEl.value = remote;
+    try { localStorage.setItem(LS_NOTES_CACHE, remote); } catch(e){}
+    updateWordCount();
+    setStatus('Loaded from GitHub');
+  } else if(remote === null && cached === null){
+    setStatus('New note — start typing.');
+  }
+})();
+</script>
+</body>
+</html>
