@@ -4,3 +4,4 @@ Delta Rule of Thumb:
 
 
 HDFC 
+Fut
