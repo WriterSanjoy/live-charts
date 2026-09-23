@@ -5,7 +5,7 @@ Finance: SELL Nov-CE 800 @ 11.35
 🚩DMA 50 @ 733.33
 👉If a bullish candlestick (like an inverted hammer or a hammer) form right on the 50 DMA with decent volume - ❌ PE 690 and🎯R2 @ 776.05 and 
 👉if breaks 733 and goes ➡️723.35, No action
-🚩Price Pivot @723.35 & EMA20 @ 721.85
+🚩Price➡️ Pivot @723.35 & EMA20 @ 721.85
 
 
 
