@@ -8,6 +8,18 @@ Finance: SELL Nov-CE 800 @ 11.35
 🚩Price➡️ Pivot @723.35 & EMA20 @ 721.85 ➡️ Watch
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 🟢🟢Stock-Strategy
 Delta Rule of Thumb:
 📌 Short Call Strike: 0.30 to 0.40 Delta 
