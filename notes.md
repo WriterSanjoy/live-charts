@@ -1,6 +1,6 @@
 🟢HDFC : Collar / Covered Combo Strategy
 Long Futures: 727.1
-Hedge: BUY OCT-PE 690 @ 5.95 
+Hedge: BUY OCT-PE 690 @ 5.95  + 
 
 
 Short Call (Financing): 770 CE sold at 10.4 (Caps your maximum profit at 770, but completely finances the put)
