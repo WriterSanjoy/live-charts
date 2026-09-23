@@ -165,7 +165,7 @@
       <option value="1800">30 min</option>
       <option value="3600">1 hr</option>
     </select>
-    <span style="font-size:11px;color:var(--muted);margin-left:4px">(9:15\u201315:30 IST, Mon\u2013Fri only)</span>
+    <span style="font-size:11px;color:var(--muted);margin-left:4px">(9:15 ▪ 15:30 IST, Mon ▪ Fri only)</span>
     <span class="label" style="margin-left:14px">Chart link:</span>
     <label style="font-size:12px;display:inline-flex;align-items:center;gap:3px"><input type="radio" name="chartSrc" id="chartSrcMc" value="mc"> MC</label>
     <label style="font-size:12px;display:inline-flex;align-items:center;gap:3px"><input type="radio" name="chartSrc" id="chartSrcInv" value="inv"> Inv</label>
@@ -337,7 +337,7 @@ const NARROW_WIDTHS = { symbol: '100px', qty: '50px', buyPrice: '68px', alert: '
 const DEFAULT_COLUMNS = [
   { key: 'symbol',    label: 'Symbol',       type: 'manual', inputType: 'text', agg: false, hidden: false },
   { key: 'dayIcon',   label: '',             type: 'calc', resultType: 'text',
-    formula: "dayHigh>prevHigh && dayLow>prevLow ? '⬆️' : (dayHigh<prevHigh && dayLow<prevLow ? '⬇️' : '-')", agg: false, hidden: false },
+    formula: "dayHigh>prevHigh && dayLow>prevLow ? '⬆️' : (dayHigh<prevHigh && dayLow<prevLow ? '🔻' : '-')", agg: false, hidden: false },
   { key: 'qty',       label: 'Qty',          type: 'manual', agg: false, hidden: false },
   { key: 'buyPrice',  label: 'Buy Price',    type: 'manual', agg: false, hidden: false },
   { key: 'name',      label: 'Name',         type: 'fetched', agg: false, hidden: false },
@@ -346,7 +346,7 @@ const DEFAULT_COLUMNS = [
   { key: 'prevClose', label: 'Prev Close',   type: 'fetched', agg: false, hidden: false },
   { key: 'chgPct',    label: 'Chg %',        type: 'fetched', agg: false, hidden: false },
   { key: 'trend',     label: 'Trend',        type: 'calc', resultType: 'text',
-    formula: "chgPct>0 ? '🔼' : (chgPct<0 ? '🔽' : '-')", agg: false, hidden: false },
+    formula: "chgPct>0 ? '🔼' : (chgPct<0 ? '🔻' : '-')", agg: false, hidden: false },
   // Classic pivot formula. Moneycontrol's chart uses TradingView's "Pivots Traditional" with
   // Timeframe=Auto, which steps the pivot period UP one level from the chart's own candle
   // interval — confirmed directly via the indicator's settings dialog: Hourly chart -> Weekly
@@ -508,11 +508,11 @@ const DEFAULT_COLUMNS = [
     formula: "alert && ltp && ltp<=alert ? 'BUY' : (target && ltp && ltp>=target ? 'SELL' : '-')", agg: false, hidden: false },
   { key: 'mcCode',    label: 'MC Code',      type: 'manual', inputType: 'text', agg: false, hidden: true },
   { key: 'invCode',   label: 'Inv Code',     type: 'manual', inputType: 'text', agg: false, hidden: true, afterActions: true },
-  { key: 'dayHigh',   label: 'Today⬆️',   type: 'fetched', agg: false, hidden: true },
-  { key: 'dayLow',    label: 'Today ⬇️',    type: 'fetched', agg: false, hidden: true },
+  { key: 'dayHigh',   label: 'Day⬆️',   type: 'fetched', agg: false, hidden: true },
+  { key: 'dayLow',    label: 'Day🔻',    type: 'fetched', agg: false, hidden: true },
   { key: 'prevHigh',  label: 'Prev⬆️',    type: 'fetched', agg: false, hidden: true },
   { key: 'prevLow',   label: 'Prev⬇️',     type: 'fetched', agg: false, hidden: true },
-  { key: 'dayOpen',   label: 'Day-Open',   type: 'fetched', agg: false, hidden: true },
+  { key: 'dayOpen',   label: 'Day🔓',   type: 'fetched', agg: false, hidden: true },
   { key: 'prevWeekHigh',  label: 'Pre-W⬆️',  type: 'fetched', agg: false, hidden: true },
   { key: 'prevWeekLow',   label: 'Pre-W⬇️',   type: 'fetched', agg: false, hidden: true },
   { key: 'prevWeekClose', label: 'Pre-W🚧', type: 'fetched', agg: false, hidden: true },
@@ -1165,11 +1165,27 @@ function isMarketHoursIST(){
   return istMinutes >= (9 * 60 + 15) && istMinutes <= (15 * 60 + 30);
 }
 let autoTimer = null;
-document.getElementById('autoRefresh').addEventListener('change', (e) => {
+const LS_AUTOREFRESH = 'portfolioAutoRefreshSecs_v1';
+function applyAutoRefresh(secs){
   if(autoTimer) clearInterval(autoTimer);
-  const secs = parseInt(e.target.value, 10);
+  autoTimer = null;
   if(secs > 0) autoTimer = setInterval(() => { if(isMarketHoursIST()) refreshPrices(); }, secs * 1000);
+}
+document.getElementById('autoRefresh').addEventListener('change', (e) => {
+  const secs = parseInt(e.target.value, 10);
+  try { localStorage.setItem(LS_AUTOREFRESH, String(secs)); } catch(err){}
+  applyAutoRefresh(secs);
 });
+// Restore on load — a plain page reload does NOT fire the 'change' event above even if the
+// browser visually redisplays the dropdown's last value, so without this the interval silently
+// never gets created again after any refresh/reopen, despite the dropdown looking correctly set.
+(function restoreAutoRefresh(){
+  const saved = parseInt(localStorage.getItem(LS_AUTOREFRESH) || '0', 10);
+  if(saved > 0){
+    document.getElementById('autoRefresh').value = String(saved);
+    applyAutoRefresh(saved);
+  }
+})();
 
 const chartSrcMc = document.getElementById('chartSrcMc');
 const chartSrcInv = document.getElementById('chartSrcInv');
