@@ -8,20 +8,6 @@ Finance: SELL Nov-CE 800 @ 11.35
 🚩Price➡️ Pivot @723.35 & EMA20 @ 721.85 ➡️ Watch
 
 
-
-📈 Upward Scenario: 
-🟥 If closes above R1 (742.50) + strong volume:
-•	Do not change the future. The long future will print profits.
-•	Problem: 770 CE caps profit
-•	BUY 770 CE > Sell 790 / 800 CE. can capture R2 (776.05) and R3 (795.20).
-•	No Change : 690 PE. If above 755, Sell 690 PE and buy 720.
-
-📉 Downward Scenario: 
-🟥 If closes below DMA50 (734.78) and going to Pivot (723.35):
-•	Sell 690 PE and buy 720.
-•	BUY 770 CE > Sell 740 / 750 CE. can capture R2 (776.05) and R3 (795.20).
-
-
 🟢🟢Stock-Strategy
 Delta Rule of Thumb:
 📌 Short Call Strike: 0.30 to 0.40 Delta 
