@@ -7,6 +7,7 @@ Pivot @723.35 & EMA20 @ 721.85
 
 
 
+
 📈 Upward Scenario: 
 🟥 If closes above R1 (742.50) + strong volume:
 •	Do not change the future. The long future will print profits.
