@@ -3,7 +3,7 @@ Long Futures: 727.1
 Hedge   : BUY Oct-PE 690 @ 5.95  + Oct-PE 720 @9.9
 Finance: SELL Nov-CE 800 @ 11.35
 🚩DMA 50 @ 733.33
-If a bullish candlestick (like an inverted hammer or a hammer) form right on the 50 DMA with decent volume - R2 @ 776.05
+If a bullish candlestick (like an inverted hammer or a hammer) form right on the 50 DMA with decent volume - R2 @ **776.05
 🚩Pivot @723.35 & EMA20 @ 721.85
 
 
