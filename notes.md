@@ -9,7 +9,7 @@ Finance: SELL Nov-CE 800 @ 11.35
 
 =======================================================
 🟢Reliance : Collar / Covered Combo Strategy
-Long Futures: 1232.9 ✚ 18.9➖19.95 ➡️ 1231.85
+Long Futures: 1232.9 ✚ 18.9➖19.95 🟰 1231.85
 Hedge   : BUY Oct-PE 1210 @ 18.9 
 Finance: SELL Nov-CE 1260 @ 19.95
 🚩DMA 20 @ 1267.61
