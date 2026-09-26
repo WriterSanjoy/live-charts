@@ -11,7 +11,7 @@ Finance: SELL Nov-CE 800 @ 11.35
 🟢Reliance : Collar / Covered Combo Strategy
 Long Futures: 1232.9 ✚ 18.9➖19.95 ➡️ 1231.85
 Hedge   : BUY Oct-PE 1210 @ 18.9 
-Finance: SELL Nov-CE 1260 @ 11.35
+Finance: SELL Nov-CE 1260 @ 19.95
 🚩DMA 50 @ 733.33
 👉If a bullish candlestick (like an inverted hammer or a hammer) form right on the 50 DMA with decent volume - ❌ PE 690❌ and🎯R2 @ 776.05 and 
 👉if breaks 733 and goes ➡️723.35, No action
