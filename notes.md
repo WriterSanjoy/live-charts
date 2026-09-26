@@ -20,6 +20,8 @@ Finance: SELL Nov-CE 800 @ 11.35
 
 
 
+
+
 🟢🟢Stock-Strategy
 Delta Rule of Thumb:
 📌 Short Call Strike: 0.30 to 0.40 Delta 
