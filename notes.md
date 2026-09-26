@@ -15,7 +15,7 @@ Finance: SELL Nov-CE 1260 @ 19.95
 🚩DMA 20 @ 1267.61
 👉If a bullish candlestick (like an inverted hammer or a hammer) form right on the 20 DMA with decent volume 🎯R2 @ 1279 and 
 👉if breaks 1211 execute STOPLOSS Basket
-🚩Price➡️ Pivot @723.35 & EMA20 @ 721.85 ➡️ Watch
+🚩Price➡️ P
 
 
 
