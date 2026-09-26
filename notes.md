@@ -13,7 +13,7 @@ Long Futures: 1232.9 ✚ 18.9➖19.95 ➡️ 1231.85
 Hedge   : BUY Oct-PE 1210 @ 18.9 
 Finance: SELL Nov-CE 1260 @ 19.95
 🚩DMA 20 @ 1267.61
-👉If a bullish candlestick (like an inverted hammer or a hammer) form right on the 20 DMA with decent volume - ❌ PE 690❌ and🎯R2 @ 776.05 and 
+👉If a bullish candlestick (like an inverted hammer or a hammer) form right on the 20 DMA with decent volume - ❌ PE 1210❌ and🎯R2 @ 776.05 and 
 👉if breaks 733 and goes ➡️723.35, No action
 🚩Price➡️ Pivot @723.35 & EMA20 @ 721.85 ➡️ Watch
 
