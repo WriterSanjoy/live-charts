@@ -7,6 +7,7 @@ Finance: SELL Nov-CE 800 @ 11.35
 👉if breaks 733 and goes ➡️723.35, No action
 🚩Price➡️ Pivot @723.35 & EMA20 @ 721.85 ➡️ Watch
 
+=======================================================
 
 
 
