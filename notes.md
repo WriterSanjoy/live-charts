@@ -12,10 +12,10 @@ Finance: SELL Nov-CE 800 @ 11.35
 Long Futures: 1232.9 ✚ 18.9➖19.95 🟰 1231.85
 Hedge   : BUY Oct-PE 1210 @ 18.9 
 Finance: SELL Nov-CE 1260 @ 19.95
-DMA 20 @ 1267.61
-👉If a bullish candlestick (like an inverted hammer or a hammer) form right on the 20 DMA with decent volume 🎯R2 @ 1279 and 1290
 🚩if breaks 🔻 1211 execute STOPLOSS Basket
 🚩Price🔼 1260 Execute Breakout Basket and 🎯DMA50 @ 1290
+DMA 20 @ 1267.61
+👉If a bullish candlestick (like an inverted hammer or a hammer) form right on the 20 DMA with decent volume 🎯R2 @ 1279 and 1290
 
 
 
