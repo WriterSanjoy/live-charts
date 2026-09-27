@@ -8,7 +8,7 @@ Finance: SELL Nov-CE 800 @ 11.35
 🚩Price➡️ Pivot @723.35 & EMA20 @ 721.85 ➡️ Watch
 
 =======================================================
-🟢Reliance : Collar / Covered Combo Strategy                                       
+🟢Reliance : Collar / Covered Combo Strategy                                         🎯
 Long Futures: 1232.9 ✚ 18.9➖19.95 🟰 1231.85
 Hedge   : BUY Oct-PE 1210 @ 18.9 
 Finance: SELL Nov-CE 1260 @ 19.95
