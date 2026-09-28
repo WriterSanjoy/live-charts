@@ -10,7 +10,8 @@ Finance: SELL Nov-CE 800 @ 11.35
 =======================================================
 🟢Reliance : Collar / Covered Combo Strategy                                         All lets squared-off. then fresh Long FUT 
 Long Futures: 1219.25
-🎯Buy➡️1220/1230 PE when it goes
+🎯Buy➡️1220/1230 PE when it goes up
+
 
 
 
