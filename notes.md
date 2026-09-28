@@ -10,12 +10,6 @@ Finance: SELL Nov-CE 800 @ 11.35
 =======================================================
 🟢Reliance : Collar / Covered Combo Strategy                                         All lets squared-off. then fresh Long FUT 
 Long Futures: 1219.25
-Hedge   : BUY Oct-PE 1210 @ 18.9 
-Finance: SELL Nov-CE 1260 @ 19.95
-🚩if breaks 🔻 1211 execute STOPLOSS Basket
-🚩Price🔼 1260 > 🚨Alert fires @ 1260 to BUY 1260 Call                                                                                                       Think🤔 Execute Breakout Basket or not
-👉DMA 20 @ 1267.61
-👉If a bullish candlestick (like an inverted hammer or a hammer) form right on the 20 DMA with decent volume 🎯R2 1279 and 🎯1290
 
 
 
