@@ -17,6 +17,41 @@
     --down: #d9736c;
     --warn: #d9b25c;
   }
+  /* Light theme — every rule below overrides either a CSS variable above, or a color that was
+     hardcoded directly in a rule (bypassing the variables) and so wouldn't otherwise respond to
+     the toggle at all. Catalogued by grepping every hex/rgba literal in this stylesheet, not
+     guessed, so nothing should be left silently stuck in dark colors. */
+  [data-theme="light"] {
+    --bg: #ffffff;
+    --panel: #eef0f3;
+    --border: #d7dbe0;
+    --text: #1c2430;
+    --muted: #5b6472;
+    --accent: #1f8a5c;
+    --accent-dim: #cdece0;
+    --up: #1f8a5c;
+    --down: #c23b32;
+    --warn: #96700a;
+  }
+  [data-theme="light"] input[type=text], [data-theme="light"] input[type=number],
+  [data-theme="light"] select, [data-theme="light"] textarea { background: #ffffff; }
+  [data-theme="light"] button, [data-theme="light"] a.linkbtn { color: #0f3d27; }
+  [data-theme="light"] button:hover, [data-theme="light"] a.linkbtn:hover { color: #ffffff; }
+  [data-theme="light"] button.ghost:hover { background: #eef0f3; }
+  [data-theme="light"] button.danger { border-color: #e3b3af; }
+  [data-theme="light"] button.danger:hover { background: #fbe4e2; }
+  [data-theme="light"] .tab.active { background: #eef0f3; border-bottom: 1px solid #eef0f3; }
+  [data-theme="light"] #tableWrap { background: #f7f8fa; }
+  [data-theme="light"] th { background: #e4e7eb; }
+  [data-theme="light"] tbody tr:hover { background: #dbe7f7; }
+  [data-theme="light"] tr.row-buy { background: rgba(34,197,94,0.10); }
+  [data-theme="light"] tr.row-sell { background: rgba(239,68,68,0.10); }
+  [data-theme="light"] td.bg-green { background: rgba(31,138,92,0.16); }
+  [data-theme="light"] td.bg-red { background: rgba(194,59,50,0.16); }
+  [data-theme="light"] tfoot td { background: #eef0f3; }
+  [data-theme="light"] .hint code { background: #eef0f3; }
+  [data-theme="light"] .key-chip { background: #eef0f3; }
+  [data-theme="light"] .key-chip:hover { background: #e4e7eb; }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
   body {
@@ -85,7 +120,7 @@
   td input[type=text], td input[type=number] { width: 100%; min-width: 70px; text-align: right; padding: 3px 5px; }
   td:first-child input[type=text] { text-align: left; }
   td.readonly { color: var(--text); }
-  td.calc { color: var(--muted); }
+  td.calc { color: var(--text); font-weight: 600; }
   td.up { color: var(--up); }
   td.down { color: var(--down); }
   td.up-bold { color: var(--up); font-weight: 700; }
@@ -147,6 +182,7 @@
     <button id="importBtn" class="ghost">Import</button>
     <button id="syncBtn" class="ghost">GitHub Sync</button>
     <button id="notesBtn" class="ghost" title="Open your notes.md in a new tab">📝</button>
+    <button id="themeBtn" class="ghost" title="Toggle light/dark theme">🌙</button>
     <input type="file" id="importFile" accept=".json" style="display:none">
     <span id="status"></span>
   </div>
@@ -479,7 +515,7 @@ const DEFAULT_COLUMNS = [
     formula: "(function(){ if(!ltp || !hrPivotP) return '-'; var isTrap=false, isBearTrap=false, isSqueeze=false; if(mtsScore>=3){ if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) isTrap=true; } else if(mtsScore>=1){ if(dailyDistToCeiling>2 && weeklyDistToCeiling>0 && weeklyDistToCeiling<0.5) isTrap=true; } else if(mtsScore>-1){ if(((dailyDistToCeiling>0 && dailyDistToCeiling<1) || (dailyDistToFloor>0 && dailyDistToFloor<1)) && ((weeklyDistToCeiling>0 && weeklyDistToCeiling<1) || (weeklyDistToFloor>0 && weeklyDistToFloor<1))) isSqueeze=true; } else if(mtsScore>-3){ if(dailyDistToFloor>0 && dailyDistToFloor<1 && weeklyDistToFloor>2) isBearTrap=true; } function nearestCeiling(){ if(ltp>=hrPivotR3) return 'Beyond Hr R3'; if(ltp>=hrPivotR2) return hrPivotR3; if(ltp>=hrPivotR1) return hrPivotR2; if(ltp>=hrPivotP) return hrPivotR1; return hrPivotP; } function nearestFloor(){ if(ltp<=hrPivotS3) return 'Beyond Hr S3'; if(ltp<=hrPivotS2) return hrPivotS3; if(ltp<=hrPivotS1) return hrPivotS2; if(ltp<=hrPivotP) return hrPivotS1; return hrPivotP; } if(isTrap) return nearestCeiling(); if(isBearTrap) return nearestFloor(); if(isSqueeze) return (weeklyDistToCeiling<=weeklyDistToFloor) ? nearestCeiling() : nearestFloor(); return '-'; })()",
     agg: false, hidden: false },
   { key: 'fiftyTwoWkHigh', label: '52W-⬆️', type: 'fetched', agg: false, hidden: false },
-  { key: 'fiftyTwoWkLow',  label: '52W-⬇️',  type: 'fetched', agg: false, hidden: false },
+  { key: 'fiftyTwoWkLow',  label: '52W-🔻',  type: 'fetched', agg: false, hidden: false },
   { key: 'peRatio',   label: 'PE',           type: 'fetched', agg: false, hidden: false },
   { key: 'forwardPE', label: 'F➡️PE',       type: 'fetched', agg: false, hidden: false },
   { key: 'eps',       label: 'EPS',          type: 'fetched', agg: false, hidden: false },
@@ -1281,6 +1317,26 @@ async function loadFromGithub(){
 
 document.getElementById('syncBtn').addEventListener('click', () => { restoreGhConfig(); flashGhStatus(''); syncModalBackdrop.classList.add('open'); });
 document.getElementById('notesBtn').addEventListener('click', () => { window.open('notes.html', '_blank'); });
+
+const LS_THEME = 'portfolioThemePref_v1';
+function applyTheme(theme){
+  if(theme === 'light'){
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.getElementById('themeBtn').textContent = '☀️';
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    document.getElementById('themeBtn').textContent = '🌙';
+  }
+}
+document.getElementById('themeBtn').addEventListener('click', () => {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const next = isLight ? 'dark' : 'light';
+  try { localStorage.setItem(LS_THEME, next); } catch(e){}
+  applyTheme(next);
+});
+// Restore on load — same reason as auto-refresh above: nothing re-applies this on a fresh
+// page load unless we explicitly read it back and re-apply it ourselves.
+applyTheme(localStorage.getItem(LS_THEME) || 'dark');
 document.getElementById('closeSyncModal').addEventListener('click', () => syncModalBackdrop.classList.remove('open'));
 syncModalBackdrop.addEventListener('click', (e) => { if(e.target === syncModalBackdrop) syncModalBackdrop.classList.remove('open'); });
 document.getElementById('saveToGhBtn').addEventListener('click', saveToGithub);
