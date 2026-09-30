@@ -30,6 +30,8 @@ If NIFTY 🟢🟢
 🟢 Phase 1: The "Do Nothing" Zone (Up to 22,780)
 If Profit ▶️▶️ Square off all legs
 ⚠️ Phase 2: The Upside Adjustment Trigger (Nifty breaks 22,820+)
+BUY to Close: 1 Lot of 06 Oct 22,800 PE
+
 
 If  NIFTY 🔴🔴
 🚩Lower Trigger (22,580-): Execute the Downside Roll (Move your 22,800 PE & 23,500 PE ➡️ 22,600 PE & 22300 PE block).
