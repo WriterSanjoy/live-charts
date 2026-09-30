@@ -28,7 +28,7 @@ BUY 22800 PE  & SELL 22500 PE                           Then                    
 
 If NIFTY ⏫⏫ 
 
-If 
+If  NIFTY ⏬⏬
 🚩Lower Trigger (22,580-): Execute the Downside Roll (Move your 22,800 PE & 23,500 PE ➡️ 22,600 PE & 22300 PE block).
 BUY 22800 PE  & SELL 22500 PE                           Then                              SELL 22600 PE & BUY 22300 PE
 The Action Trigger: Only execute this Nifty22580Down basket tomorrow if Nifty opens or breaks decisively below 22,580 and sustains that level for more than 15 minutes.
