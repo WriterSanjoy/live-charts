@@ -26,7 +26,7 @@ The Action Trigger: Only execute this Nifty22580Down basket tomorrow if Nifty op
 
 -----------------------------------------------------------------------------------------------------------------------------------------------
 🚩Trigger 22,680-
-📍Current Position : Sold 22800 PE + Bought 2250 PE ✚ SELL 22700 CE & BUY 23000 CE
+📍Current Position : Sold 22800 PE + Bought 2250 PE     ✚    SELL 22700 CE & BUY 23000 CE
 📍 Lower Trigger (22,680-): Execute the Downside Roll (Move your 22,800 CE / 23,100 CE down to the 22,700 CE / 23,000 CE block).
 BUY 22800 CE  & SELL 23100 CE                           Then                              SELL 22700 CE & BUY 23000 CE
 
