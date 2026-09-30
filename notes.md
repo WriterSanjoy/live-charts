@@ -17,7 +17,7 @@ Long Futures: 1219.25
 =======================================================
 Keep your execution alerts strictly set to these two numbers on your charting terminal:
 • Upper Trigger (22,920+): Execute the Inverted Fly Shift (Move your 22,800 PE / 22,500 PE up to the 22,900 PE / 22,600 PE block).
-BUY 22800 PE  & SELL 2250 PE
+BUY 22800 PE  & SELL 22500 PE                           Then                              
 • Lower Trigger (22,680-): Execute the Downside Roll (Move your 22,800 CE / 23,100 CE down to the 22,700 CE / 23,000 CE block).
 
 
