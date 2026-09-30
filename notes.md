@@ -23,7 +23,7 @@ BUY 22800 PE  & SELL 22500 PE                           Then                    
 BUY 22800 PE  & SELL 22500 PE                           Then                              SELL 22600 PE & BUY 22300 PE
 
 
-🚩• Lower Trigger (22,680-): Execute the Downside Roll (Move your 22,800 CE / 23,100 CE down to the 22,700 CE / 23,000 CE block).
+• Lower Trigger (22,680-): Execute the Downside Roll (Move your 22,800 CE / 23,100 CE down to the 22,700 CE / 23,000 CE block).
 BUY 22800 CE  & SELL 23100 CE                           Then                              SELL 22700 CE & BUY 23000 CE
 
 
