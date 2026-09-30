@@ -28,6 +28,7 @@ The Action Trigger: Only execute this Nifty22580Down basket tomorrow if Nifty op
 🚩Trigger 22,680-
 📍Current Position : Sold 22800 PE + Bought 2250 PE     ✚    SELL 22700 CE & BUY 23000 CE
 
+If 
 
 
 
