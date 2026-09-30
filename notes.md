@@ -27,6 +27,7 @@ BUY 22800 PE  & SELL 22500 PE                           Then                    
 📍Current Position : Sold 22800 PE + Bought 2250 PE     ✚    SELL 22700 CE & BUY 23000 CE
 
 If NIFTY 🟢🟢
+🟢 Phase 1: The "Do Nothing" Zone (Up to 22,780)
 
 
 
