@@ -29,7 +29,7 @@ BUY 22800 PE  & SELL 22500 PE                           Then                    
 If NIFTY 🟢🟢
 🟢 Phase 1: The "Do Nothing" Zone (Up to 22,780)
 If Profit ▶️▶️ Square off all legs
-
+⚠️ Phase 2: The Upside Adjustment Trigger (Nifty breaks 22,820+)
 
 If  NIFTY 🔴🔴
 🚩Lower Trigger (22,580-): Execute the Downside Roll (Move your 22,800 PE & 23,500 PE ➡️ 22,600 PE & 22300 PE block).
