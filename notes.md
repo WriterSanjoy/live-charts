@@ -26,6 +26,7 @@ Long Futures: 1219.25
 
 
 
+
 🟢🟢Stock-Strategy
 Delta Rule of Thumb:
 📌 Short Call Strike: 0.30 to 0.40 Delta 
