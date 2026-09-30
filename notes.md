@@ -26,7 +26,7 @@ BUY 22800 PE  & SELL 22500 PE                           Then                    
 🚩Trigger 22,680-
 📍Current Position : Sold 22800 PE + Bought 2250 PE     ✚    SELL 22700 CE & BUY 23000 CE
 
-If NIFTY ⏫⏫ 
+If NIFTY 🟢🟢
 
 If  NIFTY 🔴🔴
 🚩Lower Trigger (22,580-): Execute the Downside Roll (Move your 22,800 PE & 23,500 PE ➡️ 22,600 PE & 22300 PE block).
