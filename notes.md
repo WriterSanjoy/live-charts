@@ -14,7 +14,7 @@ Long Futures: 1219.25
 🎯Sell ➡️CE to cover PE cost
 
 
-=======================================================⏫
+=======================================================
 Keep your execution alerts strictly set to these two numbers on your charting terminal:
 • Upper Trigger (22,920+): Execute the Inverted Fly Shift (Move your 22,800 PE / 22,500 PE up to the 22,900 PE / 22,600 PE block).
 BUY 22800 PE  & SELL 22500 PE                           Then                              SELL 22900 PE & BUY 22600 PE
