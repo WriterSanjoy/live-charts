@@ -41,9 +41,18 @@
 
 const YAHOO_HEADERS = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
 
-function pickLastCompletedBar(ts, isCurrentPeriod) {
+// Walks backward from the end of the array to find the last bar that is BOTH (a) not still
+// the current, in-progress period, per the caller's isCurrentPeriod predicate, AND (b) actually
+// has real close/high/low data. (b) matters on its own: confirmed live that Yahoo can correctly
+// identify a month as "completed" (right at month rollover) while that month's bar still has a
+// null close server-side — the period check alone said "this bar is done", but the data wasn't
+// actually there yet. Skipping straight past such a bar, rather than accepting it with a null
+// field, is what prevents a pivot calculation downstream from silently coercing that null to 0.
+function pickLastCompletedBar(ts, quote, isCurrentPeriod) {
   for (let i = ts.length - 1; i >= 0; i--) {
-    if (!isCurrentPeriod(ts[i])) return i;
+    if (isCurrentPeriod(ts[i])) continue;
+    if (typeof quote.close[i] !== 'number' || typeof quote.high[i] !== 'number' || typeof quote.low[i] !== 'number') continue;
+    return i;
   }
   return -1;
 }
@@ -64,7 +73,7 @@ async function fetchPeriodOHLC(symbol, interval, range, isCurrentPeriod) {
   const ts = result && result.timestamp;
   if (!quote || !ts || !ts.length) return null;
 
-  const idx = pickLastCompletedBar(ts, isCurrentPeriod);
+  const idx = pickLastCompletedBar(ts, quote, isCurrentPeriod);
   if (idx < 0) return null;
 
   return {
