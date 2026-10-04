@@ -33,7 +33,9 @@ BUY 22800 PE  & SELL 22500 PE                           Then                    
 The Action Trigger: Only execute this Nifty22580Down basket tomorrow if Nifty opens or breaks decisively below 22,580 and sustains that level for more than 15 minutes.
 
 
+==============================================
 
+==============================================
 
 
 
