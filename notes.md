@@ -34,7 +34,7 @@ The Action Trigger: Only execute this Nifty22580Down basket tomorrow if Nifty op
 
 
 ==============================================
-
+Hedging a 10L Nifty Portfolio
 ==============================================
 
 
