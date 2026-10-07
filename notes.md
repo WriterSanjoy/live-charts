@@ -4,7 +4,6 @@ Long Futures: 🟰699.7 (net)
 👉If a bullish candlestick (like an inverted hammer or a hammer) form right on the 50 DMA with decent volume - ❌ PE 690❌ and🎯R2 @ 776.05 and 
 👉if breaks 733 and goes ➡️723.35, No action
 🚩Price➡️ Pivot @723.35 & EMA20 @ 721.85 ➡️ Watch
-⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪⚪
 
 🟢HDFC : Collar / Covered Combo Strategy
 Hedge   : BUY Oct/Nov PE 710 when ⬆️710➕
