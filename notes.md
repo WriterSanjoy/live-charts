@@ -7,7 +7,7 @@ Long Futures: 🟰699.7 (net)
 
 🟢HDFC : Collar / Covered Combo Strategy
 Hedge   : BUY Oct/Nov PE 710 when ⬆️710➕
-Finance: SELL Nov-CE 800 @ 11.35
+Finance: SELL Nov-CE 
 
 
 
