@@ -6,7 +6,7 @@ Long Futures: 🟰699.7 (net)
 🚩Price➡️ Pivot @723.35 & EMA20 @ 721.85 ➡️ Watch
 
 🟢HDFC : Collar / Covered Combo Strategy
-Hedge   : BUY Oct/Nov PE 710 when ⬆️710+ 
+Hedge   : BUY Oct/Nov PE 710 when ⬆️710➕
 Finance: SELL Nov-CE 800 @ 11.35
 
 
