@@ -13,7 +13,7 @@ Finance: SELL Nov-CE ~780
 
 =======================================================
 🟢Reliance : Collar / Covered Combo Strategy                                         28-Sep: All lets squared-off. then fresh Long FUT 
-Long Futures: 1219.25
+Long Futures: Squared off
 🎯Buy➡️1220/1230 PE when goes up 
 🎯Sell ➡️CE to cover PE cost
 
