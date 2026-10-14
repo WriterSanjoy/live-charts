@@ -21,21 +21,6 @@ Long Futures: 1219.25
 -----------------------------------------------------------------------------------------------------------------------------------------------
 5PAISA NIFTY POSITIONS
 -----------------------------------------------------------------------------------------------------------------------------------------------
-🚩Triggered @ when below 22,680
-📍Current Position : Sold 22800 PE + Bought 22500 PE     ✚    SELL 22700 CE & BUY 23000 CE
-
-If NIFTY 🟢🟢
-🟢 Phase 1: The "Do Nothing" Zone (Up to 22,780)
-If Profit ▶️▶️ Square off all legs
-⚠️ Phase 2: If Nifty breaks ⬆️ 22,820+         (The Upside Adjustment Trigger )
-BUY 22,800 PE & SELL 22,500 PE     ✚    SELL 22,900 PE & BUY 22,600 PE 
-
-
-If  NIFTY 🔴🔴
-🚩Lower Trigger (🔻🔻22,580-): 
-BUY 22800 PE  & SELL 22500 PE                           Then                              SELL 22600 PE & BUY 22300 PE
-The Action Trigger: Only execute this Nifty22580Down basket tomorrow if Nifty opens or breaks decisively below 22,580 and sustains that level for more than 15 minutes.
-
 
 ==============================================
 DHAN Hedging a 10L Nifty Portfolio
