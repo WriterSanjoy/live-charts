@@ -22,7 +22,7 @@ Long Futures: 1219.25
 5PAISA NIFTY POSITIONS
 -----------------------------------------------------------------------------------------------------------------------------------------------
 🚩Triggered @ when below 22,680
-📍Current Position : Sold 22800 PE + Bought 2250 PE     ✚    SELL 22700 CE & BUY 23000 CE
+📍Current Position : Sold 22800 PE + Bought 22500 PE     ✚    SELL 22700 CE & BUY 23000 CE
 
 If NIFTY 🟢🟢
 🟢 Phase 1: The "Do Nothing" Zone (Up to 22,780)
