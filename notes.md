@@ -6,7 +6,7 @@ https://www.youtube.com/watch?v=y6Y-VFyUwqM
 
 🟢22-Oct-26 Tushar Gone
 check 23050 - 15min Candle > 23300
-Check 22900 - it can 
+Check 22900 - it can go down from here
 
 ⚪HDFC : 
 Long Futures: 🟰705.5
