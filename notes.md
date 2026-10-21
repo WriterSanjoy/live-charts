@@ -1,6 +1,6 @@
 After 31-Oct - Changes
 https://www.youtube.com/watch?v=y6Y-VFyUwqM
-🚩Power sufflng > Bank rule Changes > 
+🚩Power suffleing > Bank rule Changes > 
 
 
 ⚪HDFC : ❌ ALL OPTIONS SQUARED OFF❌  
