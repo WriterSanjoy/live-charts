@@ -1,6 +1,6 @@
 After 31-Oct - Changes
 https://www.youtube.com/watch?v=y6Y-VFyUwqM
-🚩Power shuffling > Bank rule Changes > Gold ⬆️ > Bank ⬆️Interest Rate > Nifty may 25% bullish > Bank, Metal, real estate
+🚩Power shuffling > Bank rule Changes > Gold ⬆️ > Bank ⬆️Interest Rate > Nifty may 25% bullish > Bank, Metal, real estate> 
 
 
 ⚪HDFC : ❌ ALL OPTIONS SQUARED OFF❌  
