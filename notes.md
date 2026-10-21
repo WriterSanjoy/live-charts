@@ -8,6 +8,9 @@ https://www.youtube.com/watch?v=y6Y-VFyUwqM
 check 23050 - 15min Candle > 23300
 Check 22900 - it can go down from here > 22500
 
+https://www.youtube.com/watch?v=pXQakdXGk1c
+
+
 ⚪HDFC : 
 Long Futures: 🟰705.5
 🚩DMA 50 @ 733.33
