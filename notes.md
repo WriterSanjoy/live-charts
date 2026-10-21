@@ -55,5 +55,5 @@ Delta Rule of Thumb:
 📌 Long Put Strike: -0.20 to -0.25 Delta 
 (insures the tail risk cheaply).
 
-
+🟢🟢 If Name starts with "S"
 https://www.youtube.com/watch?v=JBNPkGOr43A
