@@ -7,7 +7,7 @@ https://www.youtube.com/watch?v=y6Y-VFyUwqM
 
 
 ⚪HDFC : 
-Long Futures: 🟰699.7 (net)
+Long Futures: 🟰705.5
 🚩DMA 50 @ 733.33
 👉If a bullish candlestick (like an inverted hammer or a hammer) form right on the 50 DMA with decent volume - ❌ PE 690❌ and🎯R2 @ 776.05 and 
 👉if breaks 733 and goes ➡️723.35, No action
