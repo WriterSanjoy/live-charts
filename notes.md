@@ -1,6 +1,6 @@
 After 31-Oct - Changes
 https://www.youtube.com/watch?v=y6Y-VFyUwqM
-🚩Power shuffling > Bank rule Changes > Gold 
+🚩Power shuffling > Bank rule Changes > Gold ⬆️ > 
 
 
 ⚪HDFC : ❌ ALL OPTIONS SQUARED OFF❌  
