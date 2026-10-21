@@ -1,6 +1,7 @@
 After 31-Oct - Changes
 https://www.youtube.com/watch?v=y6Y-VFyUwqM
 🚩Power shuffling > Bank rule Changes > Gold ⬆️ > Bank ⬆️Interest Rate > Nifty may 25% bullish > Bank, Metal, real estate, defence, metal, PSU> S&P 15% ⬆️ > 
+Mar 27 - Gold ⬆️ 2L
 
 
 ⚪HDFC : 
