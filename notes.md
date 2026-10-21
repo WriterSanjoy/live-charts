@@ -3,7 +3,7 @@ https://www.youtube.com/watch?v=y6Y-VFyUwqM
 🚩Power shuffling > Bank rule Changes > Gold ⬆️ > Bank ⬆️Interest Rate > Nifty may 25% bullish > Bank, Metal, real estate> S&P 15% ⬆️ > 
 
 
-⚪HDFC : ❌ ALL OPTIONS SQUARED OFF❌  
+⚪HDFC : 
 Long Futures: 🟰699.7 (net)
 🚩DMA 50 @ 733.33
 👉If a bullish candlestick (like an inverted hammer or a hammer) form right on the 50 DMA with decent volume - ❌ PE 690❌ and🎯R2 @ 776.05 and 
