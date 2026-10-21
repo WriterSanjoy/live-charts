@@ -9,7 +9,7 @@ check 23050 - 15min Candle > 23300
 Check 22900 - it can go down from here > 22500
 
 https://www.youtube.com/watch?v=pXQakdXGk1c
-
+10:25 
 
 ⚪HDFC : 
 Long Futures: 🟰705.5
