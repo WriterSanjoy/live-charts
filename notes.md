@@ -8,10 +8,11 @@ https://www.youtube.com/watch?v=y6Y-VFyUwqM
 check 23050 - 15min Candle > 23300
 Check 22900 - it can go down from here > 22500
 
-Astro Stock Market by Anil Parashar
+🟢Astro Stock Market by Anil Parashar
 https://www.youtube.com/watch?v=pXQakdXGk1c
 10:25 ⬆️
 13:2o 🔻
+
 
 ⚪HDFC : 
 Long Futures: 🟰705.5
