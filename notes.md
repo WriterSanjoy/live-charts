@@ -1,6 +1,6 @@
 After 31-Oct - Changes
 https://www.youtube.com/watch?v=y6Y-VFyUwqM
-🚩Power shuffling > Bank rule Changes > Gold ⬆️ > Bank ⬆️Interest Rate > Nifty may 25% bullish > Bank, Metal, real estate, defance, metal(copper), PSU> S&P 15% ⬆️ > 
+🚩Power shuffling > Bank rule Changes > Gold ⬆️ > Bank ⬆️Interest Rate > Nifty may 25% bullish > Bank, Metal, real estate, defence, metal(copper), PSU> S&P 15% ⬆️ > 
 🚩Mar 27 - Gold ⬆️ 2L
 🚩31-Oct-26 to 25-Jan-27 Stock bearish Nov - first 2 weeks
 🚩
