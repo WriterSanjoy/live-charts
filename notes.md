@@ -1,3 +1,6 @@
+
+
+
 ⚪HDFC : ❌ ALL OPTIONS SQUARED OFF❌  
 Long Futures: 🟰699.7 (net)
 🚩DMA 50 @ 733.33
