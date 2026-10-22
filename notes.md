@@ -12,7 +12,7 @@ if gap 🔻  > 22530  -  22480  -  22400
 https://www.youtube.com/watch?v=pXQakdXGk1c
 10:25 🔻
 14:2o ⬆️
-22730 > 810 
+22730 > 22810 > 22920 
 
 ⚪HDFC : 
 Long Futures: 🟰705.5
