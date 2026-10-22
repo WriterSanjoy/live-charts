@@ -14,6 +14,7 @@ https://www.youtube.com/watch?v=pXQakdXGk1c
 14:2o ⬆️
 22730 > 22810 > 22920 > 22970
 
+
 ⚪HDFC : 
 Long Futures: 🟰705.5
 🚩DMA 50 @ 733.33
