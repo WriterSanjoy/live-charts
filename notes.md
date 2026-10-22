@@ -5,7 +5,7 @@ https://www.youtube.com/watch?v=y6Y-VFyUwqM
 🚩31-Oct-26 to 25-Jan-27 Stock bearish Nov - first 2 weeks
 
 🟢23-Oct-26 Tushar Gone
-
+If Gap 
 
 🟢Astro Stock Market by Anil Parashar
 https://www.youtube.com/watch?v=pXQakdXGk1c
