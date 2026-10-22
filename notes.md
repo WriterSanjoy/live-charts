@@ -11,7 +11,7 @@ if gap 🔻  > 22530  -  22480  -  22400
 🟢Astro Stock Market by Anil Parashar
 https://www.youtube.com/watch?v=pXQakdXGk1c
 10:25 ⬆️
-13:2o 🔻
+14:2o 🔻
 
 
 ⚪HDFC : 
