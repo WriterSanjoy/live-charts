@@ -5,7 +5,7 @@ https://www.youtube.com/watch?v=y6Y-VFyUwqM
 🚩31-Oct-26 to 25-Jan-27 Stock bearish Nov - first 2 weeks
 
 🟢23-Oct-26 Tushar Gone
-If Gap ⬆️ > 22720 - 22820 - 22890 then 🚩 
+If Gap ⬆️ > 22720 - 22820 - 22890 then 🚩 22800  -  22600  - 22400
 if gap 🔻  > 22530  -  22480  -  22400
 
 🟢Astro Stock Market by Anil Parashar
