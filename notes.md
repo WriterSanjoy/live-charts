@@ -6,7 +6,7 @@ https://www.youtube.com/watch?v=y6Y-VFyUwqM
 
 🟢23-Oct-26 Tushar Gone
 If Gap ⬆️ > 22720 - 22820 - 22890
-if gap 
+if gap 🔻> 
 
 🟢Astro Stock Market by Anil Parashar
 https://www.youtube.com/watch?v=pXQakdXGk1c
